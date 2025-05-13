@@ -1,0 +1,1 @@
+/home/cybrosys/Downloads/odoo_jsonrpc(1) apr 8/odoo_jsonrpc/example_saleapp/build/app/intermediates/cxx/Debug/303r586w/obj/x86

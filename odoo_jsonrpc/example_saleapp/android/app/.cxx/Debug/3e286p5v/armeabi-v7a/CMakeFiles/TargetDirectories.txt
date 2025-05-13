@@ -1,0 +1,2 @@
+/home/cybroshalbin/AndroidStudioProjects/odoo_jsonrpc/example_saleapp/android/app/.cxx/Debug/3e286p5v/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/cybroshalbin/AndroidStudioProjects/odoo_jsonrpc/example_saleapp/android/app/.cxx/Debug/3e286p5v/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,1 @@
+/home/cybroshalbin/AndroidStudioProjects/odoo_jsonrpc/example_saleapp/build/app/intermediates/cxx/RelWithDebInfo/5b32y1w6/obj/arm64-v8a

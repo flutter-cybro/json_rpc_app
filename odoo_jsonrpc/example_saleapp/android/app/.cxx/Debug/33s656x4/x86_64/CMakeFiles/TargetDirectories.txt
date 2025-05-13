@@ -1,0 +1,2 @@
+/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/.cxx/Debug/33s656x4/x86_64/CMakeFiles/edit_cache.dir
+/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/.cxx/Debug/33s656x4/x86_64/CMakeFiles/rebuild_cache.dir

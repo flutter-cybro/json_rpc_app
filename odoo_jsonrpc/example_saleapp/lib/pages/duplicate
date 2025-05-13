@@ -1,0 +1,53 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Future<void> _updateFieldValue(String fieldName, dynamic value) async {
+      setState(() => recordState[fieldName] = value);
+      if (widget.modelName == 'res.config.settings') return;
+      final fieldType = allPythonFields[fieldName]?['type'] ?? 'char';
+      final isOne2Many = fieldType == 'one2many';
+      final hasRecordId = widget.recordId != 0;
+
+      if (!hasRecordId || isOne2Many) {
+        print('$fieldName updated successfully');
+        // For local records or one2many fields, just update the state and show success
+        // _showSuccessSnackBar('$fieldName updated successfully');
+        return;
+      }
+
+      await _callKwWithErrorHandling(
+        method: 'write',
+        args: [
+          [widget.recordId],
+          {fieldName: value},
+        ],
+        onSuccess: (_) async {
+          print("entered in the onSuccess");
+          await _loadRecordState();
+          _showSuccessSnackBar('$fieldName updated successfully');
+        },
+        onError: () async {
+          await _loadRecordState();
+          _showErrorSnackBar('Failed to update $fieldName');
+        },
+        errorMessage: 'Error updating field value',
+      );
+    }

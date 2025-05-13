@@ -1,0 +1,1 @@
+/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/app/intermediates/cxx/Debug/33s656x4/obj/x86_64
