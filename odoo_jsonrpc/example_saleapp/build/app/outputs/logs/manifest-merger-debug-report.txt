@@ -1,0 +1,546 @@
+-- Merging decision tree log ---
+application
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:13:5-45:19
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:13:5-46:19
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:13:5-46:19
+MERGED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:8:5-32:19
+MERGED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:8:5-32:19
+MERGED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-12:19
+MERGED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-12:19
+MERGED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:22:5-29:19
+MERGED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:28:5-89
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/377d4d844fa81ec5fa3d509ee1f8b393/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/377d4d844fa81ec5fa3d509ee1f8b393/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+	android:extractNativeLibs
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+	android:name
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml
+manifest
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:1:1-57:12
+MERGED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:1:1-57:12
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml:1:1-7:12
+MERGED from [:shared_preferences_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:syncfusion_flutter_pdfviewer] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/syncfusion_flutter_pdfviewer/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:device_info_plus] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-48:12
+MERGED from [:local_auth_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/local_auth_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:17:1-29:12
+MERGED from [androidx.preference:preference:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/a006c83d112cce6def48bc8de6db9d96/transformed/preference-1.2.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/bbd5b86463310ea1c4da513f1dfdcd35/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.appcompat:appcompat:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/7a51f4ce62c63b08bb5d8b6e5c75e091/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-15:12
+MERGED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-34:12
+MERGED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-14:12
+MERGED from [:flutter_plugin_android_lifecycle] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_plugin_android_lifecycle/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:flutter_secure_storage] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_secure_storage/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-10:12
+MERGED from [:isar_flutter_libs] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/isar_flutter_libs/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-8:12
+MERGED from [:path_provider_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [:permission_handler_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.webkit:webkit:1.12.0] /home/cybrosys/.gradle/caches/transforms-3/955da32a56b10282b9b81b68f8631f35/transformed/webkit-1.12.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.browser:browser:1.8.0] /home/cybrosys/.gradle/caches/transforms-3/d1ddb54350762f163821b19a8cf5620b/transformed/browser-1.8.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/30f4b55bcc18581c76d12d7ced29c148/transformed/recyclerview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/f1ee2e8b59771fc8251c01f50f87fa80/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/a014e3295fdd0a484e31744c5109ff69/transformed/swiperefreshlayout-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/4b2e0ca5f3ed3377f9d6302114e259fd/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.fragment:fragment:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/9fee3f826a71f279e0c175b0e70119b5/transformed/fragment-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity-ktx:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/43d6b5dc17f697875facf49c844ddb59/transformed/jetified-activity-ktx-1.9.3/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.activity:activity:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/393b1a54a04873832e65fb0ed554e4c9/transformed/jetified-activity-1.9.3/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ef746adde5301194f5252f851c3ed87b/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:17:1-31:12
+MERGED from [androidx.window:window-java:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/4aba2da3c09739042af82f580639af44/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:17:1-21:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/cdbd8818d121e7419c86938fabfa6f1b/transformed/drawerlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/39550d8f424cd0d700479a86016945f9/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/10a63ffc0ada026514043881106c9525/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/7f42139c9cda24ccf45844da9a2441d9/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/d70c59c6058f5a1fbb9fd61df6ed5204/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/f2bc15ad5068a44a0371b19548fc19e0/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/5ab0d38d952c9e4b5b5ba01e8f1b0c34/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/519dbfa6677c429e55d127120a9853f9/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/881cd784645a0ff484081409e8526f78/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/3f1eb7eaf0171b67b1e0eb7ecf5a5b25/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/66d492ec46608bc2a19fca9083ffff1b/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/2313c2b513c62f75d76a9052fb1e6af9/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/c9888b1266f72702e413951534a688a7/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/1b4acd2551dd73b8278de7b8e93de349/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core-ktx:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/455b8dfe32827cef8ebc20f49d38e92d/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/197f9555d7947d742d8a639d7d01d041/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/2c0775ada28a105614c306226861f997/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/57ce1d6785626a43426ec70921cd020f/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/16ecb5e6d6c2b2e3a156054560170e96/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/eec2f214ba09e812f1bad82d74c74ca4/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.4.1] /home/cybrosys/.gradle/caches/transforms-3/9832f41354bf899827278b7dade30a89/transformed/transition-1.4.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/6cf98dd14f59514fcb4b6b784ad0f2f7/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/cybrosys/.gradle/caches/transforms-3/bad6c5c68b4a00dc9da620728845a093/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] /home/cybrosys/.gradle/caches/transforms-3/34d8849b568b3fc4d5058111b865ccae/transformed/jetified-security-crypto-1.1.0-alpha06/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/cybrosys/.gradle/caches/transforms-3/75d386c1213e022427b8336d6def7e70/transformed/exifinterface-1.3.7/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:17:1-55:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.tracing:tracing:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3f1ed22c4bb836637e48b18dff52fcd7/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/377d4d844fa81ec5fa3d509ee1f8b393/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/8bd907a89f36ddfe477e575b9726b0e6/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/466fdd3d909c8041d6d357d4609ba032/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/e549a7aa2300c95c0bf1c44d01eaec11/transformed/jetified-datastore-core-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/66d1c4a4d6a545298253473af4f586d0/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.datastore:datastore-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/5eae250f516b6ff92867cd41550d532a/transformed/jetified-datastore-release/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/cybrosys/.gradle/caches/transforms-3/615a3ff688f7bc3345bfa432bc05f4fc/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.window.extensions.core:core:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/233bc2af112d741999fd14dccd34174f/transformed/jetified-core-1.0.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/5706b41745746ca33e92f7f70c4070c7/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/a158db9fec7529d40ac27c8b39997077/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/2e35cfe3768810a08888c9ce546295c5/transformed/print-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.multidex:multidex:2.0.0] /home/cybrosys/.gradle/caches/transforms-3/eb657150fda0a1545875363eb70357b5/transformed/multidex-2.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /home/cybrosys/.gradle/caches/transforms-3/5f6cebb40b0611a5767418033fdb29b9/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:2:1-7:12
+	package
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:1:70-107
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:1:11-69
+uses-feature#android.hardware.camera
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:3:5-5:36
+	android:required
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:5:9-33
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:4:9-47
+uses-permission#android.permission.USE_BIOMETRIC
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:7:5-71
+MERGED from [:local_auth_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/local_auth_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-72
+MERGED from [:local_auth_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/local_auth_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-72
+MERGED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:24:5-72
+MERGED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:24:5-72
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:7:22-69
+uses-permission#android.permission.INTERNET
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:8:5-67
+MERGED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:8:5-67
+MERGED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:8:5-67
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:8:22-64
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:9:5-79
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:9:22-77
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:10:5-80
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:10:22-78
+uses-permission#android.permission.CAMERA
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:11:5-64
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:11:22-62
+queries
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:51:5-56:15
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-11:15
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-11:15
+MERGED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-13:15
+MERGED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:7:5-13:15
+intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:52:9-55:18
+action#android.intent.action.PROCESS_TEXT
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:53:13-72
+	android:name
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:53:21-70
+data
+ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:54:13-50
+	android:mimeType
+		ADDED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/main/AndroidManifest.xml:54:19-48
+uses-sdk
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+MERGED from [:shared_preferences_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:shared_preferences_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/shared_preferences_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:syncfusion_flutter_pdfviewer] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/syncfusion_flutter_pdfviewer/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:syncfusion_flutter_pdfviewer] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/syncfusion_flutter_pdfviewer/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:device_info_plus] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:device_info_plus] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/device_info_plus/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:local_auth_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/local_auth_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:local_auth_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/local_auth_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.preference:preference:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/a006c83d112cce6def48bc8de6db9d96/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.preference:preference:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/a006c83d112cce6def48bc8de6db9d96/transformed/preference-1.2.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/bbd5b86463310ea1c4da513f1dfdcd35/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/bbd5b86463310ea1c4da513f1dfdcd35/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/7a51f4ce62c63b08bb5d8b6e5c75e091/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.6.1] /home/cybrosys/.gradle/caches/transforms-3/7a51f4ce62c63b08bb5d8b6e5c75e091/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-44
+MERGED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-44
+MERGED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_plugin_android_lifecycle] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_plugin_android_lifecycle/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_plugin_android_lifecycle] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_plugin_android_lifecycle/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:flutter_secure_storage] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_secure_storage/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-8:53
+MERGED from [:flutter_secure_storage] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_secure_storage/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-8:53
+MERGED from [:isar_flutter_libs] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/isar_flutter_libs/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-44
+MERGED from [:isar_flutter_libs] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/isar_flutter_libs/intermediates/merged_manifest/debug/AndroidManifest.xml:6:5-44
+MERGED from [:path_provider_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/path_provider_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:permission_handler_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [:permission_handler_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/permission_handler_android/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-44
+MERGED from [androidx.webkit:webkit:1.12.0] /home/cybrosys/.gradle/caches/transforms-3/955da32a56b10282b9b81b68f8631f35/transformed/webkit-1.12.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.webkit:webkit:1.12.0] /home/cybrosys/.gradle/caches/transforms-3/955da32a56b10282b9b81b68f8631f35/transformed/webkit-1.12.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.browser:browser:1.8.0] /home/cybrosys/.gradle/caches/transforms-3/d1ddb54350762f163821b19a8cf5620b/transformed/browser-1.8.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.browser:browser:1.8.0] /home/cybrosys/.gradle/caches/transforms-3/d1ddb54350762f163821b19a8cf5620b/transformed/browser-1.8.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/30f4b55bcc18581c76d12d7ced29c148/transformed/recyclerview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/30f4b55bcc18581c76d12d7ced29c148/transformed/recyclerview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/f1ee2e8b59771fc8251c01f50f87fa80/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/f1ee2e8b59771fc8251c01f50f87fa80/transformed/legacy-support-core-ui-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/a014e3295fdd0a484e31744c5109ff69/transformed/swiperefreshlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/a014e3295fdd0a484e31744c5109ff69/transformed/swiperefreshlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/4b2e0ca5f3ed3377f9d6302114e259fd/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment-ktx:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/4b2e0ca5f3ed3377f9d6302114e259fd/transformed/jetified-fragment-ktx-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/9fee3f826a71f279e0c175b0e70119b5/transformed/fragment-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.7.1] /home/cybrosys/.gradle/caches/transforms-3/9fee3f826a71f279e0c175b0e70119b5/transformed/fragment-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/43d6b5dc17f697875facf49c844ddb59/transformed/jetified-activity-ktx-1.9.3/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity-ktx:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/43d6b5dc17f697875facf49c844ddb59/transformed/jetified-activity-ktx-1.9.3/AndroidManifest.xml:5:5-44
+MERGED from [androidx.activity:activity:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/393b1a54a04873832e65fb0ed554e4c9/transformed/jetified-activity-1.9.3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.9.3] /home/cybrosys/.gradle/caches/transforms-3/393b1a54a04873832e65fb0ed554e4c9/transformed/jetified-activity-1.9.3/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ef746adde5301194f5252f851c3ed87b/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ef746adde5301194f5252f851c3ed87b/transformed/slidingpanelayout-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window:window-java:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/4aba2da3c09739042af82f580639af44/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:19:5-44
+MERGED from [androidx.window:window-java:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/4aba2da3c09739042af82f580639af44/transformed/jetified-window-java-1.2.0/AndroidManifest.xml:19:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/cdbd8818d121e7419c86938fabfa6f1b/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/cdbd8818d121e7419c86938fabfa6f1b/transformed/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/39550d8f424cd0d700479a86016945f9/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/39550d8f424cd0d700479a86016945f9/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/10a63ffc0ada026514043881106c9525/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/10a63ffc0ada026514043881106c9525/transformed/legacy-support-core-utils-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/7f42139c9cda24ccf45844da9a2441d9/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/7f42139c9cda24ccf45844da9a2441d9/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/d70c59c6058f5a1fbb9fd61df6ed5204/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/d70c59c6058f5a1fbb9fd61df6ed5204/transformed/jetified-lifecycle-runtime-ktx-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/f2bc15ad5068a44a0371b19548fc19e0/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/f2bc15ad5068a44a0371b19548fc19e0/transformed/lifecycle-livedata-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/5ab0d38d952c9e4b5b5ba01e8f1b0c34/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/5ab0d38d952c9e4b5b5ba01e8f1b0c34/transformed/jetified-lifecycle-viewmodel-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/519dbfa6677c429e55d127120a9853f9/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/519dbfa6677c429e55d127120a9853f9/transformed/jetified-lifecycle-livedata-core-ktx-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/881cd784645a0ff484081409e8526f78/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/881cd784645a0ff484081409e8526f78/transformed/lifecycle-viewmodel-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/3f1eb7eaf0171b67b1e0eb7ecf5a5b25/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/3f1eb7eaf0171b67b1e0eb7ecf5a5b25/transformed/lifecycle-livedata-core-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/66d492ec46608bc2a19fca9083ffff1b/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate-ktx:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/66d492ec46608bc2a19fca9083ffff1b/transformed/jetified-savedstate-ktx-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/2313c2b513c62f75d76a9052fb1e6af9/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /home/cybrosys/.gradle/caches/transforms-3/2313c2b513c62f75d76a9052fb1e6af9/transformed/jetified-savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/c9888b1266f72702e413951534a688a7/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/c9888b1266f72702e413951534a688a7/transformed/lifecycle-runtime-2.7.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/1b4acd2551dd73b8278de7b8e93de349/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/1b4acd2551dd73b8278de7b8e93de349/transformed/jetified-lifecycle-viewmodel-savedstate-2.7.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/455b8dfe32827cef8ebc20f49d38e92d/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/455b8dfe32827cef8ebc20f49d38e92d/transformed/jetified-core-ktx-1.13.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/197f9555d7947d742d8a639d7d01d041/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/197f9555d7947d742d8a639d7d01d041/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/2c0775ada28a105614c306226861f997/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/2c0775ada28a105614c306226861f997/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/57ce1d6785626a43426ec70921cd020f/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/57ce1d6785626a43426ec70921cd020f/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/16ecb5e6d6c2b2e3a156054560170e96/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/16ecb5e6d6c2b2e3a156054560170e96/transformed/coordinatorlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/eec2f214ba09e812f1bad82d74c74ca4/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/eec2f214ba09e812f1bad82d74c74ca4/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] /home/cybrosys/.gradle/caches/transforms-3/9832f41354bf899827278b7dade30a89/transformed/transition-1.4.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.4.1] /home/cybrosys/.gradle/caches/transforms-3/9832f41354bf899827278b7dade30a89/transformed/transition-1.4.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/6cf98dd14f59514fcb4b6b784ad0f2f7/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/6cf98dd14f59514fcb4b6b784ad0f2f7/transformed/asynclayoutinflater-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/cybrosys/.gradle/caches/transforms-3/bad6c5c68b4a00dc9da620728845a093/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.0] /home/cybrosys/.gradle/caches/transforms-3/bad6c5c68b4a00dc9da620728845a093/transformed/jetified-annotation-experimental-1.4.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] /home/cybrosys/.gradle/caches/transforms-3/34d8849b568b3fc4d5058111b865ccae/transformed/jetified-security-crypto-1.1.0-alpha06/AndroidManifest.xml:20:5-44
+MERGED from [androidx.security:security-crypto:1.1.0-alpha06] /home/cybrosys/.gradle/caches/transforms-3/34d8849b568b3fc4d5058111b865ccae/transformed/jetified-security-crypto-1.1.0-alpha06/AndroidManifest.xml:20:5-44
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/cybrosys/.gradle/caches/transforms-3/75d386c1213e022427b8336d6def7e70/transformed/exifinterface-1.3.7/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.7] /home/cybrosys/.gradle/caches/transforms-3/75d386c1213e022427b8336d6def7e70/transformed/exifinterface-1.3.7/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:21:5-44
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.tracing:tracing:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3f1ed22c4bb836637e48b18dff52fcd7/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3f1ed22c4bb836637e48b18dff52fcd7/transformed/jetified-tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/377d4d844fa81ec5fa3d509ee1f8b393/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/377d4d844fa81ec5fa3d509ee1f8b393/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/8bd907a89f36ddfe477e575b9726b0e6/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/8bd907a89f36ddfe477e575b9726b0e6/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/466fdd3d909c8041d6d357d4609ba032/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/466fdd3d909c8041d6d357d4609ba032/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/e549a7aa2300c95c0bf1c44d01eaec11/transformed/jetified-datastore-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-core-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/e549a7aa2300c95c0bf1c44d01eaec11/transformed/jetified-datastore-core-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/66d1c4a4d6a545298253473af4f586d0/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-preferences-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/66d1c4a4d6a545298253473af4f586d0/transformed/jetified-datastore-preferences-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/5eae250f516b6ff92867cd41550d532a/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.datastore:datastore-android:1.1.3] /home/cybrosys/.gradle/caches/transforms-3/5eae250f516b6ff92867cd41550d532a/transformed/jetified-datastore-release/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/cybrosys/.gradle/caches/transforms-3/615a3ff688f7bc3345bfa432bc05f4fc/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/cybrosys/.gradle/caches/transforms-3/615a3ff688f7bc3345bfa432bc05f4fc/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/233bc2af112d741999fd14dccd34174f/transformed/jetified-core-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.window.extensions.core:core:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/233bc2af112d741999fd14dccd34174f/transformed/jetified-core-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/5706b41745746ca33e92f7f70c4070c7/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/5706b41745746ca33e92f7f70c4070c7/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/a158db9fec7529d40ac27c8b39997077/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/a158db9fec7529d40ac27c8b39997077/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/2e35cfe3768810a08888c9ce546295c5/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /home/cybrosys/.gradle/caches/transforms-3/2e35cfe3768810a08888c9ce546295c5/transformed/print-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.multidex:multidex:2.0.0] /home/cybrosys/.gradle/caches/transforms-3/eb657150fda0a1545875363eb70357b5/transformed/multidex-2.0.0/AndroidManifest.xml:20:5-43
+MERGED from [androidx.multidex:multidex:2.0.0] /home/cybrosys/.gradle/caches/transforms-3/eb657150fda0a1545875363eb70357b5/transformed/multidex-2.0.0/AndroidManifest.xml:20:5-43
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /home/cybrosys/.gradle/caches/transforms-3/5f6cebb40b0611a5767418033fdb29b9/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:5:5-43
+MERGED from [com.getkeepsafe.relinker:relinker:1.4.5] /home/cybrosys/.gradle/caches/transforms-3/5f6cebb40b0611a5767418033fdb29b9/transformed/jetified-relinker-1.4.5/AndroidManifest.xml:5:5-43
+	tools:overrideLibrary
+		ADDED from [:flutter_secure_storage] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_secure_storage/intermediates/merged_manifest/debug/AndroidManifest.xml:8:9-50
+	android:targetSdkVersion
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/android/app/src/debug/AndroidManifest.xml
+intent#action:name:android.support.customtabs.action.CustomTabsService
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:8:9-10:18
+action#android.support.customtabs.action.CustomTabsService
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:9:13-90
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:9:21-87
+activity#com.pichillilorenzo.flutter_inappwebview_android.in_app_browser.InAppBrowserActivity
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:14:9-18:47
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:17:13-37
+	android:configChanges
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:16:13-137
+	android:theme
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:18:13-44
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:15:13-112
+activity#com.pichillilorenzo.flutter_inappwebview_android.chrome_custom_tabs.ChromeCustomTabsActivity
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:19:9-22:55
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:21:13-37
+	android:theme
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:22:13-52
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:20:13-120
+activity#com.pichillilorenzo.flutter_inappwebview_android.chrome_custom_tabs.TrustedWebActivity
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:23:9-26:55
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:25:13-37
+	android:theme
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:26:13-52
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:24:13-114
+activity#com.pichillilorenzo.flutter_inappwebview_android.chrome_custom_tabs.ChromeCustomTabsActivitySingleInstance
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:27:9-31:55
+	android:launchMode
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:30:13-48
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:29:13-37
+	android:theme
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:31:13-52
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:28:13-134
+activity#com.pichillilorenzo.flutter_inappwebview_android.chrome_custom_tabs.TrustedWebActivitySingleInstance
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:32:9-36:55
+	android:launchMode
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:35:13-48
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:34:13-37
+	android:theme
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:36:13-52
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:33:13-128
+receiver#com.pichillilorenzo.flutter_inappwebview_android.chrome_custom_tabs.ActionBroadcastReceiver
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:38:9-41:40
+	android:enabled
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:40:13-35
+	android:exported
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:41:13-37
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:39:13-119
+meta-data#io.flutter.embedded_views_preview
+ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:43:9-45:36
+	android:value
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:45:13-33
+	android:name
+		ADDED from [:flutter_inappwebview_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/flutter_inappwebview_android/intermediates/merged_manifest/debug/AndroidManifest.xml:44:13-61
+uses-permission#android.permission.USE_FINGERPRINT
+ADDED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:27:5-74
+	android:name
+		ADDED from [androidx.biometric:biometric:1.1.0] /home/cybrosys/.gradle/caches/transforms-3/4d06bf90ddc85ed8bc6459fd272bc640/transformed/biometric-1.1.0/AndroidManifest.xml:27:22-71
+intent#action:name:android.intent.action.GET_CONTENT+data:mimeType:*/*
+ADDED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:8:9-12:18
+action#android.intent.action.GET_CONTENT
+ADDED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:13-72
+	android:name
+		ADDED from [:file_picker] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/file_picker/intermediates/merged_manifest/debug/AndroidManifest.xml:9:21-69
+provider#io.flutter.plugins.imagepicker.ImagePickerFileProvider
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:9:9-17:20
+	android:grantUriPermissions
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:13:13-47
+	android:authorities
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:11:13-74
+	android:exported
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:12:13-37
+	android:name
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:10:13-82
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:14:13-16:75
+	android:resource
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:16:17-72
+	android:name
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:15:17-67
+service#com.google.android.gms.metadata.ModuleDependencies
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:19:9-31:19
+	android:enabled
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:21:13-36
+	android:exported
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:22:13-37
+	tools:ignore
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:23:13-40
+	android:name
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:20:13-78
+intent-filter#action:name:com.google.android.gms.metadata.MODULE_DEPENDENCIES
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:24:13-26:29
+action#com.google.android.gms.metadata.MODULE_DEPENDENCIES
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:25:17-94
+	android:name
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:25:25-91
+meta-data#photopicker_activity:0:required
+ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:28:13-30:36
+	android:value
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:30:17-33
+	android:name
+		ADDED from [:image_picker_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/image_picker_android/intermediates/merged_manifest/debug/AndroidManifest.xml:29:17-63
+activity#io.flutter.plugins.urllauncher.WebViewActivity
+ADDED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:8:9-11:74
+	android:exported
+		ADDED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:10:13-37
+	android:theme
+		ADDED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:11:13-71
+	android:name
+		ADDED from [:url_launcher_android] /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/url_launcher_android/intermediates/merged_manifest/debug/AndroidManifest.xml:9:13-74
+uses-library#androidx.window.extensions
+ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+uses-library#androidx.window.sidecar
+ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+	android:required
+		ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+	android:name
+		ADDED from [androidx.window:window:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/ec27163b32bd040aee47b88253247fc0/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /home/cybrosys/.gradle/caches/transforms-3/f65aa2145fb73bc68a9229ebaec9b120/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:28:13-31
+	android:authorities
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+	android:exported
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+meta-data#androidx.emoji2.text.EmojiCompatInitializer
+ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.2.0] /home/cybrosys/.gradle/caches/transforms-3/3601ca544ebe865a577903be351622c8/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.7.0] /home/cybrosys/.gradle/caches/transforms-3/2d9258b1d934c1d542adbed7c5c85233/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+permission#com.example.example_saleapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+uses-permission#com.example.example_saleapp.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.13.1] /home/cybrosys/.gradle/caches/transforms-3/713088a574df50ab54ab3a7a70e27a1a/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.3.1] /home/cybrosys/.gradle/caches/transforms-3/31729098e50ecea9654b0bab7ac7eaf2/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92

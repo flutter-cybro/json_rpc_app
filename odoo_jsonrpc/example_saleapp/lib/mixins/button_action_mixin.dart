@@ -93,9 +93,9 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
       }
     }
 
-    if (mounted) {
-      _showActionResult(buildContext, response?.toString() ?? 'Action completed');
-    }
+    // if (mounted) {
+    //   _showActionResult(buildContext, response?.toString() ?? 'Action completed');
+    // }
     return true;
   }
 
