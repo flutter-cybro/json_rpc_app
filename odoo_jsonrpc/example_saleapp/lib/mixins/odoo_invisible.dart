@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:developer' as dev;
 
 mixin InvisibleConditionMixin {
@@ -32,8 +31,11 @@ mixin InvisibleConditionMixin {
         return _expressionCache[value]!;
       }
 
-      final result =
-      _evaluateInvisibleExpression(value, requireFieldExistence: requireFieldExistence);
+      // Normalize the expression first
+      final normalizedExpr = _normalizeExpression(value);
+      dev.log('Normalized expression: $normalizedExpr', name: 'InvisibleConditionMixin');
+
+      final result = _evaluateInvisibleExpression(normalizedExpr, requireFieldExistence: requireFieldExistence);
       if (useCache) _expressionCache[value] = result;
       return result;
     }
@@ -45,120 +47,311 @@ mixin InvisibleConditionMixin {
     return false;
   }
 
+  String _normalizeExpression(String expression) {
+    // Replace text operators with symbol operators for consistency
+    String normalized = expression
+        .replaceAll(RegExp(r'\s+and\s+', caseSensitive: false), ' & ')
+        .replaceAll(RegExp(r'\s+or\s+', caseSensitive: false), ' | ');
+
+    // Handle spaces around operators
+    normalized = normalized
+        .replaceAll(RegExp(r'\s*==\s*'), '==')
+        .replaceAll(RegExp(r'\s*!=\s*'), '!=')
+        .replaceAll(RegExp(r'\s*<=\s*'), '<=')
+        .replaceAll(RegExp(r'\s*>=\s*'), '>=')
+        .replaceAll(RegExp(r'\s*<\s*'), '<')
+        .replaceAll(RegExp(r'\s*>\s*'), '>')
+        .replaceAll(RegExp(r'\s*=\s*'), '=');
+
+    // Add spaces around logical operators for easier splitting
+    normalized = normalized
+        .replaceAll('&', ' & ')
+        .replaceAll('|', ' | ');
+
+    return normalized;
+  }
+
   bool _evaluateInvisibleExpression(String expression,
       {bool requireFieldExistence = false}) {
-    // dev.log('Evaluating expression: $expression', name: 'InvisibleConditionMixin');
-
-    String expr = expression
-        .replaceAll(RegExp(r'\s*and\s*', caseSensitive: false), '&')
-        .replaceAll(RegExp(r'\s*or\s*', caseSensitive: false), '|')
-        .replaceAll(RegExp(r'\s+'), '');
-
     dev.log('Evaluating expression: $expression', name: 'InvisibleConditionMixin');
 
-    if (expr.contains('in') || expr.contains('notin')) {
-      final operator = expr.contains('notin') ? 'notin' : 'in';
-      final parts = expr.split(operator);
-      if (parts.length != 2) {
-        dev.log('Invalid $operator expression: $expr', name: 'InvisibleConditionMixin');
-        return false;
-      }
-
-      final fieldName = parts[0].trim();
-      String listPart = parts[1].trim();
-
-      if ((listPart.startsWith('[') && listPart.endsWith(']')) ||
-          (listPart.startsWith('(') && listPart.endsWith(')'))) {
-        listPart = listPart.substring(1, listPart.length - 1);
-        final values = _splitListValues(listPart);
-        final fieldValue = recordState[fieldName]?.toString();
-
-        if (fieldValue == null) {
-          dev.log('Field $fieldName is null', name: 'InvisibleConditionMixin');
-          return requireFieldExistence ? false : operator == 'notin';
-        }
-
-        final isInList = values.contains(fieldValue);
-        final result = operator == 'notin' ? !isInList : isInList;
-        dev.log('$fieldName $operator $values: $result', name: 'InvisibleConditionMixin');
-        return result;
-      }
-      dev.log('Invalid list delimiters in $operator expression: $expr',
-          name: 'InvisibleConditionMixin');
-      return false;
+    // First, check if there are logical operators at the top level
+    if (_containsLogicalOperatorsAtTopLevel(expression)) {
+      return _evaluateLogicalExpression(expression, requireFieldExistence: requireFieldExistence);
     }
 
-    if (expr.startsWith('not') && expr.length > 3) {
-      final fieldName = expr.substring(3).trim();
-      final result = !_getFieldBoolValue(fieldName);
+    // Handle 'in' and 'not in' operators
+    if (_containsInOperator(expression)) {
+      return _evaluateInExpression(expression, requireFieldExistence: requireFieldExistence);
+    }
+
+    // Handle 'not' prefix
+    if (expression.trim().startsWith('not ')) {
+      final fieldName = expression.trim().substring(4).trim();
+      final result = !_getFieldBoolValue(fieldName, requireFieldExistence: requireFieldExistence);
       dev.log('Evaluated not $fieldName: $result', name: 'InvisibleConditionMixin');
       return result;
     }
 
+    // Handle comparison operators
+    final comparisonResult = _evaluateComparisonExpression(expression, requireFieldExistence: requireFieldExistence);
+    if (comparisonResult != null) {
+      return comparisonResult;
+    }
+
+    // Handle group_ prefix
+    if (expression.trim().startsWith('group_')) {
+      final result = _getFieldBoolValue(expression.trim(), requireFieldExistence: requireFieldExistence);
+      dev.log('Evaluated group $expression: $result', name: 'InvisibleConditionMixin');
+      return result;
+    }
+
+    // Handle nested fields
+    if (expression.contains('.')) {
+      final result = _evaluateNestedField(expression, requireFieldExistence: requireFieldExistence);
+      dev.log('Evaluated nested field $expression: $result', name: 'InvisibleConditionMixin');
+      return result;
+    }
+
+    // Default case - treat as field name
+    final result = _getFieldBoolValue(expression.trim(), requireFieldExistence: requireFieldExistence);
+    dev.log('Evaluated field $expression: $result', name: 'InvisibleConditionMixin');
+    return result;
+  }
+
+  bool _containsLogicalOperatorsAtTopLevel(String expression) {
+    // Check if the expression contains & or | operators that are not inside quotes or parentheses
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
+    int parenthesisLevel = 0;
+
+    for (int i = 0; i < expression.length; i++) {
+      final char = expression[i];
+
+      // Handle quotes
+      if (char == "'" && !inDoubleQuote) {
+        inSingleQuote = !inSingleQuote;
+      } else if (char == '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+      }
+
+      // Handle parentheses
+      if (!inSingleQuote && !inDoubleQuote) {
+        if (char == '(') {
+          parenthesisLevel++;
+        } else if (char == ')') {
+          parenthesisLevel--;
+        }
+      }
+
+      // Check for logical operators at top level
+      if (!inSingleQuote && !inDoubleQuote && parenthesisLevel == 0) {
+        if ((char == '&' || char == '|') &&
+            (i == 0 || expression[i-1] == ' ') &&
+            (i == expression.length - 1 || expression[i+1] == ' ')) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool _containsInOperator(String expression) {
+    // Check for 'in' or 'not in' operators that are not inside quotes
+    final inPattern = RegExp(r'(?<!\w)in(?!\w)');
+    final notInPattern = RegExp(r'(?<!\w)not\s+in(?!\w)');
+
+    bool inSingleQuote = false;
+    bool inDoubleQuote = false;
+    String tempExpr = '';
+
+    // Remove quoted parts for checking
+    for (int i = 0; i < expression.length; i++) {
+      final char = expression[i];
+
+      if (char == "'" && !inDoubleQuote) {
+        inSingleQuote = !inSingleQuote;
+        continue;
+      } else if (char == '"' && !inSingleQuote) {
+        inDoubleQuote = !inDoubleQuote;
+        continue;
+      }
+
+      if (!inSingleQuote && !inDoubleQuote) {
+        tempExpr += char;
+      }
+    }
+
+    return inPattern.hasMatch(tempExpr) || notInPattern.hasMatch(tempExpr);
+  }
+
+  bool _evaluateInExpression(String expression, {bool requireFieldExistence = false}) {
+    // Handle 'in' and 'not in' operators
+    String operator;
+    List<String> parts;
+
+    if (expression.contains(' not in ')) {
+      operator = 'not in';
+      parts = expression.split(' not in ');
+    } else if (expression.contains(' in ')) {
+      operator = 'in';
+      parts = expression.split(' in ');
+    } else {
+      dev.log('Invalid in/not in expression: $expression', name: 'InvisibleConditionMixin');
+      return false;
+    }
+
+    if (parts.length != 2) {
+      dev.log('Invalid $operator expression format: $expression', name: 'InvisibleConditionMixin');
+      return false;
+    }
+
+    final fieldName = parts[0].trim();
+    String listPart = parts[1].trim();
+
+    // Extract list values
+    if ((listPart.startsWith('[') && listPart.endsWith(']')) ||
+        (listPart.startsWith('(') && listPart.endsWith(')'))) {
+      listPart = listPart.substring(1, listPart.length - 1);
+      final values = _splitListValues(listPart);
+      final fieldValue = _getFieldValue(fieldName);
+
+      if (fieldValue == null) {
+        dev.log('Field $fieldName is null', name: 'InvisibleConditionMixin');
+        return requireFieldExistence ? false : operator == 'not in';
+      }
+
+      final fieldValueStr = fieldValue.toString();
+      final isInList = values.contains(fieldValueStr);
+      final result = operator == 'not in' ? !isInList : isInList;
+      dev.log('$fieldName $operator $values: $result', name: 'InvisibleConditionMixin');
+      return result;
+    }
+
+    dev.log('Invalid list format in $operator expression: $expression', name: 'InvisibleConditionMixin');
+    return false;
+  }
+
+  bool? _evaluateComparisonExpression(String expression, {bool requireFieldExistence = false}) {
+    // Handle comparison operators
     const comparisonOperators = ['==', '!=', '<=', '>=', '<', '>', '='];
     String? foundOperator;
-    for (var op in comparisonOperators) {
-      if (expr.contains(op)) {
+    List<String>? parts;
+
+    for (final op in comparisonOperators) {
+      if (expression.contains(op)) {
         foundOperator = op;
+        parts = expression.split(op);
         break;
       }
     }
 
-    if (foundOperator != null) {
-      final parts = expr.split(foundOperator);
+    if (foundOperator != null && parts != null) {
       if (parts.length != 2) {
-        dev.log('Invalid $foundOperator expression: $expr', name: 'InvisibleConditionMixin');
+        dev.log('Invalid $foundOperator expression: $expression', name: 'InvisibleConditionMixin');
         return false;
       }
 
       final fieldName = parts[0].trim();
       var expectedValue = parts[1].trim();
 
+      // Remove quotes if present
       if ((expectedValue.startsWith("'") && expectedValue.endsWith("'")) ||
           (expectedValue.startsWith('"') && expectedValue.endsWith('"'))) {
         expectedValue = expectedValue.substring(1, expectedValue.length - 1);
       }
 
-      if (!recordState.containsKey(fieldName)) {
+      if (!_fieldExists(fieldName)) {
         dev.log('Field $fieldName not found', name: 'InvisibleConditionMixin');
         return requireFieldExistence ? false : foundOperator == '!=';
       }
 
-      final fieldValue = recordState[fieldName]?.toString();
-      final result =
-      _compareValues(fieldValue, expectedValue, foundOperator, requireFieldExistence);
-      dev.log('$fieldName $foundOperator $expectedValue = $result',
-          name: 'InvisibleConditionMixin');
+      final fieldValue = _getFieldValue(fieldName)?.toString();
+      final result = _compareValues(fieldValue, expectedValue, foundOperator, requireFieldExistence);
+      dev.log('$fieldName $foundOperator $expectedValue = $result', name: 'InvisibleConditionMixin');
       return result;
     }
 
-    if (expr.startsWith('group_')) {
-      final result = _getFieldBoolValue(expr);
-      dev.log('Evaluated group $expr: $result', name: 'InvisibleConditionMixin');
-      return result;
+    return null;
+  }
+
+  bool _fieldExists(String fieldName) {
+    if (fieldName.contains('.')) {
+      // Check if nested field exists
+      final parts = fieldName.split('.');
+      dynamic current = recordState;
+
+      for (var part in parts) {
+        if (current is Map<String, dynamic>) {
+          if (!current.containsKey(part)) {
+            return false;
+          }
+          current = current[part];
+        } else if (current is List && int.tryParse(part) != null) {
+          final index = int.parse(part);
+          if (index < 0 || index >= current.length) {
+            return false;
+          }
+          current = current[index];
+        } else {
+          return false;
+        }
+      }
+
+      return true;
+    } else {
+      return recordState.containsKey(fieldName);
+    }
+  }
+
+  dynamic _getFieldValue(String fieldName) {
+    if (fieldName.contains('.')) {
+      return _getNestedFieldValue(fieldName);
+    } else {
+      return recordState[fieldName];
+    }
+  }
+
+  bool _evaluateLogicalExpression(String expression, {bool requireFieldExistence = false}) {
+    dev.log('Evaluating logical expression: $expression', name: 'InvisibleConditionMixin');
+
+    // Handle parenthesized expressions first
+    final parenthesizedRegex = RegExp(r'\([^()]*\)');
+    String processedExpr = expression;
+
+    while (parenthesizedRegex.hasMatch(processedExpr)) {
+      processedExpr = processedExpr.replaceAllMapped(parenthesizedRegex, (match) {
+        final innerExpr = match.group(0)!.substring(1, match.group(0)!.length - 1);
+        final result = _evaluateInvisibleExpression(innerExpr, requireFieldExistence: requireFieldExistence);
+        return result.toString();
+      });
     }
 
-    if (expr.contains('.')) {
-      final result = _evaluateNestedField(expr, requireFieldExistence: requireFieldExistence);
-      dev.log('Evaluated nested field $expr: $result', name: 'InvisibleConditionMixin');
-      return result;
+    // Split by OR operator first
+    if (processedExpr.contains(' | ')) {
+      final orParts = processedExpr.split(' | ');
+      for (final part in orParts) {
+        if (_evaluateInvisibleExpression(part.trim(), requireFieldExistence: requireFieldExistence)) {
+          return true;
+        }
+      }
+      return false;
     }
 
-    if (RegExp(r'^[a-zA-Z_][a-zA-Z0-9_]*$').hasMatch(expr)) {
-      final result = _getFieldBoolValue(expr);
-      dev.log('Evaluated field $expr: $result', name: 'InvisibleConditionMixin');
-      return result;
+    // Then split by AND operator
+    if (processedExpr.contains(' & ')) {
+      final andParts = processedExpr.split(' & ');
+      for (final part in andParts) {
+        if (!_evaluateInvisibleExpression(part.trim(), requireFieldExistence: requireFieldExistence)) {
+          return false;
+        }
+      }
+      return true;
     }
 
-    if (expr.contains('&') || expr.contains('|')) {
-      final result = _evaluateLogicalExpression(expr, requireFieldExistence: requireFieldExistence);
-      dev.log('Evaluated logical expression $expr: $result', name: 'InvisibleConditionMixin');
-      return result;
-    }
-
-    final result = _getFieldBoolValue(expr);
-    dev.log('Evaluated default field $expr: $result', name: 'InvisibleConditionMixin');
-    return result;
+    // If no logical operators found after processing parentheses
+    return _evaluateInvisibleExpression(processedExpr, requireFieldExistence: requireFieldExistence);
   }
 
   List<String> _splitListValues(String listPart) {
@@ -248,11 +441,9 @@ mixin InvisibleConditionMixin {
       final operator = domain[1] as String;
       final expectedValue = domain[2];
 
-      final fieldValue = fieldName.contains('.')
-          ? _getNestedFieldValue(fieldName)
-          : recordState[fieldName]?.toString();
+      final fieldValue = _getFieldValue(fieldName)?.toString();
 
-      if (fieldValue == null && !recordState.containsKey(fieldName)) {
+      if (!_fieldExists(fieldName)) {
         dev.log('Field $fieldName not found', name: 'InvisibleConditionMixin');
         return requireFieldExistence ? false : (operator == '!=' || operator == 'not in');
       }
@@ -334,85 +525,18 @@ mixin InvisibleConditionMixin {
     }
   }
 
-  bool _evaluateLogicalExpression(String expr, {bool requireFieldExistence = false}) {
-    if (expr.startsWith('(') && expr.endsWith(')')) {
-      final innerExpr = expr.substring(1, expr.length - 1).trim();
-      if (innerExpr.isNotEmpty) {
-        return _evaluateInvisibleExpression(innerExpr,
-            requireFieldExistence: requireFieldExistence);
+  bool _getFieldBoolValue(String fieldName, {bool requireFieldExistence = false}) {
+    final value = _getFieldValue(fieldName);
+    print("_getFieldBoolValue  : $fieldName $value");
+    if (value == null) {
+      if (requireFieldExistence && !_fieldExists(fieldName)) {
+        return false;
       }
       return false;
     }
 
-    if (expr.contains('|')) {
-      final conditions = _splitOnOperator(expr, '|', respectParentheses: true);
-      for (var condition in conditions) {
-        if (_evaluateInvisibleExpression(condition,
-            requireFieldExistence: requireFieldExistence)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    if (expr.contains('&')) {
-      final conditions = _splitOnOperator(expr, '&', respectParentheses: true);
-      for (var condition in conditions) {
-        if (!_evaluateInvisibleExpression(condition,
-            requireFieldExistence: requireFieldExistence)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    return _evaluateInvisibleExpression(expr, requireFieldExistence: requireFieldExistence);
-  }
-
-  List<String> _splitOnOperator(String expr, String operator,
-      {bool respectParentheses = false}) {
-    final result = <String>[];
-    final current = StringBuffer();
-    bool inQuotes = false;
-    String quoteChar = '';
-    int parenLevel = 0;
-
-    for (var i = 0; i < expr.length; i++) {
-      final char = expr[i];
-
-      if (char == '"' || char == "'") {
-        if (inQuotes && char == quoteChar) {
-          inQuotes = false;
-          quoteChar = '';
-        } else if (!inQuotes) {
-          inQuotes = true;
-          quoteChar = char;
-        }
-      } else if (respectParentheses && char == '(' && !inQuotes) {
-        parenLevel++;
-      } else if (respectParentheses && char == ')' && !inQuotes) {
-        parenLevel--;
-      } else if (char == operator && !inQuotes && parenLevel == 0) {
-        if (current.isNotEmpty) result.add(current.toString().trim());
-        current.clear();
-        continue;
-      }
-
-      current.write(char);
-    }
-
-    if (current.isNotEmpty) result.add(current.toString().trim());
-    return result;
-  }
-
-  bool _getFieldBoolValue(String fieldName) {
-    final value = fieldName.contains('.')
-        ? _getNestedFieldValue(fieldName)
-        : recordState[fieldName];
-
-    if (value == null) return false;
     if (value is bool) return value;
-    if (value is int) return value == 1;
+    if (value is int) return true;
     if (value is String) {
       final lowerValue = value.toLowerCase();
       return lowerValue == 'true' || lowerValue == '1';
@@ -443,17 +567,20 @@ mixin InvisibleConditionMixin {
   }
 
   bool _evaluateNestedField(String expr, {bool requireFieldExistence = false}) {
-    const comparisonOperators = ['==', '!=', '='];
+    // Check if it's a comparison expression
+    const comparisonOperators = ['==', '!=', '<=', '>=', '<', '>', '='];
     String? foundOperator;
-    for (var op in comparisonOperators) {
+    List<String>? parts;
+
+    for (final op in comparisonOperators) {
       if (expr.contains(op)) {
         foundOperator = op;
+        parts = expr.split(op);
         break;
       }
     }
 
-    if (foundOperator != null) {
-      final parts = expr.split(foundOperator);
+    if (foundOperator != null && parts != null) {
       if (parts.length != 2) {
         dev.log('Invalid nested field expression: $expr', name: 'InvisibleConditionMixin');
         return false;
@@ -475,6 +602,6 @@ mixin InvisibleConditionMixin {
       return _compareValues(fieldValue, expectedValue, foundOperator, requireFieldExistence);
     }
 
-    return _getFieldBoolValue(expr);
+    return _getFieldBoolValue(expr, requireFieldExistence: requireFieldExistence);
   }
 }

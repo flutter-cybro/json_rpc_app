@@ -39,6 +39,7 @@ class FormView extends StatefulWidget {
   final String? formData;
   final String? name;
   final String? moduleName;
+  final defaultValues;
 
   const FormView({
     Key? key,
@@ -48,6 +49,7 @@ class FormView extends StatefulWidget {
     this.formData,
     this.name,
     this.moduleName,
+    this.defaultValues
   }) : super(key: key);
 
   @override
@@ -121,8 +123,27 @@ class _FormViewState extends State<FormView>
     }
   }
 
+  Future<void> calldemofunction() async {
+    if (!_odooClientController.isInitialized) {
+      await _odooClientController.initialize();
+    }
+
+    final fieldsResponse = await _odooClientController.client.callKw({
+      'model': 'ir.actions.act_window',
+      'method': 'get_field_values',
+      'args': [[]],
+      'kwargs': {
+        'modelname' : 'sale.advance.payment.inv',
+        'id' : 26
+      },
+    });
+
+    log("fieldsResponse : $fieldsResponse");
+  }
+
   Future<void> _initializeFormData() async {
     try {
+      // await calldemofunction();
       if (!_odooClientController.isInitialized) {
         await _odooClientController.initialize();
       }
@@ -133,10 +154,14 @@ class _FormViewState extends State<FormView>
         _fetchDefaultValues(),
       ]);
 
-      if (widget.recordId == 0 && _defaultValues != null) {
+      if (widget.defaultValues != null && widget.defaultValues.isNotEmpty) {
         setState(() {
-          _recordState = Map<String, dynamic>.from(_defaultValues!);
+          _recordState = {
+            ...?_defaultValues, // Spread default values from default_get
+            ...widget.defaultValues, // Override with provided defaultValues
+          };
         });
+        log("_recordState  :  $_recordState");
       } else if (widget.recordId != 0) {
         await _loadRecordState();
       }
@@ -189,6 +214,7 @@ class _FormViewState extends State<FormView>
       'kwargs': {},
     });
 
+    log("fields_get");
     setState(() {
       allPythonFields = fieldsResponse as Map<String, dynamic>;
     });
@@ -1361,6 +1387,7 @@ class _FormViewState extends State<FormView>
 
     if (success && mounted) {
       _loadRecordState();
+      _fetchFormFields();
     }
   }
 

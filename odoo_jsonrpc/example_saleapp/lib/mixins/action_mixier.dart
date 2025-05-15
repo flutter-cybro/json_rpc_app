@@ -131,12 +131,33 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
       // Create the widget based on viewType
       Widget targetWidget;
       if (viewType == 'form' || views.every((v) => v[1] == 'form')) {
+        int recordId = actionResponse['res_id'] is int ? actionResponse['res_id'] as int : 0;
+        Map<String, dynamic>? defaultValues;
+
+        if (recordId == 0) {
+          try {
+            defaultValues = await odooClientController.client.callKw({
+              'model': 'ir.actions.act_window',
+              'method': 'get_field_values',
+              'args': [[]],
+              'kwargs': {
+                'modelname': resModel,
+                'id': context['active_id'] ?? 0,
+              },
+            });
+            log("Default values: $defaultValues");
+          } catch (e) {
+            debugPrint('Error fetching default values with get_field_values: $e');
+          }
+        }
+
         targetWidget = FormView(
           modelName: resModel,
           recordId: actionResponse['res_id'] is int ? actionResponse['res_id'] as int : 0,
           formData: formData,
           name: menuName,
           moduleName: modulename,
+            defaultValues: defaultValues
         );
       } else {
         try {
