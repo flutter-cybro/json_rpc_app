@@ -85,6 +85,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         }
       }
     });
+
     _bodyScrollController.addListener(() {
       if (_bodyScrollController.hasClients && _headerScrollController.hasClients) {
         if (_headerScrollController.offset != _bodyScrollController.offset) {
@@ -484,8 +485,6 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
                   ),
                 ),
               );
-
-
               if (result == true && mounted) {
                 _refreshDataList();
               }

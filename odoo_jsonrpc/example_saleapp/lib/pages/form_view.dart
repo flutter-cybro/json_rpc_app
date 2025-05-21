@@ -40,6 +40,8 @@ class FormView extends StatefulWidget {
   final String? name;
   final String? moduleName;
   final defaultValues;
+  final bool? wizard;
+  final int? parentId;
 
   const FormView({
     Key? key,
@@ -49,7 +51,9 @@ class FormView extends StatefulWidget {
     this.formData,
     this.name,
     this.moduleName,
-    this.defaultValues
+    this.defaultValues,
+    this.wizard,
+    this.parentId,
   }) : super(key: key);
 
   @override
@@ -81,7 +85,6 @@ class _FormViewState extends State<FormView>
   int? _companyId;
   int? tempRecordId;
 
-  // Implement the recordState getter required by InvisibleConditionMixin
   @override
   Map<String, dynamic> get recordState => _recordState;
 
@@ -106,7 +109,7 @@ class _FormViewState extends State<FormView>
   @override
   void initState() {
     super.initState();
-    print("name of modulename : ${widget.modelName}");
+    print("name of modulename : ${widget.wizard}");
     if (widget.recordId == 0) {
       tempRecordId = DateTime.now().millisecondsSinceEpoch;
     }
@@ -133,8 +136,8 @@ class _FormViewState extends State<FormView>
       'method': 'get_field_values',
       'args': [[]],
       'kwargs': {
-        'modelname' : 'sale.advance.payment.inv',
-        'id' : 26
+        'modelname': 'sale.advance.payment.inv',
+        'id': widget.parentId
       },
     });
 
@@ -143,31 +146,33 @@ class _FormViewState extends State<FormView>
 
   Future<void> _initializeFormData() async {
     try {
-      // await calldemofunction();
       if (!_odooClientController.isInitialized) {
         await _odooClientController.initialize();
       }
 
-      await Future.wait([
-        _fetchCompanyId(),
-        _fetchFields(),
-        _fetchDefaultValues(),
-      ]);
+      await _fetchFields();
 
       if (widget.defaultValues != null && widget.defaultValues.isNotEmpty) {
         setState(() {
           _recordState = {
-            ...?_defaultValues, // Spread default values from default_get
-            ...widget.defaultValues, // Override with provided defaultValues
+            ...?_defaultValues,
+            ...widget.defaultValues,
           };
         });
         log("_recordState  :  $_recordState");
       } else if (widget.recordId != 0) {
         await _loadRecordState();
       }
+
+      // Fetch remaining data concurrently
+      await Future.wait([
+        _fetchCompanyId(),
+        _fetchDefaultValues(),
+      ]);
     } catch (e) {
       setState(() {
         _error = 'Error initializing form data: $e';
+        log(_error!);
       });
     }
   }
@@ -177,14 +182,14 @@ class _FormViewState extends State<FormView>
       final fieldsResponse = await _odooClientController.client.callKw({
         'model': widget.modelName,
         'method': 'fields_get',
-        'args': [],
+        'args': [[]],
         'kwargs': {},
       });
 
       if (fieldsResponse is Map<String, dynamic>) {
         final fields = fieldsResponse.keys.toList();
         final defaultValuesResponse =
-        await _odooClientController.client.callKw({
+            await _odooClientController.client.callKw({
           'model': widget.modelName,
           'method': 'default_get',
           'args': [fields],
@@ -210,7 +215,7 @@ class _FormViewState extends State<FormView>
     final fieldsResponse = await _odooClientController.client.callKw({
       'model': widget.modelName,
       'method': 'fields_get',
-      'args': [],
+      'args': [[]],
       'kwargs': {},
     });
 
@@ -409,29 +414,60 @@ class _FormViewState extends State<FormView>
   }
 
   Future<void> _loadRecordState() async => await _callKwWithErrorHandling(
-    method: 'read',
-    args: [
-      [widget.recordId],
-    ],
-    kwargs: {'fields': allPythonFields.keys.toList()},
-    onSuccess: (response) {
-      if (response is List && response.isNotEmpty) {
-        setState(() {
-          _recordState = Map<String, dynamic>.from(response.first);
-        });
-      }
-    },
-    errorMessage: 'Error loading record state',
-  );
+        method: 'read',
+        args: [
+          [widget.recordId],
+        ],
+        kwargs: {'fields': allPythonFields.keys.toList()},
+        onSuccess: (response) {
+          if (response is List && response.isNotEmpty) {
+            setState(() {
+              _recordState = Map<String, dynamic>.from(response.first);
+            });
+          }
+        },
+        errorMessage: 'Error loading record state',
+      );
 
   Future<void> _updateFieldValue(String fieldName, dynamic value) async {
     setState(() => _recordState[fieldName] = value);
+    clearExpressionCache();
     if (widget.modelName == 'res.config.settings') return;
+
     final fieldType = allPythonFields[fieldName]?['type'] ?? 'char';
     final isOne2Many = fieldType == 'one2many';
     final hasRecordId = widget.recordId != 0;
 
+    if (!hasRecordId && (widget.wizard ?? false)) {
+      log("Processing wizard field update for ${widget.parentId}");
+      try {
+        final response = await _odooClientController.client.callKw({
+          'model': 'ir.actions.act_window',
+          'method': 'get_field_values',
+          'args': [[]],
+          'kwargs': {
+            'field_name': fieldName,
+            'field_value': value,
+            'modelname': widget.modelName,
+            'id': widget.parentId ?? 0,
+          },
+        });
+
+        log("Wizard response: $response");
+        setState(() => _recordState[fieldName] = value);
+        log("Wizard after response: $_recordState");
+        await _fetchFormFields();
+        _showSuccessSnackBar('$fieldName processed in wizard');
+        return; // Exit after processing wizard action
+      } catch (e) {
+        log("Error in wizard field update: $e");
+        _showErrorSnackBar('Failed to process wizard field: $fieldName');
+        return; // Exit on error
+      }
+    }
+
     if (!hasRecordId || isOne2Many) {
+      log("sadiq is here");
       _showSuccessSnackBar('$fieldName updated successfully');
       return;
     }
@@ -444,7 +480,6 @@ class _FormViewState extends State<FormView>
       ],
       onSuccess: (_) async {
         await _fetchFormFields();
-
         _showSuccessSnackBar('$fieldName updated successfully');
       },
       onError: () async {
@@ -517,19 +552,19 @@ class _FormViewState extends State<FormView>
         'args': widget.modelName == 'res.config.settings' ? [] : [[]],
         'kwargs': widget.modelName == 'res.config.settings'
             ? {
-          'view_type': 'form',
-          'view_id': widget.viewId,
-          'context': {
-            'model_name': widget.modelName,
-            'company_id': _companyId ?? 1
-          },
-          'module_name': 'sale',
-        }
+                'view_type': 'form',
+                'view_id': widget.viewId,
+                'context': {
+                  'model_name': widget.modelName,
+                  'company_id': _companyId ?? 1
+                },
+                'module_name': 'sale',
+              }
             : {
-          'model': widget.modelName,
-          'record_id': widget.recordId,
-          'formData': widget.formData,
-        },
+                'model': widget.modelName,
+                'record_id': widget.recordId,
+                'formData': widget.formData,
+              },
       });
 
       if (response == null || (response is Map && response.isEmpty)) {
@@ -608,7 +643,7 @@ class _FormViewState extends State<FormView>
     }
 
     final Map<String, dynamic> responseData =
-    _fieldData as Map<String, dynamic>;
+        _fieldData as Map<String, dynamic>;
     log('\n\n **********  $_recordState \n\n');
     print(responseData.containsKey('apps_data'));
     print('********** ');
@@ -622,144 +657,143 @@ class _FormViewState extends State<FormView>
       setState(() {
         settingsSections = appsRaw.entries
             .where((entry) {
-          if (widget.moduleName != null && widget.moduleName!.isNotEmpty) {
-            final appData = entry.value as Map<String, dynamic>;
-            final appModule = appData['app_name'] as String?;
-            log("appModule  : $appModule");
-            log("moduleName  : ${widget.moduleName}");
-            if (widget.moduleName == "Settings" &&
-                appModule == "General Settings") {
+              if (widget.moduleName != null && widget.moduleName!.isNotEmpty) {
+                final appData = entry.value as Map<String, dynamic>;
+                final appModule = appData['app_name'] as String?;
+                log("appModule  : $appModule");
+                log("moduleName  : ${widget.moduleName}");
+                if (widget.moduleName == "Settings" &&
+                    appModule == "General Settings") {
+                  return true;
+                }
+                return appModule == widget.moduleName;
+              }
               return true;
-            }
-            return appModule == widget.moduleName;
-          }
-          return true;
-        })
+            })
             .map((entry) {
-          log("entry of the appdata  : $entry");
-          final appKey = entry.key;
-          final appData = entry.value as Map<String, dynamic>;
+              log("entry of the appdata  : $entry");
+              final appKey = entry.key;
+              final appData = entry.value as Map<String, dynamic>;
 
-          final appName = (appData['app_name'] as String?)?.trim() ??
-              (appData['attributes']?['data-string'] as String?)?.trim() ??
-              appKey;
+              final appName = (appData['app_name'] as String?)?.trim() ??
+                  (appData['attributes']?['data-string'] as String?)?.trim() ??
+                  appKey;
 
-          log("appName  : $appName");
+              log("appName  : $appName");
 
-          final logo = appData['attributes']?['logo'] as String?;
+              final logo = appData['attributes']?['logo'] as String?;
 
-          final blocks = (appData['blocks'] as Map<String, dynamic>?)
-              ?.entries
-              .map((blockEntry) {
-            final blockMap =
-            blockEntry.value as Map<String, dynamic>;
-            final blockTitle =
-                blockMap['block_name'] as String? ?? '';
-            final blockName =
-                blockMap['attributes']?['name'] as String? ??
-                    blockTitle;
+              final blocks = (appData['blocks'] as Map<String, dynamic>?)
+                      ?.entries
+                      .map((blockEntry) {
+                        final blockMap =
+                            blockEntry.value as Map<String, dynamic>;
+                        final blockTitle =
+                            blockMap['block_name'] as String? ?? '';
+                        final blockName =
+                            blockMap['attributes']?['name'] as String? ??
+                                blockTitle;
 
-            final settings = (blockMap['settings']
-            as Map<String, dynamic>?)
-                ?.entries
-                .map((settingEntry) {
-              final settingMap = settingEntry.value
-              as Map<String, dynamic>;
-              final settingId = settingEntry.key;
+                        final settings = (blockMap['settings']
+                                    as Map<String, dynamic>?)
+                                ?.entries
+                                .map((settingEntry) {
+                                  final settingMap = settingEntry.value
+                                      as Map<String, dynamic>;
+                                  final settingId = settingEntry.key;
 
-              final fields = (settingMap['fields']
-              as List<dynamic>?)
-                  ?.map((field) {
-                final fieldMap =
-                field as Map<String, dynamic>;
-                final fieldName =
-                    fieldMap['name'] as String? ??
-                        'unknown_field';
-                final fieldType =
-                    allPythonFields[fieldName]
-                    ?['type'] as String? ??
-                        'char';
-                final xmlAttributes = fieldMap[
-                'attributes']
-                as Map<String, dynamic>? ??
-                    {};
-                final modelFieldDetails = fieldMap[
-                'model_field_details']
-                as Map<String, dynamic>? ??
-                    {};
+                                  final fields = (settingMap['fields']
+                                              as List<dynamic>?)
+                                          ?.map((field) {
+                                            final fieldMap =
+                                                field as Map<String, dynamic>;
+                                            final fieldName =
+                                                fieldMap['name'] as String? ??
+                                                    'unknown_field';
+                                            final fieldType =
+                                                allPythonFields[fieldName]
+                                                        ?['type'] as String? ??
+                                                    'char';
+                                            final xmlAttributes = fieldMap[
+                                                        'attributes']
+                                                    as Map<String, dynamic>? ??
+                                                {};
+                                            final modelFieldDetails = fieldMap[
+                                                        'model_field_details']
+                                                    as Map<String, dynamic>? ??
+                                                {};
 
-                final invisible =
-                parseInvisibleValue(
-                    xmlAttributes[
-                    'invisible']);
-                final readonly =
-                parseInvisibleValue(
-                    xmlAttributes['readonly'] ??
-                        modelFieldDetails[
-                        'readonly'] ??
-                        false);
-                final widget =
-                xmlAttributes['widget']
-                as String?;
-                final fieldString =
-                    (modelFieldDetails['label']
-                    ?['string']
-                    as String?) ??
-                        modelFieldDetails[
-                        'field_description']
-                        as String? ??
-                        fieldName;
+                                            final invisible =
+                                                parseInvisibleValue(
+                                                    xmlAttributes['invisible']);
+                                            final readonly =
+                                                parseInvisibleValue(
+                                                    xmlAttributes['readonly'] ??
+                                                        modelFieldDetails[
+                                                            'readonly'] ??
+                                                        false);
+                                            final widget =
+                                                xmlAttributes['widget']
+                                                    as String?;
+                                            final fieldString =
+                                                (modelFieldDetails['label']
+                                                            ?['string']
+                                                        as String?) ??
+                                                    modelFieldDetails[
+                                                            'field_description']
+                                                        as String? ??
+                                                    fieldName;
 
-                return {
-                  'name': fieldName,
-                  'type': fieldType,
-                  'invisible': invisible,
-                  'readonly': readonly,
-                  'widget': widget,
-                  'string': fieldString,
-                };
-              })
-                  .where((field) =>
-                  _isVisible(field['invisible']))
-                  .toList() ??
+                                            return {
+                                              'name': fieldName,
+                                              'type': fieldType,
+                                              'invisible': invisible,
+                                              'readonly': readonly,
+                                              'widget': widget,
+                                              'string': fieldString,
+                                            };
+                                          })
+                                          .where((field) =>
+                                              _isVisible(field['invisible']))
+                                          .toList() ??
+                                      [];
+
+                                  return {
+                                    'id': settingId,
+                                    'fields': fields,
+                                    'widget': settingMap['widget'] as String?,
+                                    'invisible': parseInvisibleValue(
+                                        settingMap['attributes']?['invisible']),
+                                    'settingsMap': settingMap,
+                                  };
+                                })
+                                .where((setting) =>
+                                    setting['invisible'] != true &&
+                                    setting['invisible'] != 1)
+                                .toList() ??
+                            [];
+
+                        return {
+                          'title': blockTitle,
+                          'name': blockName,
+                          'settings': settings,
+                          'invisible': parseInvisibleValue(
+                              blockMap['attributes']?['invisible']),
+                        };
+                      })
+                      .where((block) =>
+                          block['invisible'] != true && block['invisible'] != 1)
+                      .toList() ??
                   [];
 
               return {
-                'id': settingId,
-                'fields': fields,
-                'widget': settingMap['widget'] as String?,
-                'invisible': parseInvisibleValue(
-                    settingMap['attributes']?['invisible']),
-                'settingsMap': settingMap,
+                'name': appName,
+                'logo': logo,
+                'blocks': blocks,
+                'invisible':
+                    parseInvisibleValue(appData['attributes']?['invisible']),
               };
             })
-                .where((setting) =>
-            setting['invisible'] != true &&
-                setting['invisible'] != 1)
-                .toList() ??
-                [];
-
-            return {
-              'title': blockTitle,
-              'name': blockName,
-              'settings': settings,
-              'invisible': parseInvisibleValue(
-                  blockMap['attributes']?['invisible']),
-            };
-          })
-              .where((block) =>
-          block['invisible'] != true && block['invisible'] != 1)
-              .toList() ??
-              [];
-
-          return {
-            'name': appName,
-            'logo': logo,
-            'blocks': blocks,
-            'invisible':
-            parseInvisibleValue(appData['attributes']?['invisible']),
-          };
-        })
             .where((app) => app['invisible'] != true && app['invisible'] != 1)
             .toList();
       });
@@ -767,7 +801,7 @@ class _FormViewState extends State<FormView>
       print("entered in the else case");
       if (responseData.containsKey('smart_buttons')) {
         final List<dynamic> smartButtonsData =
-        responseData['smart_buttons'] as List<dynamic>;
+            responseData['smart_buttons'] as List<dynamic>;
         setState(() {
           smartButtons = smartButtonsData.map((button) {
             final buttonMap = button as Map<String, dynamic>;
@@ -776,18 +810,18 @@ class _FormViewState extends State<FormView>
                 (buttonMap['smart_button_fields'] as List<dynamic>?) ?? [];
             final fieldNames = smartButtonFields
                 .map((field) =>
-            (field as Map<String, dynamic>)['name'] as String)
+                    (field as Map<String, dynamic>)['name'] as String)
                 .toList();
             final invisible = parseInvisibleValue(attributes['invisible']);
             print(
                 "invisible  : ${attributes['invisible']}  parsed invisible : ${invisible}");
             final attributeString = attributes['string'] as String?;
             final pythonString =
-            buttonMap['field_python_attributes']?['string'] as String?;
+                buttonMap['field_python_attributes']?['string'] as String?;
             final displayString =
-            (attributeString == null || attributeString.trim().isEmpty)
-                ? (pythonString ?? 'Unnamed')
-                : attributeString;
+                (attributeString == null || attributeString.trim().isEmpty)
+                    ? (pythonString ?? 'Unnamed')
+                    : attributeString;
 
             return {
               'name': attributes['name'] as String? ??
@@ -797,7 +831,7 @@ class _FormViewState extends State<FormView>
               'type': attributes['type'] as String? ?? 'object',
               'class': attributes['class'] as String? ?? 'default',
               'color':
-              _getButtonColor(attributes['class'] as String? ?? 'default'),
+                  _getButtonColor(attributes['class'] as String? ?? 'default'),
               'icon': attributes['icon'] as String?,
               'invisible': invisible,
               'field_names': fieldNames,
@@ -808,7 +842,7 @@ class _FormViewState extends State<FormView>
 
       if (responseData.containsKey('body_fields')) {
         final List<dynamic> bodyFields =
-        responseData['body_fields'] as List<dynamic>;
+            responseData['body_fields'] as List<dynamic>;
         setState(() {
           bodyField = bodyFields.map((field) {
             final fieldMap = field as Map<String, dynamic>;
@@ -819,20 +853,20 @@ class _FormViewState extends State<FormView>
             final xmlAttributes =
                 fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
             final pythonAttributes =
-            fieldMap['python_attributes'] as Map<String, dynamic>?;
-            final invisible = parseInvisibleValue(xmlAttributes
-                .containsKey('invisible')
-                ? xmlAttributes['invisible']
-                : (pythonAttributes != null &&
-                pythonAttributes.containsKey('invisible')
-                ? pythonAttributes['invisible']
-                : null));
+                fieldMap['python_attributes'] as Map<String, dynamic>?;
+            final invisible = parseInvisibleValue(
+                xmlAttributes.containsKey('invisible')
+                    ? xmlAttributes['invisible']
+                    : (pythonAttributes != null &&
+                            pythonAttributes.containsKey('invisible')
+                        ? pythonAttributes['invisible']
+                        : null));
 
             print(
                 "invisible  in body : ${fieldName}  ${xmlAttributes.containsKey('invisible') ? xmlAttributes['invisible'] : (pythonAttributes != null && pythonAttributes.containsKey('invisible') ? pythonAttributes['invisible'] : null)}  parsed invisible : ${invisible}");
             final readonly = parseInvisibleValue(xmlAttributes['readonly'] ??
                 (pythonAttributes != null &&
-                    pythonAttributes.containsKey('readonly')
+                        pythonAttributes.containsKey('readonly')
                     ? pythonAttributes['readonly']
                     : false));
             final fieldString =
@@ -854,7 +888,7 @@ class _FormViewState extends State<FormView>
 
       if (responseData.containsKey('header_buttons')) {
         final List<dynamic> headerButtonsData =
-        responseData['header_buttons'] as List<dynamic>;
+            responseData['header_buttons'] as List<dynamic>;
         setState(() {
           headerButtons = headerButtonsData.map((button) {
             log("headerButtonsData  : $button");
@@ -896,7 +930,7 @@ class _FormViewState extends State<FormView>
               'type': attributes['type'] as String? ?? 'object',
               'class': attributes['class'] as String? ?? 'default',
               'color':
-              _getButtonColor(attributes['class'] as String? ?? 'default'),
+                  _getButtonColor(attributes['class'] as String? ?? 'default'),
               'invisible': invisible,
             };
           }).toList();
@@ -905,220 +939,222 @@ class _FormViewState extends State<FormView>
 
       if (responseData.containsKey('notebook_fields')) {
         final notebookSections =
-        responseData['notebook_fields'] as List<dynamic>;
+            responseData['notebook_fields'] as List<dynamic>;
         setState(() {
           notebookPages = notebookSections
               .map((page) {
-            final pageMap = page as Map<String, dynamic>;
-            final xmlAttrs =
-                pageMap['xml_attributes'] as Map<String, dynamic>? ?? {};
+                final pageMap = page as Map<String, dynamic>;
+                final xmlAttrs =
+                    pageMap['xml_attributes'] as Map<String, dynamic>? ?? {};
 
-            final pageInvisible = parseInvisibleValue(xmlAttrs['invisible']);
+                final pageInvisible =
+                    parseInvisibleValue(xmlAttrs['invisible']);
 
-            if (pageInvisible == true || pageInvisible == 1) {
-              return null;
-            }
+                if (pageInvisible == true || pageInvisible == 1) {
+                  return null;
+                }
 
-            final fields = (pageMap['fields'] as List<dynamic>)
-                .map((field) {
-              final fieldMap = field as Map<String, dynamic>;
-              final fieldName =
-                  fieldMap['main_field_name'] as String? ??
-                      'unknown_field';
+                final fields = (pageMap['fields'] as List<dynamic>)
+                    .map((field) {
+                      final fieldMap = field as Map<String, dynamic>;
+                      final fieldName =
+                          fieldMap['main_field_name'] as String? ??
+                              'unknown_field';
 
-              if (fieldName == 'unknown_field' ||
-                  fieldName == 'custom_value' ||
-                  fieldName ==
-                      'custom_product_template_attribute_value_id' ||
-                  fieldName == 'unknown_field') {
-                return null;
-              }
-
-              final xmlAttrs =
-                  fieldMap['xml_attributes'] as Map<String, dynamic>? ??
-                      {};
-              final fieldType =
-                  allPythonFields[fieldName]?['type'] as String? ??
-                      'char';
-
-              final invisible = parseInvisibleValue(xmlAttrs['invisible']);
-              final invisibleColumn = parseInvisibleValue(
-                  xmlAttrs['invisible_column']);
-              final optional = xmlAttrs['optional'] as String?;
-
-              final modeFields =
-                  (fieldMap['mode_fields'] as List<dynamic>?)
-                      ?.map((mf) {
-                    final mfMap = mf as Map<String, dynamic>;
-                    final mfName =
-                    mfMap['mode_field_name'] as String;
-                    final mfXmlAttrs = mfMap['xml_attributes']
-                    as Map<String, dynamic>? ??
-                        {};
-                    final mfPythonAttrs =
-                        mfMap['python_attributes']
-                        as Map<String, dynamic>? ??
-                            {};
-
-                    final mfInvisible = parseInvisibleValue(
-                        mfXmlAttrs['invisible']);
-                    final mfInvisibleCol = parseInvisibleValue(
-                        mfXmlAttrs['column_invisible']);
-                    final mfOptional = mfXmlAttrs['optional']
-                    as String?;
-
-                    final mfType = allPythonFields[mfName]
-                    ?['type'] as String? ??
-                        'char';
-                    final mfDomain = mfXmlAttrs['domain'] ??
-                        mfPythonAttrs['domain'] ??
-                        allPythonFields[mfName]?['domain'] ??
-                        '[]';
-                    final mfOptions = mfXmlAttrs['options'] ??
-                        mfPythonAttrs['options'] ??
-                        allPythonFields[mfName]?['options'];
-
-                    if (mfInvisible != true &&
-                        mfInvisible != 1 &&
-                        mfInvisibleCol != true &&
-                        mfInvisibleCol != 1) {
-                      return {
-                        'name': mfName,
-                        'type': mfType,
-                        'domain': mfDomain,
-                        'options': mfOptions,
-                        'optional': mfOptional,
-                      };
-                    }
-                    return null;
-                  })
-                      .whereType<Map<String, dynamic>>()
-                      .toList() ??
-                      [];
-
-              final fieldDef = {
-                'name': fieldName,
-                'type': fieldType,
-                'string':
-                allPythonFields[fieldName]?['string'] as String? ??
-                    fieldName,
-                'widget': xmlAttrs['widget'],
-                'options': xmlAttrs['options'],
-                'readonly': xmlAttrs['readonly'] ??
-                    allPythonFields[fieldName]?['readonly'] ??
-                    false,
-                'invisible': invisible,
-                'invisible_column': invisibleColumn,
-                'optional': optional,
-                'mode_fields': modeFields,
-                if (fieldType == 'one2many') ...{
-                  'relation_model': allPythonFields[fieldName]
-                  ?['relation'] as String? ??
-                      '',
-                  'relation_field': allPythonFields[fieldName]
-                  ?['relation_field'] as String? ??
-                      '',
-                  'mode_fields': () {
-                    List<Map<String, dynamic>> updatedModeFields =
-                    List.from(modeFields);
-
-                    if (responseData
-                        .containsKey('get_all_mode_fields')) {
-                      final allModeFields =
-                      responseData['get_all_mode_fields']
-                      as Map<String, dynamic>;
-                      final modeFieldKey = fieldName;
-                      final parentKey = notebookSections.firstWhere(
-                              (page) =>
-                              (page as Map<String, dynamic>)['fields']
-                                  .any((f) =>
-                              (f as Map<String, dynamic>)[
-                              'main_field_name'] ==
-                                  fieldName),
-                          orElse: () => null)?['page_name'] as String?;
-
-                      if (parentKey != null &&
-                          allModeFields.containsKey(parentKey)) {
-                        final relationData = allModeFields[parentKey]
-                        as Map<String, dynamic>;
-                        if (relationData.containsKey(modeFieldKey)) {
-                          final additionalFieldsData =
-                          relationData[modeFieldKey]
-                          as Map<String, dynamic>;
-                          final additionalFields =
-                          additionalFieldsData['fields']
-                          as List<dynamic>;
-
-                          for (var additionalField
-                          in additionalFields) {
-                            final additionalFieldMap =
-                            additionalField as Map<String, dynamic>;
-                            final additionalFieldName =
-                            additionalFieldMap['name'] as String;
-                            final additionalXmlAttrs =
-                                additionalFieldMap['xml_attributes']
-                                as Map<String, dynamic>? ??
-                                    {};
-                            final additionalPythonAttrs =
-                                additionalFieldMap['python_attributes']
-                                as Map<String, dynamic>? ??
-                                    {};
-
-                            final additionalInvisible =
-                            parseInvisibleValue(
-                                additionalXmlAttrs['invisible']);
-                            final additionalInvisibleCol =
-                            parseInvisibleValue(additionalXmlAttrs[
-                            'column_invisible']);
-                            final additionalType =
-                                additionalPythonAttrs['type']
-                                as String? ??
-                                    'char';
-                            final additionalOptional = additionalXmlAttrs[
-                            'optional']
-                            as String?;
-
-                            if (additionalInvisible != true &&
-                                additionalInvisible != 1 &&
-                                additionalInvisibleCol != true &&
-                                additionalInvisibleCol != 1) {
-                              updatedModeFields.add({
-                                'name': additionalFieldName,
-                                'type': additionalType,
-                                'domain': additionalXmlAttrs[
-                                'domain'] ??
-                                    additionalPythonAttrs['domain'] ??
-                                    '[]',
-                                'options': additionalXmlAttrs[
-                                'options'] ??
-                                    additionalPythonAttrs['options'],
-                                'optional': additionalOptional,
-                              });
-                            }
-                          }
-                        }
+                      if (fieldName == 'unknown_field' ||
+                          fieldName == 'custom_value' ||
+                          fieldName ==
+                              'custom_product_template_attribute_value_id' ||
+                          fieldName == 'unknown_field') {
+                        return null;
                       }
-                    }
-                    return updatedModeFields;
-                  }(),
-                },
-              };
 
-              if (fieldType == 'one2many') {}
+                      final xmlAttrs =
+                          fieldMap['xml_attributes'] as Map<String, dynamic>? ??
+                              {};
+                      final fieldType =
+                          allPythonFields[fieldName]?['type'] as String? ??
+                              'char';
 
-              return fieldDef;
-            })
-                .whereType<Map<String, dynamic>>()
-                .toList();
+                      final invisible =
+                          parseInvisibleValue(xmlAttrs['invisible']);
+                      final invisibleColumn =
+                          parseInvisibleValue(xmlAttrs['invisible_column']);
+                      final optional = xmlAttrs['optional'] as String?;
 
-            return {
-              'name': pageMap['page_string'] as String? ??
-                  pageMap['page_name'] as String? ??
-                  'Unnamed',
-              'fields': fields,
-              'invisible': pageInvisible,
-            };
-          })
+                      final modeFields =
+                          (fieldMap['mode_fields'] as List<dynamic>?)
+                                  ?.map((mf) {
+                                    final mfMap = mf as Map<String, dynamic>;
+                                    final mfName =
+                                        mfMap['mode_field_name'] as String;
+                                    final mfXmlAttrs = mfMap['xml_attributes']
+                                            as Map<String, dynamic>? ??
+                                        {};
+                                    final mfPythonAttrs =
+                                        mfMap['python_attributes']
+                                                as Map<String, dynamic>? ??
+                                            {};
+
+                                    final mfInvisible = parseInvisibleValue(
+                                        mfXmlAttrs['invisible']);
+                                    final mfInvisibleCol = parseInvisibleValue(
+                                        mfXmlAttrs['column_invisible']);
+                                    final mfOptional =
+                                        mfXmlAttrs['optional'] as String?;
+
+                                    final mfType = allPythonFields[mfName]
+                                            ?['type'] as String? ??
+                                        'char';
+                                    final mfDomain = mfXmlAttrs['domain'] ??
+                                        mfPythonAttrs['domain'] ??
+                                        allPythonFields[mfName]?['domain'] ??
+                                        '[]';
+                                    final mfOptions = mfXmlAttrs['options'] ??
+                                        mfPythonAttrs['options'] ??
+                                        allPythonFields[mfName]?['options'];
+
+                                    if (mfInvisible != true &&
+                                        mfInvisible != 1 &&
+                                        mfInvisibleCol != true &&
+                                        mfInvisibleCol != 1) {
+                                      return {
+                                        'name': mfName,
+                                        'type': mfType,
+                                        'domain': mfDomain,
+                                        'options': mfOptions,
+                                        'optional': mfOptional,
+                                      };
+                                    }
+                                    return null;
+                                  })
+                                  .whereType<Map<String, dynamic>>()
+                                  .toList() ??
+                              [];
+
+                      final fieldDef = {
+                        'name': fieldName,
+                        'type': fieldType,
+                        'string':
+                            allPythonFields[fieldName]?['string'] as String? ??
+                                fieldName,
+                        'widget': xmlAttrs['widget'],
+                        'options': xmlAttrs['options'],
+                        'readonly': xmlAttrs['readonly'] ??
+                            allPythonFields[fieldName]?['readonly'] ??
+                            false,
+                        'invisible': invisible,
+                        'invisible_column': invisibleColumn,
+                        'optional': optional,
+                        'mode_fields': modeFields,
+                        if (fieldType == 'one2many') ...{
+                          'relation_model': allPythonFields[fieldName]
+                                  ?['relation'] as String? ??
+                              '',
+                          'relation_field': allPythonFields[fieldName]
+                                  ?['relation_field'] as String? ??
+                              '',
+                          'mode_fields': () {
+                            List<Map<String, dynamic>> updatedModeFields =
+                                List.from(modeFields);
+
+                            if (responseData
+                                .containsKey('get_all_mode_fields')) {
+                              final allModeFields =
+                                  responseData['get_all_mode_fields']
+                                      as Map<String, dynamic>;
+                              final modeFieldKey = fieldName;
+                              final parentKey = notebookSections.firstWhere(
+                                  (page) =>
+                                      (page as Map<String, dynamic>)['fields']
+                                          .any((f) =>
+                                              (f as Map<String, dynamic>)[
+                                                  'main_field_name'] ==
+                                              fieldName),
+                                  orElse: () => null)?['page_name'] as String?;
+
+                              if (parentKey != null &&
+                                  allModeFields.containsKey(parentKey)) {
+                                final relationData = allModeFields[parentKey]
+                                    as Map<String, dynamic>;
+                                if (relationData.containsKey(modeFieldKey)) {
+                                  final additionalFieldsData =
+                                      relationData[modeFieldKey]
+                                          as Map<String, dynamic>;
+                                  final additionalFields =
+                                      additionalFieldsData['fields']
+                                          as List<dynamic>;
+
+                                  for (var additionalField
+                                      in additionalFields) {
+                                    final additionalFieldMap =
+                                        additionalField as Map<String, dynamic>;
+                                    final additionalFieldName =
+                                        additionalFieldMap['name'] as String;
+                                    final additionalXmlAttrs =
+                                        additionalFieldMap['xml_attributes']
+                                                as Map<String, dynamic>? ??
+                                            {};
+                                    final additionalPythonAttrs =
+                                        additionalFieldMap['python_attributes']
+                                                as Map<String, dynamic>? ??
+                                            {};
+
+                                    final additionalInvisible =
+                                        parseInvisibleValue(
+                                            additionalXmlAttrs['invisible']);
+                                    final additionalInvisibleCol =
+                                        parseInvisibleValue(additionalXmlAttrs[
+                                            'column_invisible']);
+                                    final additionalType =
+                                        additionalPythonAttrs['type']
+                                                as String? ??
+                                            'char';
+                                    final additionalOptional =
+                                        additionalXmlAttrs['optional']
+                                            as String?;
+
+                                    if (additionalInvisible != true &&
+                                        additionalInvisible != 1 &&
+                                        additionalInvisibleCol != true &&
+                                        additionalInvisibleCol != 1) {
+                                      updatedModeFields.add({
+                                        'name': additionalFieldName,
+                                        'type': additionalType,
+                                        'domain': additionalXmlAttrs[
+                                                'domain'] ??
+                                            additionalPythonAttrs['domain'] ??
+                                            '[]',
+                                        'options': additionalXmlAttrs[
+                                                'options'] ??
+                                            additionalPythonAttrs['options'],
+                                        'optional': additionalOptional,
+                                      });
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                            return updatedModeFields;
+                          }(),
+                        },
+                      };
+
+                      if (fieldType == 'one2many') {}
+
+                      return fieldDef;
+                    })
+                    .whereType<Map<String, dynamic>>()
+                    .toList();
+
+                return {
+                  'name': pageMap['page_string'] as String? ??
+                      pageMap['page_name'] as String? ??
+                      'Unnamed',
+                  'fields': fields,
+                  'invisible': pageInvisible,
+                };
+              })
               .whereType<Map<String, dynamic>>()
               .toList();
         });
@@ -1126,57 +1162,60 @@ class _FormViewState extends State<FormView>
 
       if (responseData.containsKey('wizard_data')) {
         final List<dynamic> wizardFields =
-        responseData['wizard_data'] as List<dynamic>;
+            responseData['wizard_data'] as List<dynamic>;
         log("wizardFields  : $wizardFields");
         setState(() {
           wizardData = wizardFields
               .where((field) {
-            final fieldMap = field as Map<String, dynamic>;
-            final fieldName =
-                fieldMap['main_field_name'] as String? ?? 'unknown';
-            return fieldName.isNotEmpty && fieldName != 'unknown';
-          })
+                final fieldMap = field as Map<String, dynamic>;
+                final fieldName =
+                    fieldMap['main_field_name'] as String? ?? 'unknown';
+                return fieldName.isNotEmpty && fieldName != 'unknown';
+              })
               .map((field) {
-            log("field kimster : $field");
-            final fieldMap = field as Map<String, dynamic>;
-            final fieldName =
-                fieldMap['main_field_name'] as String? ?? 'unknown';
+                log("field kimster : $field");
+                final fieldMap = field as Map<String, dynamic>;
+                final fieldName =
+                    fieldMap['main_field_name'] as String? ?? 'unknown';
 
-            final xmlAttributes =
-                fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
-            final pythonAttributes =
-                fieldMap['python_attributes'] as Map<String, dynamic>? ??
-                    {};
-            final fieldType = pythonAttributes['type'] as String? ?? 'char';
-            final invisible = parseInvisibleValue(xmlAttributes['invisible']);
-            print("invisible count $fieldName: $invisible");
-            final readonly = parseInvisibleValue(xmlAttributes['readonly'] ??
-                pythonAttributes['readonly'] ??
-                false);
-            final required = parseInvisibleValue(xmlAttributes['required'] ??
-                pythonAttributes['required'] ??
-                false);
-            final fieldString =
-                pythonAttributes['string'] as String? ?? fieldName;
-            final widget = xmlAttributes['widget'] as String?;
-            final options =
-                xmlAttributes['options'] ?? pythonAttributes['options'];
+                final xmlAttributes =
+                    fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
+                final pythonAttributes =
+                    fieldMap['python_attributes'] as Map<String, dynamic>? ??
+                        {};
+                final fieldType = pythonAttributes['type'] as String? ?? 'char';
+                final invisible =
+                    parseInvisibleValue(xmlAttributes['invisible']);
+                print("invisible count $fieldName: $invisible");
+                final readonly = parseInvisibleValue(
+                    xmlAttributes['readonly'] ??
+                        pythonAttributes['readonly'] ??
+                        false);
+                final required = parseInvisibleValue(
+                    xmlAttributes['required'] ??
+                        pythonAttributes['required'] ??
+                        false);
+                final fieldString =
+                    pythonAttributes['string'] as String? ?? fieldName;
+                final widget = xmlAttributes['widget'] as String?;
+                final options =
+                    xmlAttributes['options'] ?? pythonAttributes['options'];
 
-            log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
+                log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
 
-            return {
-              'name': fieldName,
-              'type': fieldType,
-              'string': fieldString,
-              'invisible': invisible,
-              'readonly': readonly,
-              'required': required,
-              'widget': widget,
-              'options': options,
-            };
-          })
+                return {
+                  'name': fieldName,
+                  'type': fieldType,
+                  'string': fieldString,
+                  'invisible': invisible,
+                  'readonly': readonly,
+                  'required': required,
+                  'widget': widget,
+                  'options': options,
+                };
+              })
               .where((field) =>
-          field['invisible'] != true && field['invisible'] != 1)
+                  field['invisible'] != true && field['invisible'] != 1)
               .toList();
 
           footerButtons = [];
@@ -1185,7 +1224,7 @@ class _FormViewState extends State<FormView>
             if (fieldMap.containsKey('footer')) {
               print("inside the footer");
               final List<dynamic> footerButtonsData =
-              fieldMap['footer'] as List<dynamic>;
+                  fieldMap['footer'] as List<dynamic>;
               log("footerButtonsData: $footerButtonsData");
               footerButtons.addAll(footerButtonsData.map((button) {
                 final buttonMap = button as Map<String, dynamic>;
@@ -1216,7 +1255,7 @@ class _FormViewState extends State<FormView>
     Map<String, dynamic> result = {};
     if (attributesStr.startsWith('{') && attributesStr.endsWith('}')) {
       String content =
-      attributesStr.substring(1, attributesStr.length - 1).trim();
+          attributesStr.substring(1, attributesStr.length - 1).trim();
       List<String> pairs = [];
       int startIndex = 0;
       int nestLevel = 0;
@@ -1335,32 +1374,32 @@ class _FormViewState extends State<FormView>
       position: const RelativeRect.fromLTRB(1, 80, 0, 0),
       items: visibleButtons
           .map((button) => PopupMenuItem<Map<String, dynamic>>(
-        value: button,
-        child: Container(
-          width: double.infinity,
-          padding:
-          const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          decoration: BoxDecoration(
-            color: button['color'] as Color,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Text(
-            button['string'] ?? 'Unnamed',
-            style: TextStyle(
-              color: (button['color'] as Color).computeLuminance() > 0.5
-                  ? Colors.black
-                  : Colors.white,
-            ),
-          ),
-        ),
-      ))
+                value: button,
+                child: Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: button['color'] as Color,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    button['string'] ?? 'Unnamed',
+                    style: TextStyle(
+                      color: (button['color'] as Color).computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
+                  ),
+                ),
+              ))
           .toList(),
       elevation: 0,
     ).then((selected) {
@@ -1449,9 +1488,9 @@ class _FormViewState extends State<FormView>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: button['color'] as Color,
                   foregroundColor:
-                  (button['color'] as Color).computeLuminance() > 0.5
-                      ? Colors.black
-                      : Colors.white,
+                      (button['color'] as Color).computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
                 ),
               ),
             );
@@ -1493,15 +1532,15 @@ class _FormViewState extends State<FormView>
           final one2ManyData = _recordState[fieldName] as List<dynamic>;
           recordData[fieldName] = one2ManyData
               .map((item) {
-            if (item is Map<String, dynamic>) {
-              return [0, 0, item];
-            } else if (item is int) {
-              return [4, item, 0];
-            } else {
-              log('Unexpected one2many item type for $fieldName: $item');
-              return null;
-            }
-          })
+                if (item is Map<String, dynamic>) {
+                  return [0, 0, item];
+                } else if (item is int) {
+                  return [4, item, 0];
+                } else {
+                  log('Unexpected one2many item type for $fieldName: $item');
+                  return null;
+                }
+              })
               .where((item) => item != null)
               .toList();
         }
@@ -1565,9 +1604,9 @@ class _FormViewState extends State<FormView>
           if (blockTitle == '' && groupedBlocks.isNotEmpty) {
             final lastBlock = groupedBlocks.last;
             final lastBlockSettings =
-            (lastBlock['settings'] as List<dynamic>).toList();
+                (lastBlock['settings'] as List<dynamic>).toList();
             final currentBlockSettings =
-            (block['settings'] as List<dynamic>).toList();
+                (block['settings'] as List<dynamic>).toList();
             lastBlock['settings'] = [
               ...lastBlockSettings,
               ...currentBlockSettings
@@ -1595,7 +1634,6 @@ class _FormViewState extends State<FormView>
                   ),
                 ],
               ),
-
               ...groupedBlocks.map((block) {
                 final blockName = block['title'] as String? ?? 'Settings';
                 final blockKey = '$appName-$blockName';
@@ -1605,7 +1643,7 @@ class _FormViewState extends State<FormView>
 
                 final isNamedBlock = blockName != '';
                 final isExpanded =
-                isNamedBlock ? _expandedBlocks.contains(blockKey) : true;
+                    isNamedBlock ? _expandedBlocks.contains(blockKey) : true;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1658,14 +1696,13 @@ class _FormViewState extends State<FormView>
                           ),
                         ),
                       ),
-
                     if (!isNamedBlock || isExpanded)
                       ...settings.map((setting) {
                         final settingTitle = setting['settingsMap']
-                        ?['attributes']?['string'] as String? ??
+                                ?['attributes']?['string'] as String? ??
                             '';
                         final helpText = setting['settingsMap']?['attributes']
-                        ?['help'] as String?;
+                            ?['help'] as String?;
                         final fields = (setting['fields'] as List<dynamic>)
                             .whereType<Map<String, dynamic>>()
                             .toList();
@@ -1677,7 +1714,7 @@ class _FormViewState extends State<FormView>
                             color: ODOO_COLOR.withOpacity(0),
                             borderRadius: BorderRadius.circular(8),
                             border:
-                            Border.all(color: Colors.grey[200]!, width: 1),
+                                Border.all(color: Colors.grey[200]!, width: 1),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8),
@@ -1715,22 +1752,22 @@ class _FormViewState extends State<FormView>
                                         ),
                                       const SizedBox(height: 16),
                                       if ((setting['settingsMap']?['buttons']
-                                      as List?)
-                                          ?.isNotEmpty ??
+                                                  as List?)
+                                              ?.isNotEmpty ??
                                           false)
                                         ...((setting['settingsMap']!['buttons']
-                                        as List)
+                                                as List)
                                             .whereType<Map<String, dynamic>>()
                                             .map((btn) {
                                           final btnString =
                                               btn['string'] as String? ??
                                                   'Unnamed Button';
                                           final btnName =
-                                          btn['name']?.toString();
+                                              btn['name']?.toString();
                                           final btnType =
-                                          btn['type']?.toString();
+                                              btn['type']?.toString();
                                           final btnInvisible = btn['attributes']
-                                          ?['invisible'] as String?;
+                                              ?['invisible'] as String?;
 
                                           bool isVisible = true;
                                           if (btnInvisible != null &&
@@ -1738,12 +1775,12 @@ class _FormViewState extends State<FormView>
                                             if (btnInvisible.contains(
                                                 'group_cash_rounding')) {
                                               final fieldValue = _recordState[
-                                              'group_cash_rounding'] ??
+                                                      'group_cash_rounding'] ??
                                                   false;
                                               isVisible =
-                                              btnInvisible.startsWith('not')
-                                                  ? !fieldValue
-                                                  : fieldValue;
+                                                  btnInvisible.startsWith('not')
+                                                      ? !fieldValue
+                                                      : fieldValue;
                                             }
                                           }
 
@@ -1752,21 +1789,21 @@ class _FormViewState extends State<FormView>
 
                                           return Padding(
                                             padding:
-                                            const EdgeInsets.only(top: 8.0),
+                                                const EdgeInsets.only(top: 8.0),
                                             child: InkWell(
                                               onTap: () async {
                                                 if (btnName != null &&
                                                     btnType != null) {
                                                   final success =
-                                                  await handleButtonAction(
+                                                      await handleButtonAction(
                                                     buttonData: {
                                                       'name': btnName,
                                                       'type': btnType,
                                                       'context': {
                                                         'active_id':
-                                                        widget.recordId,
+                                                            widget.recordId,
                                                         'active_model':
-                                                        widget.modelName,
+                                                            widget.modelName,
                                                       },
                                                     },
                                                     buildContext: context,
@@ -1787,7 +1824,7 @@ class _FormViewState extends State<FormView>
                                                       color: ODOO_COLOR,
                                                       fontSize: 14.0,
                                                       fontWeight:
-                                                      FontWeight.w500,
+                                                          FontWeight.w500,
                                                       decoration: TextDecoration
                                                           .underline,
                                                     ),
@@ -1868,24 +1905,24 @@ class _FormViewState extends State<FormView>
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? Center(
-          child:
-          Text(_error!, style: const TextStyle(color: Colors.red)))
-          : SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_isSettingsForm()) _buildSettingsSections(),
-            if (!_isSettingsForm()) ...[
-              if (smartButtons.isNotEmpty) _buildSmartButtons(),
-              if (bodyField.isNotEmpty || wizardData.isNotEmpty)
-                _buildMainFields(),
-              if (notebookPages.isNotEmpty) _buildNotebookSection(),
-              if (footerButtons.isNotEmpty) _buildFooterButtons(),
-            ],
-          ],
-        ),
-      ),
+              ? Center(
+                  child:
+                      Text(_error!, style: const TextStyle(color: Colors.red)))
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_isSettingsForm()) _buildSettingsSections(),
+                      if (!_isSettingsForm()) ...[
+                        if (smartButtons.isNotEmpty) _buildSmartButtons(),
+                        if (bodyField.isNotEmpty || wizardData.isNotEmpty)
+                          _buildMainFields(),
+                        if (notebookPages.isNotEmpty) _buildNotebookSection(),
+                        if (footerButtons.isNotEmpty) _buildFooterButtons(),
+                      ],
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -1916,11 +1953,23 @@ class _FormViewState extends State<FormView>
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (button['special'] == 'cancel') {
                         Navigator.pop(context);
                       } else {
-                        _onButtonPressed(button['name'], button['type']);
+                        // log("recordState : $recordState");
+                        final response =
+                            await _odooClientController.client.callKw({
+                          'model': 'ir.actions.act_window',
+                          'method': 'wizard_button_action',
+                          'args': [[]],
+                          'kwargs':
+                            recordState
+                            // 'context': {},
+                          ,
+                        });
+                        // print("buttons  : ${button}");
+                        // _onButtonPressed(button['name'], button['type']);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -1959,7 +2008,7 @@ class _FormViewState extends State<FormView>
                   backgroundColor: buttonColor,
                   foregroundColor: getTextColor(buttonColor),
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 child: Text(button['string'] ?? 'Unnamed'),
               );
@@ -1988,6 +2037,7 @@ class _FormViewState extends State<FormView>
                   fieldData: field)),
               if (bodyField.isEmpty)
                 ...wizardData.where((field) {
+                  log("field  : $field");
                   final invisible = field['invisible'];
                   return invisible != true &&
                       invisible != 'True' &&
@@ -2015,12 +2065,12 @@ class _FormViewState extends State<FormView>
               indicatorColor: Colors.blue,
               tabs: notebookPages
                   .map((page) => Tab(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(page['name'] ?? 'Unnamed',
-                      style: const TextStyle(fontSize: 16)),
-                ),
-              ))
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text(page['name'] ?? 'Unnamed',
+                              style: const TextStyle(fontSize: 16)),
+                        ),
+                      ))
                   .toList(),
             ),
           ),
@@ -2032,13 +2082,13 @@ class _FormViewState extends State<FormView>
                   padding: const EdgeInsets.all(16),
                   children: (page['fields'] as List<Map<String, dynamic>>)
                       .where((field) {
-                    final invisible = field['invisible'];
-                    return invisible != true &&
-                        invisible != 'True' &&
-                        invisible != 1;
-                  })
+                        final invisible = field['invisible'];
+                        return invisible != true &&
+                            invisible != 'True' &&
+                            invisible != 1;
+                      })
                       .map((field) =>
-                      _buildFieldWidget(field['name'], fieldData: field))
+                          _buildFieldWidget(field['name'], fieldData: field))
                       .toList(),
                 );
               }).toList(),
@@ -2117,22 +2167,20 @@ class _FormViewState extends State<FormView>
     }
 
     final value = type == 'boolean'
-        ? valueToBool(rawValue ??
-        configSettingsValues[fieldName] ??
-        false)
+        ? valueToBool(rawValue ?? configSettingsValues[fieldName] ?? false)
         : (type == 'datetime'
-        ? valueToDateTime(rawValue)
-        : (type == 'date'
-        ? valueToDate(rawValue)
-        : (type == 'many2many'
-        ? valueToMany2Many(rawValue)
-        : (type == 'one2many'
-        ? valueToOne2Many(rawValue)
-        : (type == 'many2one'
-        ? valueToMany2One(rawValue)
-        : (type == 'selection'
-        ? valueToSelection(rawValue)
-        : rawValue))))));
+            ? valueToDateTime(rawValue)
+            : (type == 'date'
+                ? valueToDate(rawValue)
+                : (type == 'many2many'
+                    ? valueToMany2Many(rawValue)
+                    : (type == 'one2many'
+                        ? valueToOne2Many(rawValue)
+                        : (type == 'many2one'
+                            ? valueToMany2One(rawValue)
+                            : (type == 'selection'
+                                ? valueToSelection(rawValue)
+                                : rawValue))))));
     Future<List<Map<String, dynamic>>> fetchRelationOptions(
         String relation) async {
       if (relation == 'unknown' || relation.isEmpty) {
@@ -2150,7 +2198,7 @@ class _FormViewState extends State<FormView>
         });
         return (response as List)
             .map((item) =>
-        {'id': item['id'] as int, 'name': item['name'] as String})
+                {'id': item['id'] as int, 'name': item['name'] as String})
             .toList();
       } catch (e) {
         return [];
@@ -2252,7 +2300,7 @@ class _FormViewState extends State<FormView>
             Text(
               label,
               style:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
             ),
             ElevatedButton(
               onPressed: () =>
@@ -2352,7 +2400,6 @@ class _FormViewState extends State<FormView>
               final options = snapshot.data!;
 
               int? currentValue = value;
-
 
               if (currentValue == null &&
                   _defaultValues != null &&
@@ -2511,7 +2558,6 @@ class _FormViewState extends State<FormView>
           }
         }
 
-
         final effectiveValue = value is bool ? value : defaultValue;
 
         void handleBooleanChange(bool newValue) async {
@@ -2592,7 +2638,6 @@ class _FormViewState extends State<FormView>
               );
 
               if (confirmed == true) {
-
                 final success = await _handleModuleInstallUninstall(
                     fieldName, newValue, previousValue);
                 if (!success) {
@@ -2601,7 +2646,6 @@ class _FormViewState extends State<FormView>
                   });
                 }
               } else {
-
                 setState(() {
                   recordState[fieldName] = previousValue;
                 });
@@ -2609,7 +2653,6 @@ class _FormViewState extends State<FormView>
             }
           } else if (isUpgradeBoolean) {
             if (newValue) {
-
               final confirmed = await showDialog<bool>(
                 context: context,
                 barrierDismissible: false,
@@ -2673,17 +2716,14 @@ class _FormViewState extends State<FormView>
               );
 
               if (confirmed == true) {
-
                 await _updateFieldValue(fieldName, newValue);
               } else {
-
                 setState(() {
                   recordState[fieldName] = previousValue;
                 });
               }
             }
           } else {
-
             await _updateFieldValue(fieldName, newValue);
           }
         }

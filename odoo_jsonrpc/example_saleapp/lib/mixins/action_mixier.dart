@@ -151,13 +151,17 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
           }
         }
 
+        int? parentId = context['active_id'] as int?;
+
         targetWidget = FormView(
           modelName: resModel,
           recordId: actionResponse['res_id'] is int ? actionResponse['res_id'] as int : 0,
           formData: formData,
           name: menuName,
           moduleName: modulename,
-            defaultValues: defaultValues
+            defaultValues: defaultValues,
+            wizard: true,
+          parentId: parentId,
         );
       } else {
         try {

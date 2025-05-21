@@ -15,35 +15,97 @@ mixin InvisibleConditionMixin {
     _expressionCache.clear();
   }
 
-  bool parseInvisibleValue(dynamic value,
-      {bool useCache = true, bool requireFieldExistence = false}) {
-    dev.log('Parsing invisible value: $value', name: 'InvisibleConditionMixin');
-    if (value == null) return false;
+  bool parseInvisibleValue(
+      dynamic value, {
+        bool useCache = true,
+        bool requireFieldExistence = false,
+      }) {
+    dev.log(
+      'Parsing invisible value: $value for field: ${value ?? 'unknown'}',
+      name: 'InvisibleConditionMixin',
+    );
+    if (value == null) {
+      dev.log(
+        'Result for field ${value ?? 'unknown'}: false (value is null)',
+        name: 'InvisibleConditionMixin',
+      );
+      return false;
+    }
 
-    if (value is bool) return value;
-    if (value is int) return value == 1;
+    if (value is bool) {
+      dev.log(
+        'Result for field ${value ?? 'unknown'}: $value (boolean)',
+        name: 'InvisibleConditionMixin',
+      );
+      return value;
+    }
+    if (value is int) {
+      final result = value == 1;
+      dev.log(
+        'Result for field ${value ?? 'unknown'}: $result (int: $value)',
+        name: 'InvisibleConditionMixin',
+      );
+      return result;
+    }
     if (value is String) {
       final lowerValue = value.toLowerCase().trim();
-      if (lowerValue == 'true' || lowerValue == '1') return true;
-      if (lowerValue == 'false' || lowerValue == '0') return false;
+      if (lowerValue == 'true' || lowerValue == '1') {
+        dev.log(
+          'Result for field ${value ?? 'unknown'}: true (string: $value)',
+          name: 'InvisibleConditionMixin',
+        );
+        return true;
+      }
+      if (lowerValue == 'false' || lowerValue == '0') {
+        dev.log(
+          'Result for field ${value ?? 'unknown'}: false (string: $value)',
+          name: 'InvisibleConditionMixin',
+        );
+        return false;
+      }
 
       if (useCache && _expressionCache.containsKey(value)) {
+        dev.log(
+          'Result for field ${value ?? 'unknown'}: ${_expressionCache[value]!} (from cache)',
+          name: 'InvisibleConditionMixin',
+        );
         return _expressionCache[value]!;
       }
 
       // Normalize the expression first
       final normalizedExpr = _normalizeExpression(value);
-      dev.log('Normalized expression: $normalizedExpr', name: 'InvisibleConditionMixin');
+      dev.log(
+        'Normalized expression for field ${value ?? 'unknown'}: $normalizedExpr',
+        name: 'InvisibleConditionMixin',
+      );
 
-      final result = _evaluateInvisibleExpression(normalizedExpr, requireFieldExistence: requireFieldExistence);
+      final result = _evaluateInvisibleExpression(
+        normalizedExpr,
+        requireFieldExistence: requireFieldExistence,
+      );
       if (useCache) _expressionCache[value] = result;
+      dev.log(
+        'Result for field ${value ?? 'unknown'}: $result (evaluated expression: $normalizedExpr)',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
     if (value is List) {
-      return _evaluateDomainExpression(value, requireFieldExistence: requireFieldExistence);
+      final result = _evaluateDomainExpression(
+        value,
+        requireFieldExistence: requireFieldExistence,
+      );
+      dev.log(
+        'Result for field ${value ?? 'unknown'}: $result (domain expression: $value)',
+        name: 'InvisibleConditionMixin',
+      );
+      return result;
     }
 
-    dev.log('Unsupported value type: ${value.runtimeType}', name: 'InvisibleConditionMixin');
+    dev.log(
+      'Result for field ${value ?? 'unknown'}: false (unsupported type: ${value.runtimeType})',
+      name: 'InvisibleConditionMixin',
+    );
     return false;
   }
 
@@ -71,51 +133,89 @@ mixin InvisibleConditionMixin {
     return normalized;
   }
 
-  bool _evaluateInvisibleExpression(String expression,
-      {bool requireFieldExistence = false}) {
-    dev.log('Evaluating expression: $expression', name: 'InvisibleConditionMixin');
+  bool _evaluateInvisibleExpression(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
+    dev.log(
+      'Evaluating expression: $expression',
+      name: 'InvisibleConditionMixin',
+    );
 
     // First, check if there are logical operators at the top level
     if (_containsLogicalOperatorsAtTopLevel(expression)) {
-      return _evaluateLogicalExpression(expression, requireFieldExistence: requireFieldExistence);
+      return _evaluateLogicalExpression(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
     }
 
     // Handle 'in' and 'not in' operators
     if (_containsInOperator(expression)) {
-      return _evaluateInExpression(expression, requireFieldExistence: requireFieldExistence);
+      return _evaluateInExpression(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
     }
 
     // Handle 'not' prefix
     if (expression.trim().startsWith('not ')) {
       final fieldName = expression.trim().substring(4).trim();
-      final result = !_getFieldBoolValue(fieldName, requireFieldExistence: requireFieldExistence);
-      dev.log('Evaluated not $fieldName: $result', name: 'InvisibleConditionMixin');
+      final result = !_getFieldBoolValue(
+        fieldName,
+        requireFieldExistence: requireFieldExistence,
+      );
+      dev.log(
+        'Evaluated not $fieldName: $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
     // Handle comparison operators
-    final comparisonResult = _evaluateComparisonExpression(expression, requireFieldExistence: requireFieldExistence);
+    final comparisonResult = _evaluateComparisonExpression(
+      expression,
+      requireFieldExistence: requireFieldExistence,
+    );
     if (comparisonResult != null) {
       return comparisonResult;
     }
 
     // Handle group_ prefix
     if (expression.trim().startsWith('group_')) {
-      final result = _getFieldBoolValue(expression.trim(), requireFieldExistence: requireFieldExistence);
-      dev.log('Evaluated group $expression: $result', name: 'InvisibleConditionMixin');
+      final result = _getFieldBoolValue(
+        expression.trim(),
+        requireFieldExistence: requireFieldExistence,
+      );
+      dev.log(
+        'Evaluated group $expression: $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
     // Handle nested fields
     if (expression.contains('.')) {
-      final result = _evaluateNestedField(expression, requireFieldExistence: requireFieldExistence);
-      dev.log('Evaluated nested field $expression: $result', name: 'InvisibleConditionMixin');
+      final result = _evaluateNestedField(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
+      dev.log(
+        'Evaluated nested field $expression: $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
     // Default case - treat as field name
-    final result = _getFieldBoolValue(expression.trim(), requireFieldExistence: requireFieldExistence);
-    dev.log('Evaluated field $expression: $result', name: 'InvisibleConditionMixin');
+    final result = _getFieldBoolValue(
+      expression.trim(),
+      requireFieldExistence: requireFieldExistence,
+    );
+    dev.log(
+      'Evaluated field $expression: $result',
+      name: 'InvisibleConditionMixin',
+    );
     return result;
   }
 
@@ -147,8 +247,8 @@ mixin InvisibleConditionMixin {
       // Check for logical operators at top level
       if (!inSingleQuote && !inDoubleQuote && parenthesisLevel == 0) {
         if ((char == '&' || char == '|') &&
-            (i == 0 || expression[i-1] == ' ') &&
-            (i == expression.length - 1 || expression[i+1] == ' ')) {
+            (i == 0 || expression[i - 1] == ' ') &&
+            (i == expression.length - 1 || expression[i + 1] == ' ')) {
           return true;
         }
       }
@@ -186,7 +286,10 @@ mixin InvisibleConditionMixin {
     return inPattern.hasMatch(tempExpr) || notInPattern.hasMatch(tempExpr);
   }
 
-  bool _evaluateInExpression(String expression, {bool requireFieldExistence = false}) {
+  bool _evaluateInExpression(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
     // Handle 'in' and 'not in' operators
     String operator;
     List<String> parts;
@@ -198,12 +301,18 @@ mixin InvisibleConditionMixin {
       operator = 'in';
       parts = expression.split(' in ');
     } else {
-      dev.log('Invalid in/not in expression: $expression', name: 'InvisibleConditionMixin');
+      dev.log(
+        'Invalid in/not in expression: $expression',
+        name: 'InvisibleConditionMixin',
+      );
       return false;
     }
 
     if (parts.length != 2) {
-      dev.log('Invalid $operator expression format: $expression', name: 'InvisibleConditionMixin');
+      dev.log(
+        'Invalid $operator expression format: $expression',
+        name: 'InvisibleConditionMixin',
+      );
       return false;
     }
 
@@ -218,22 +327,34 @@ mixin InvisibleConditionMixin {
       final fieldValue = _getFieldValue(fieldName);
 
       if (fieldValue == null) {
-        dev.log('Field $fieldName is null', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Field $fieldName is null',
+          name: 'InvisibleConditionMixin',
+        );
         return requireFieldExistence ? false : operator == 'not in';
       }
 
       final fieldValueStr = fieldValue.toString();
       final isInList = values.contains(fieldValueStr);
       final result = operator == 'not in' ? !isInList : isInList;
-      dev.log('$fieldName $operator $values: $result', name: 'InvisibleConditionMixin');
+      dev.log(
+        '$fieldName $operator $values: $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
-    dev.log('Invalid list format in $operator expression: $expression', name: 'InvisibleConditionMixin');
+    dev.log(
+      'Invalid list format in $operator expression: $expression',
+      name: 'InvisibleConditionMixin',
+    );
     return false;
   }
 
-  bool? _evaluateComparisonExpression(String expression, {bool requireFieldExistence = false}) {
+  bool? _evaluateComparisonExpression(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
     // Handle comparison operators
     const comparisonOperators = ['==', '!=', '<=', '>=', '<', '>', '='];
     String? foundOperator;
@@ -249,7 +370,10 @@ mixin InvisibleConditionMixin {
 
     if (foundOperator != null && parts != null) {
       if (parts.length != 2) {
-        dev.log('Invalid $foundOperator expression: $expression', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Invalid $foundOperator expression: $expression',
+          name: 'InvisibleConditionMixin',
+        );
         return false;
       }
 
@@ -263,13 +387,24 @@ mixin InvisibleConditionMixin {
       }
 
       if (!_fieldExists(fieldName)) {
-        dev.log('Field $fieldName not found', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Field $fieldName not found',
+          name: 'InvisibleConditionMixin',
+        );
         return requireFieldExistence ? false : foundOperator == '!=';
       }
 
       final fieldValue = _getFieldValue(fieldName)?.toString();
-      final result = _compareValues(fieldValue, expectedValue, foundOperator, requireFieldExistence);
-      dev.log('$fieldName $foundOperator $expectedValue = $result', name: 'InvisibleConditionMixin');
+      final result = _compareValues(
+        fieldValue,
+        expectedValue,
+        foundOperator,
+        requireFieldExistence,
+      );
+      dev.log(
+        '$fieldName $foundOperator $expectedValue = $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
@@ -313,8 +448,14 @@ mixin InvisibleConditionMixin {
     }
   }
 
-  bool _evaluateLogicalExpression(String expression, {bool requireFieldExistence = false}) {
-    dev.log('Evaluating logical expression: $expression', name: 'InvisibleConditionMixin');
+  bool _evaluateLogicalExpression(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
+    dev.log(
+      'Evaluating logical expression: $expression',
+      name: 'InvisibleConditionMixin',
+    );
 
     // Handle parenthesized expressions first
     final parenthesizedRegex = RegExp(r'\([^()]*\)');
@@ -323,7 +464,10 @@ mixin InvisibleConditionMixin {
     while (parenthesizedRegex.hasMatch(processedExpr)) {
       processedExpr = processedExpr.replaceAllMapped(parenthesizedRegex, (match) {
         final innerExpr = match.group(0)!.substring(1, match.group(0)!.length - 1);
-        final result = _evaluateInvisibleExpression(innerExpr, requireFieldExistence: requireFieldExistence);
+        final result = _evaluateInvisibleExpression(
+          innerExpr,
+          requireFieldExistence: requireFieldExistence,
+        );
         return result.toString();
       });
     }
@@ -332,7 +476,10 @@ mixin InvisibleConditionMixin {
     if (processedExpr.contains(' | ')) {
       final orParts = processedExpr.split(' | ');
       for (final part in orParts) {
-        if (_evaluateInvisibleExpression(part.trim(), requireFieldExistence: requireFieldExistence)) {
+        if (_evaluateInvisibleExpression(
+          part.trim(),
+          requireFieldExistence: requireFieldExistence,
+        )) {
           return true;
         }
       }
@@ -343,7 +490,10 @@ mixin InvisibleConditionMixin {
     if (processedExpr.contains(' & ')) {
       final andParts = processedExpr.split(' & ');
       for (final part in andParts) {
-        if (!_evaluateInvisibleExpression(part.trim(), requireFieldExistence: requireFieldExistence)) {
+        if (!_evaluateInvisibleExpression(
+          part.trim(),
+          requireFieldExistence: requireFieldExistence,
+        )) {
           return false;
         }
       }
@@ -351,7 +501,10 @@ mixin InvisibleConditionMixin {
     }
 
     // If no logical operators found after processing parentheses
-    return _evaluateInvisibleExpression(processedExpr, requireFieldExistence: requireFieldExistence);
+    return _evaluateInvisibleExpression(
+      processedExpr,
+      requireFieldExistence: requireFieldExistence,
+    );
   }
 
   List<String> _splitListValues(String listPart) {
@@ -395,13 +548,22 @@ mixin InvisibleConditionMixin {
       }
     }
 
-    dev.log('Parsed list: $result', name: 'InvisibleConditionMixin');
+    dev.log(
+      'Parsed list: $result',
+      name: 'InvisibleConditionMixin',
+    );
     return result;
   }
 
-  bool _evaluateDomainExpression(List<dynamic> domain, {bool requireFieldExistence = false}) {
+  bool _evaluateDomainExpression(
+      List<dynamic> domain, {
+        bool requireFieldExistence = false,
+      }) {
     if (domain.isEmpty) {
-      dev.log('Empty domain, returning true', name: 'InvisibleConditionMixin');
+      dev.log(
+        'Empty domain, returning true',
+        name: 'InvisibleConditionMixin',
+      );
       return true;
     }
 
@@ -409,26 +571,35 @@ mixin InvisibleConditionMixin {
       final operator = domain[0] as String;
       if (operator == '!') {
         if (domain.length != 2) {
-          dev.log('Invalid ! domain: $domain', name: 'InvisibleConditionMixin');
+          dev.log(
+            'Invalid ! domain: $domain',
+            name: 'InvisibleConditionMixin',
+          );
           return false;
         }
-        return !_evaluateDomainExpression(domain[1] as List<dynamic>,
-            requireFieldExistence: requireFieldExistence);
+        return !_evaluateDomainExpression(
+          domain[1] as List<dynamic>,
+          requireFieldExistence: requireFieldExistence,
+        );
       }
 
       final subDomains = domain.sublist(1);
       if (operator == '&') {
         for (var subDomain in subDomains) {
-          if (!_evaluateDomainExpression(subDomain as List<dynamic>,
-              requireFieldExistence: requireFieldExistence)) {
+          if (!_evaluateDomainExpression(
+            subDomain as List<dynamic>,
+            requireFieldExistence: requireFieldExistence,
+          )) {
             return false;
           }
         }
         return true;
       } else if (operator == '|') {
         for (var subDomain in subDomains) {
-          if (_evaluateDomainExpression(subDomain as List<dynamic>,
-              requireFieldExistence: requireFieldExistence)) {
+          if (_evaluateDomainExpression(
+            subDomain as List<dynamic>,
+            requireFieldExistence: requireFieldExistence,
+          )) {
             return true;
           }
         }
@@ -444,8 +615,13 @@ mixin InvisibleConditionMixin {
       final fieldValue = _getFieldValue(fieldName)?.toString();
 
       if (!_fieldExists(fieldName)) {
-        dev.log('Field $fieldName not found', name: 'InvisibleConditionMixin');
-        return requireFieldExistence ? false : (operator == '!=' || operator == 'not in');
+        dev.log(
+          'Field $fieldName not found',
+          name: 'InvisibleConditionMixin',
+        );
+        return requireFieldExistence
+            ? false
+            : (operator == '!=' || operator == 'not in');
       }
 
       if (operator == 'in' || operator == 'not in') {
@@ -454,7 +630,10 @@ mixin InvisibleConditionMixin {
             : [expectedValue.toString()];
         final isInList = values.contains(fieldValue);
         final result = operator == 'not in' ? !isInList : isInList;
-        dev.log('$fieldName $operator $values: $result', name: 'InvisibleConditionMixin');
+        dev.log(
+          '$fieldName $operator $values: $result',
+          name: 'InvisibleConditionMixin',
+        );
         return result;
       }
 
@@ -462,27 +641,47 @@ mixin InvisibleConditionMixin {
         if (fieldValue == null) {
           return operator == 'not ilike';
         }
-        final isLike =
-        fieldValue.toLowerCase().contains(expectedValue.toString().toLowerCase());
+        final isLike = fieldValue
+            .toLowerCase()
+            .contains(expectedValue.toString().toLowerCase());
         final result = operator == 'not ilike' ? !isLike : isLike;
-        dev.log('$fieldName $operator $expectedValue: $result', name: 'InvisibleConditionMixin');
+        dev.log(
+          '$fieldName $operator $expectedValue: $result',
+          name: 'InvisibleConditionMixin',
+        );
         return result;
       }
 
-      final result = _compareValues(fieldValue, expectedValue.toString(), operator,
-          requireFieldExistence);
-      dev.log('$fieldName $operator $expectedValue: $result', name: 'InvisibleConditionMixin');
+      final result = _compareValues(
+        fieldValue,
+        expectedValue.toString(),
+        operator,
+        requireFieldExistence,
+      );
+      dev.log(
+        '$fieldName $operator $expectedValue: $result',
+        name: 'InvisibleConditionMixin',
+      );
       return result;
     }
 
-    dev.log('Invalid domain: $domain', name: 'InvisibleConditionMixin');
+    dev.log(
+      'Invalid domain: $domain',
+      name: 'InvisibleConditionMixin',
+    );
     return false;
   }
 
-  bool _compareValues(String? fieldValue, String expectedValue, String operator,
-      bool requireFieldExistence) {
+  bool _compareValues(
+      String? fieldValue,
+      String expectedValue,
+      String operator,
+      bool requireFieldExistence,
+      ) {
     if (fieldValue == null) {
-      return requireFieldExistence ? false : (operator == '!=' || operator == 'not in');
+      return requireFieldExistence
+          ? false
+          : (operator == '!=' || operator == 'not in');
     }
 
     if (_customOperators.containsKey(operator)) {
@@ -508,7 +707,10 @@ mixin InvisibleConditionMixin {
         case '>=':
           return fieldNum >= expectedNum;
         default:
-          dev.log('Unsupported numerical operator: $operator', name: 'InvisibleConditionMixin');
+          dev.log(
+            'Unsupported numerical operator: $operator',
+            name: 'InvisibleConditionMixin',
+          );
           return false;
       }
     }
@@ -520,12 +722,18 @@ mixin InvisibleConditionMixin {
       case '!=':
         return fieldValue != expectedValue;
       default:
-        dev.log('Unsupported string operator: $operator', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Unsupported string operator: $operator',
+          name: 'InvisibleConditionMixin',
+        );
         return false;
     }
   }
 
-  bool _getFieldBoolValue(String fieldName, {bool requireFieldExistence = false}) {
+  bool _getFieldBoolValue(
+      String fieldName, {
+        bool requireFieldExistence = false,
+      }) {
     final value = _getFieldValue(fieldName);
     print("_getFieldBoolValue  : $fieldName $value");
     if (value == null) {
@@ -566,7 +774,10 @@ mixin InvisibleConditionMixin {
     return current;
   }
 
-  bool _evaluateNestedField(String expr, {bool requireFieldExistence = false}) {
+  bool _evaluateNestedField(
+      String expr, {
+        bool requireFieldExistence = false,
+      }) {
     // Check if it's a comparison expression
     const comparisonOperators = ['==', '!=', '<=', '>=', '<', '>', '='];
     String? foundOperator;
@@ -582,7 +793,10 @@ mixin InvisibleConditionMixin {
 
     if (foundOperator != null && parts != null) {
       if (parts.length != 2) {
-        dev.log('Invalid nested field expression: $expr', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Invalid nested field expression: $expr',
+          name: 'InvisibleConditionMixin',
+        );
         return false;
       }
 
@@ -596,12 +810,23 @@ mixin InvisibleConditionMixin {
 
       final fieldValue = _getNestedFieldValue(fieldPath)?.toString();
       if (fieldValue == null && requireFieldExistence) {
-        dev.log('Nested field $fieldPath not found', name: 'InvisibleConditionMixin');
+        dev.log(
+          'Nested field $fieldPath not found',
+          name: 'InvisibleConditionMixin',
+        );
         return false;
       }
-      return _compareValues(fieldValue, expectedValue, foundOperator, requireFieldExistence);
+      return _compareValues(
+        fieldValue,
+        expectedValue,
+        foundOperator,
+        requireFieldExistence,
+      );
     }
 
-    return _getFieldBoolValue(expr, requireFieldExistence: requireFieldExistence);
+    return _getFieldBoolValue(
+      expr,
+      requireFieldExistence: requireFieldExistence,
+    );
   }
 }

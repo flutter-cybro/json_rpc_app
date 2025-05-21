@@ -1,4 +1,4 @@
-#Thu May 15 16:50:21 IST 2025
+#Wed May 21 10:11:28 IST 2025
 base.0=/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/app/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/app/intermediates/dex/debug/mergeLibDexDebug/0/classes.dex
 base.2=/home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/build/app/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
