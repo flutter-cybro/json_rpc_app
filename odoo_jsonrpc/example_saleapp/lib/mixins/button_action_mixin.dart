@@ -64,7 +64,7 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
     }
   }
 
-  /// Handles 'object' type actions (calls a method on the model).
+  
   Future<bool> _handleObjectAction(
       String methodName,
       Map<String, dynamic> context,
