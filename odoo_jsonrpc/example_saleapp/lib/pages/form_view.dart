@@ -804,6 +804,7 @@ class _FormViewState extends State<FormView>
             responseData['smart_buttons'] as List<dynamic>;
         setState(() {
           smartButtons = smartButtonsData.map((button) {
+
             final buttonMap = button as Map<String, dynamic>;
             final attributes = buttonMap['attributes'] as Map<String, dynamic>;
             final smartButtonFields =
@@ -839,6 +840,8 @@ class _FormViewState extends State<FormView>
           }).toList();
         });
       }
+
+
 
       if (responseData.containsKey('body_fields')) {
         final List<dynamic> bodyFields =

@@ -81,22 +81,23 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
 
       log("resModel  : $resModel , viewMode : $viewMode , views : $views , target : $target");
 
-      // String viewType = 'list';
-      // for (var view in views) {
-      //   if (view is List && view.length >= 2 && view[1] is String) {
-      //     if (view[1] == 'form') {
-      //       viewType = 'form';
-      //       break;
-      //     } else if (['list', 'kanban', 'calendar'].contains(view[1])) {
-      //       viewType = view[1] as String;
-      //     }
-      //   }
-      // }
+      String viewType = 'list';
+      for (var view in views) {
+        if (view is List && view.length >= 2 && view[1] is String) {
+          if (view[1] != 'form' && view[1] != 'list') {
+            viewType = 'list';
+            break;
+          } else if (view[1] == 'form' || view[1] == 'list') {
+            viewType = view[1] as String;
+            break;
+          }
+        }
+      }
 
-      final viewType = viewMode.split(',').firstWhere(
-            (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
-        orElse: () => 'list',
-      ); // Use first valid view type
+      // final viewType = viewMode.split(',').firstWhere(
+      //       (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
+      //   orElse: () => 'list',
+      // ); // Use first valid view type
 
       log("resModel: $resModel, viewMode: $viewMode, views: $views, viewType: $viewType, target: $target");
 

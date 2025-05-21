@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 import 'package:example_saleapp/pages/form_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -104,7 +105,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     try {
       await _odooClientController.initialize();
     } catch (e) {
-      log('Failed to initialize Odoo client: $e');
+      // log('Failed to initialize Odoo client: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to initialize Odoo client: $e')),
@@ -307,9 +308,9 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   Future<void> _refreshDataList() async {
     try {
       final updatedData = await search(
-        [], // Fetch all records; adjust domain as needed
+        [],
         fields: _visibleFields,
-        limit: 50, // Match your original limit if applicable
+        limit: 50,
       );
       if (mounted) {
         setState(() {
@@ -318,7 +319,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         });
       }
     } catch (e) {
-      log('Failed to refresh data: $e');
+      // log('Failed to refresh data: $e');
     }
   }
 
@@ -454,8 +455,10 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   Widget build(BuildContext context) {
     final visibleFieldCount = _visibleFields.length;
     final screenWidth = MediaQuery.of(context).size.width;
-    final fieldWidth =
-        screenWidth / (visibleFieldCount <= maxFieldsPerScreen ? visibleFieldCount : maxFieldsPerScreen);
+    final fieldWidth = max(
+        120.0,
+        screenWidth / (visibleFieldCount <= maxFieldsPerScreen ? visibleFieldCount : maxFieldsPerScreen)
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -596,29 +599,27 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
                               .map((metadata) {
                             final fieldName = metadata['name'];
                             final displayValue = getFieldDisplay(data, fieldName);
-                            return Container(
+                            return SizedBox(
                               width: fieldWidth,
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: displayValue is Widget
-                                        ? displayValue
-                                        : Text(
-                                      displayValue.toString(),
-                                      style: const TextStyle(
-                                        fontSize: 16.0,
-                                        color: Colors.black87,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      if (displayValue is Widget)
+                                        displayValue
+                                      else
+                                        Text(
+                                          displayValue.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 16.0,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  // if (recordId != null)
-                                  //   IconButton(
-                                  //     icon: const Icon(Icons.delete, color: Colors.red),
-                                  //     onPressed: () => _deleteRecord(recordId, index),
-                                  //   ),
-                                ],
+                                ),
                               ),
                             );
                           }).toList(),
