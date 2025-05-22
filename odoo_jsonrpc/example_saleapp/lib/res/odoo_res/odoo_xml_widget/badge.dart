@@ -1,95 +1,86 @@
 import 'package:flutter/material.dart';
 
 class BadgeWidget extends StatelessWidget {
-  final String value; // e.g., "open", "sold"
-  final Map<String, dynamic> metadata; // For selection and decoration attrs
+  final String value; // The display value, e.g., "Done", "Error", "In Progress"
+  final String fieldLabel; // The label for accessibility and tooltips
+  final VoidCallback? onTap; // Optional tap callback for interactivity
 
   const BadgeWidget({
     super.key,
     required this.value,
-    required this.metadata,
+    required this.fieldLabel,
+    this.onTap,
   });
-
-  // Get display text from selection options
-  String _getDisplayText() {
-    final selection = metadata['pythonAttributes']['selection'] as List<dynamic>?;
-    if (selection != null) {
-      for (var option in selection) {
-        if (option[0].toString() == value) {
-          return option[1].toString(); // e.g., "open" -> "Registered"
-        }
-      }
-    }
-    return value; // Fallback to raw value if no match
-  }
-
-  // Determine badge style based on decoration attributes
-  (Color bgColor, Color textColor) _getBadgeStyle() {
-    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-    if (xmlAttrs == null) {
-      return (Colors.grey[200]!, Colors.black); // Default
-    }
-
-    // Check decoration conditions
-    if (_matchesDecoration(xmlAttrs, 'decoration-info', value)) {
-      return (Colors.blue[100]!, Colors.blue[900]!); // Info style
-    } else if (_matchesDecoration(xmlAttrs, 'decoration-success', value)) {
-      return (Colors.green[100]!, Colors.green[900]!); // Success style
-    } else if (_matchesDecoration(xmlAttrs, 'decoration-danger', value)) {
-      return (Colors.red[100]!, Colors.red[900]!); // Danger style
-    } else if (_matchesDecoration(xmlAttrs, 'decoration-muted', value)) {
-      return (Colors.grey[300]!, Colors.grey[700]!); // Muted style
-    }
-    return (Colors.grey[200]!, Colors.black); // Default
-  }
-
-  bool _matchesDecoration(List<dynamic> attrs, String decoration, String value) {
-    final attr = attrs.firstWhere(
-          (a) => a['name'] == decoration,
-      orElse: () => {'value': null},
-    );
-    final condition = attr['value'];
-    if (condition == null) return false;
-
-    // Simple condition parsing (e.g., "state == 'done'")
-    if (condition.contains('==')) {
-      final parts = condition.split('==').map((p) => p.trim()).toList();
-      if (parts.length == 2) {
-        final field = parts[0].trim();
-        final expected = parts[1].trim().replaceAll("'", "");
-        return field == 'state' && value == expected;
-      }
-    } else if (condition.contains('in')) {
-      final parts = condition.split('in').map((p) => p.trim()).toList();
-      if (parts.length == 2) {
-        final field = parts[0].trim();
-        final list = parts[1].trim().replaceAll('(', '').replaceAll(')', '').split(',').map((v) => v.trim().replaceAll("'", "")).toList();
-        return field == 'state' && list.contains(value);
-      }
-    }
-    return false;
-  }
 
   @override
   Widget build(BuildContext context) {
-    final displayText = _getDisplayText();
-    final (bgColor, textColor) = _getBadgeStyle();
+    // Access theme for consistent styling
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: textColor.withOpacity(0.5)),
-      ),
-      child: Text(
-        displayText,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
+    // Responsive sizing based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    final fontSize = screenWidth < 360 ? 12.0 : 14.0; // Smaller font for narrow screens
+    final padding = screenWidth < 360 ? 4.0 : 6.0; // Adjust padding
+
+    // Determine background and text color based on value
+    Color backgroundColor;
+    Color textColor;
+    String tooltipMessage = '$fieldLabel: $value';
+
+    switch (value.toLowerCase()) {
+      case 'done':
+      case 'completed':
+        backgroundColor = isDarkMode ? Colors.green[800]! : Colors.green[100]!;
+        textColor = isDarkMode ? Colors.white : Colors.green[900]!;
+        break;
+      case 'error':
+      case 'failed':
+        backgroundColor = isDarkMode ? Colors.red[800]! : Colors.red[100]!;
+        textColor = isDarkMode ? Colors.white : Colors.red[900]!;
+        break;
+      case 'in progress':
+      case 'pending':
+        backgroundColor = isDarkMode ? Colors.blue[800]! : Colors.blue[100]!;
+        textColor = isDarkMode ? Colors.white : Colors.blue[900]!;
+        break;
+      default:
+        backgroundColor = isDarkMode ? Colors.grey[700]! : Colors.grey[200]!;
+        textColor = isDarkMode ? Colors.white : Colors.grey[800]!;
+        break;
+    }
+
+    return Tooltip(
+      message: tooltipMessage,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: padding * 2, vertical: padding),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: textColor.withOpacity(0.5),
+              width: 1.0,
+            ),
+          ),
+          constraints: BoxConstraints(
+            minWidth: 60.0, // Ensure minimum width
+            maxWidth: screenWidth < 360 ? 100.0 : 120.0, // Responsive max width
+          ),
+          child: Text(
+            value.isEmpty ? 'N/A' : value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: textColor,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
-        overflow: TextOverflow.ellipsis,
       ),
     );
   }

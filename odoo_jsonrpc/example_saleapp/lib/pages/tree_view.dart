@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'dart:math';
 import 'package:example_saleapp/pages/form_view.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,9 @@ import '../res/constants/app_colors.dart';
 import '../res/odoo_res/odoo_data_types/boolean_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
+import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
+import '../res/odoo_res/odoo_xml_widget/RemainingDaysWidget.dart';
+import '../res/odoo_res/odoo_xml_widget/badge.dart';
 import '../res/odoo_res/odoo_xml_widget/boolean_favorite.dart';
 import '../res/odoo_res/odoo_xml_widget/color.dart';
 import '../res/odoo_res/odoo_xml_widget/color_picker.dart';
@@ -73,6 +76,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   @override
   void initState() {
     super.initState();
+
+    dev.log("title  : ${widget.title}  , dataList  : ${widget.dataList}  , modelname : ${widget.modelname} , formdata : ${widget.formdata} , fieldMetadata : ${widget.fieldMetadata}");
 
     _odooClientController = OdooClientController();
     _initializeOdooClient();
@@ -139,20 +144,41 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       return '';
     }
 
+    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
+    final widgetType = xmlAttrs?.firstWhere(
+          (attr) => attr['name'] == 'widget',
+      orElse: () => {'value': null},
+    )['value'];
+
+    dev.log("widgetType : $widgetType  , fieldName  : $fieldName  , metadata : $metadata");
+    final fieldLabel = metadata['pythonAttributes']['string'] ?? fieldName;
+
     if (fieldValue is List && fieldValue.length >= 2 && metadata['type'] == 'many2one') {
       return fieldValue[1].toString();
     }
 
     if (metadata['type'] == 'selection' && metadata['pythonAttributes']['selection'] != null) {
       final selection = metadata['pythonAttributes']['selection'] as List<dynamic>;
+      String displayValue = '';
       for (var option in selection) {
         if (option[0].toString() == fieldValue.toString()) {
-          return option[1].toString();
+          displayValue = option[1].toString();
+          break;
         }
       }
+
+      // Handle priority widget for selection fields
+      if (widgetType == 'priority') {
+        return PriorityWidget(
+          value: displayValue,
+          selection: selection,
+        );
+      }
+
+      return displayValue;
     }
 
-    if (metadata['type'] == 'many2many' && metadata['widget'] == 'many2many_tags') {
+    if (metadata['type'] == 'many2many' && widgetType == 'many2many_tags') {
       return FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'], fieldValue as List<dynamic>),
         builder: (context, snapshot) {
@@ -186,7 +212,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       );
     }
 
-    if (metadata['widget'] == 'color_picker') {
+    if (widgetType == 'color_picker') {
       int colorValue = int.tryParse(fieldValue.toString()) ?? 0;
       return ColorPickerWidget(
         initialColorValue: colorValue,
@@ -199,33 +225,28 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         height: 76,
         child: SingleChildScrollView(
           child: HtmlFieldWidget(
-            name: metadata['pythonAttributes']['string'] ?? fieldName,
+            name: fieldLabel,
             value: fieldValue.toString(),
           ),
         ),
       );
     }
 
-    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-    final widgetType = xmlAttrs?.firstWhere(
-          (attr) => attr['name'] == 'widget',
-      orElse: () => {'value': null},
-    )['value'];
-
-    final fieldLabel = metadata['pythonAttributes']['string'] ?? fieldName;
-
     if (widgetType == 'color') {
       String colorValue = fieldValue is String ? fieldValue : '#000000';
       return ColorFieldWidget(value: colorValue);
     }
+
     if (widgetType == 'progressbar') {
       double progressValue = fieldValue is num ? fieldValue.toDouble() : 0.0;
       return ProgressBarWidget(value: progressValue);
     }
+
     if (widgetType == 'image_url') {
       String urlValue = fieldValue is String ? fieldValue : '';
       return ImageUrlFieldWidget(value: urlValue);
     }
+
     if (widgetType == 'image') {
       String imageValue = fieldValue is String ? fieldValue : '';
       return ImageFieldWidget(
@@ -235,28 +256,50 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         viewType: 'tree',
       );
     }
+
     if (widgetType == 'handle') {
       int sequenceValue = int.tryParse(fieldValue.toString()) ?? 0;
       return HandleWidget(sequence: sequenceValue);
     }
+
     if (widgetType == 'boolean_favorite') {
+      dev.log("fieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
       bool favoriteValue = fieldValue is bool ? fieldValue : false;
       return BooleanFavoriteWidget(isFavorite: favoriteValue);
     }
 
-    if (metadata['type'] == 'boolean') {
-      bool boolValue = fieldValue is bool ? fieldValue : false;
-      return BooleanFieldWidget(
-        value: boolValue,
-        onChanged: (newValue) {
-          setState(() {
-            data[fieldName] = newValue;
-            _updateRecord(data['id'], {fieldName: newValue});
-          });
-        },
-        viewType: 'list',
+    if (widgetType == 'remaining_days') {
+      num daysValue = fieldValue is num ? fieldValue : 0;
+      return RemainingDaysWidget(
+        value: daysValue,
+        fieldLabel: fieldLabel,
       );
     }
+
+    if (widgetType == 'badge') {
+      dev.log("badgefieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
+      String badgeValue = fieldValue.toString();
+      return BadgeWidget(
+        value: badgeValue,
+        fieldLabel: fieldLabel,
+      );
+    }
+
+    if (metadata['type'] == 'boolean') {
+      bool boolValue = fieldValue is bool ? fieldValue : false;
+      return Checkbox( // Temporary replacement until BooleanFieldWidget is resolved
+        value: boolValue,
+        onChanged: (newValue) {
+          if (newValue != null) {
+            setState(() {
+              data[fieldName] = newValue;
+              _updateRecord(data['id'], {fieldName: newValue});
+            });
+          }
+        },
+      );
+    }
+
     if (metadata['type'] == 'reference') {
       String referenceValue = fieldValue is String ? fieldValue : '';
       return ReferenceFieldWidget(
@@ -264,6 +307,12 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         onTap: () {},
       );
     }
+
+    if (widgetType != null) {
+      dev.log('Unsupported widget type: $widgetType for field: $fieldName');
+      return const Text('Unsupported');
+    }
+
     return fieldValue.toString();
   }
 
@@ -359,8 +408,28 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
           (attr) => attr['name'] == 'optional',
       orElse: () => {'value': null},
     )['value'];
+    final widgetType = xmlAttrs
+        ?.firstWhere(
+          (attr) => attr['name'] == 'widget',
+      orElse: () => {'value': null},
+    )['value'];
 
-    return (columnInvisible != 'True' && columnInvisible != '1') && optional != 'hide';
+    // Define allowed widget types
+    const allowedWidgetTypes = {
+      'color',
+      'progressbar',
+      'image_url',
+      'image',
+      'handle',
+      'boolean_favorite',
+      'color_picker',
+      'many2many_tags',
+      'priority', // Add priority widget
+    };
+
+    return (columnInvisible != 'True' && columnInvisible != '1') &&
+        optional != 'hide' &&
+        (widgetType == null || allowedWidgetTypes.contains(widgetType));
   }
 
   bool isFieldVisible(Map<String, dynamic> metadata) {

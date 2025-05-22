@@ -4,12 +4,17 @@ import 'package:intl/intl.dart';
 class DateTimeFieldWidget extends StatefulWidget {
   final String name;
   final DateTime? value;
-  final Function(DateTime) onChanged;
+  final Function(DateTime)? onChanged;
+  final bool readonly;
+  final String? format; // Optional: for custom date format
 
-  DateTimeFieldWidget({
+  const DateTimeFieldWidget({
+    super.key,
     required this.name,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
+    this.readonly = false,
+    this.format,
   });
 
   @override
@@ -32,10 +37,13 @@ class _DateTimeFieldWidgetState extends State<DateTimeFieldWidget> {
   }
 
   String _formatDateTime(DateTime dateTime) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+    final format = widget.format ?? 'dd/MM/yyyy HH:mm';
+    return DateFormat(format).format(dateTime);
   }
 
   Future<void> _selectDateTime(BuildContext context) async {
+    if (widget.readonly) return;
+
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDateTime,
@@ -63,8 +71,7 @@ class _DateTimeFieldWidgetState extends State<DateTimeFieldWidget> {
           _controller.text = _formatDateTime(selectedDateTime);
         });
 
-
-        widget.onChanged(selectedDateTime);
+        widget.onChanged?.call(selectedDateTime);
       } else {
         setState(() {
           _selectedDateTime = _originalDateTime;
@@ -80,27 +87,60 @@ class _DateTimeFieldWidgetState extends State<DateTimeFieldWidget> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _controller,
-            readOnly: true,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              suffixIcon: Icon(Icons.calendar_today),
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: widget.readonly ? 'This field is read-only' : 'Select date and time',
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.name,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            onTap: () => _selectDateTime(context),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Semantics(
+              label: '${widget.name}: ${_controller.text}${widget.readonly ? ', read-only' : ''}',
+              enabled: !widget.readonly,
+              child: TextField(
+                controller: _controller,
+                readOnly: true,
+                enabled: !widget.readonly,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  suffixIcon: widget.readonly
+                      ? const Icon(Icons.lock, size: 18)
+                      : const Icon(Icons.calendar_today),
+                  disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: theme.disabledColor.withOpacity(0.5),
+                    ),
+                  ),
+                  filled: widget.readonly,
+                  fillColor: widget.readonly
+                      ? theme.disabledColor.withOpacity(0.1)
+                      : null,
+                ),
+                style: TextStyle(
+                  color: widget.readonly
+                      ? theme.disabledColor
+                      : theme.textTheme.bodyMedium?.color,
+                ),
+                onTap: widget.readonly ? null : () => _selectDateTime(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

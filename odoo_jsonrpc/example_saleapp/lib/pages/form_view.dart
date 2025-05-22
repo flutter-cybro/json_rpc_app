@@ -848,11 +848,14 @@ class _FormViewState extends State<FormView>
             responseData['body_fields'] as List<dynamic>;
         setState(() {
           bodyField = bodyFields.map((field) {
+
             final fieldMap = field as Map<String, dynamic>;
             final fieldName =
                 fieldMap['main_field_name'] as String? ?? 'unknown_field';
             final fieldType =
                 allPythonFields[fieldName]?['type'] as String? ?? 'char';
+            log("bodyfield - $fieldName , $fieldType");
+
             final xmlAttributes =
                 fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
             final pythonAttributes =
@@ -946,6 +949,7 @@ class _FormViewState extends State<FormView>
         setState(() {
           notebookPages = notebookSections
               .map((page) {
+                log("page : $page");
                 final pageMap = page as Map<String, dynamic>;
                 final xmlAttrs =
                     pageMap['xml_attributes'] as Map<String, dynamic>? ?? {};
@@ -2522,6 +2526,7 @@ class _FormViewState extends State<FormView>
           ),
         );
       case 'date':
+        print("fieldname : $fieldName");
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: DateFieldWidget(
@@ -2532,13 +2537,23 @@ class _FormViewState extends State<FormView>
           ),
         );
       case 'datetime':
+        print("datetime fieldname: $fieldName");
+        final readonlyValue = fieldData?['readonly'] ??
+            allPythonFields[fieldName]?['readonly'] ??
+            false;
+        final isReadonly = readonlyValue is bool
+            ? readonlyValue
+            : readonlyValue.toString().toLowerCase() == 'true';
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: DateTimeFieldWidget(
             name: label,
             value: value as DateTime?,
-            onChanged: (newValue) =>
+            onChanged: isReadonly
+                ? null
+                : (newValue) =>
                 _updateFieldValue(fieldName, newValue.toIso8601String()),
+            readonly: isReadonly,
           ),
         );
 
@@ -2972,6 +2987,7 @@ class _FormViewState extends State<FormView>
       case 'one2many':
         print("relational_field  : ${relational_field}");
         return One2ManyFieldWidget(
+          // readonly: true,
           mainModel: widget.modelName,
           fieldName: fieldName,
           name: label,

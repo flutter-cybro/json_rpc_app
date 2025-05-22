@@ -18,6 +18,7 @@ class One2ManyFieldWidget extends StatefulWidget {
   final Function(List<dynamic>) onUpdate;
   final List<Map<String, dynamic>> relatedFields;
   final String viewType;
+  final bool readonly;
 
   const One2ManyFieldWidget({
     required this.name,
@@ -31,6 +32,7 @@ class One2ManyFieldWidget extends StatefulWidget {
     required this.relatedFields,
     this.viewType = 'form',
     required this.mainModel,
+    this.readonly = false,
   });
 
   @override
@@ -72,7 +74,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         fieldName: widget.fieldName,
       );
       setState(() {
-        relatedRecords = localRecords.map((record) => jsonDecode(record.data) as Map<String, dynamic>).toList();
+        relatedRecords = localRecords
+            .map((record) => jsonDecode(record.data) as Map<String, dynamic>)
+            .toList();
         isLoading = false;
       });
 
@@ -92,7 +96,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       final fieldsResponse = await widget.client.callKw({
         'model': widget.relationModel,
         'method': 'fields_get',
-        'args': [fieldNames, ['domain', 'relation', 'type', 'string']],
+        'args': [
+          fieldNames,
+          ['domain', 'relation', 'type', 'string']
+        ],
         'kwargs': {},
       });
 
@@ -113,7 +120,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       // Fetch many2many and many2one options
       for (var field in widget.relatedFields) {
         final fieldDef = allFieldNames.firstWhere(
-              (f) => f['name'] == field['name'],
+          (f) => f['name'] == field['name'],
           orElse: () => <String, dynamic>{
             'name': field['name'],
             'type': field['type'] ?? 'char',
@@ -124,15 +131,17 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
         if (fieldDef['type'] == 'many2many' && fieldDef['relation'] != null) {
           final relatedModel = fieldDef['relation'] as String;
-          final domain = field['domain'] == '[]' ? fieldDef['domain'] : (field['domain'] ?? fieldDef['domain'] ?? '[]');
-          final parsedDomain = await _resolveDomainVariables(domain, widget.relationModel);
+          final domain = field['domain'] == '[]'
+              ? fieldDef['domain']
+              : (field['domain'] ?? fieldDef['domain'] ?? '[]');
+          final parsedDomain =
+              await _resolveDomainVariables(domain, widget.relationModel);
 
           log("parent_model : ${widget.mainModel} \n"
               "parent_record_id : ${widget.mainRecordId}\n"
               "domain : ${domain}\n"
               "field_relation_model : ${relatedModel}\n"
-              "parent_relational_model : ${widget.relationModel}\n"
-          );
+              "parent_relational_model : ${widget.relationModel}\n");
 
           if (widget.mainModel == 'product.template') {
             for (var record in relatedRecords) {
@@ -165,15 +174,16 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         .map((record) => Map<String, dynamic>.from(record))
                         .toList();
                   } else if (optionsResponse['records'] is List<dynamic>) {
-                    recordOptions = (optionsResponse['records'] as List<dynamic>)
-                        .map((record) => Map<String, dynamic>.from(record))
-                        .toList();
+                    recordOptions =
+                        (optionsResponse['records'] as List<dynamic>)
+                            .map((record) => Map<String, dynamic>.from(record))
+                            .toList();
                   }
                 }
 
                 recordOptions = recordOptions.fold<List<Map<String, dynamic>>>(
                   [],
-                      (uniqueList, option) {
+                  (uniqueList, option) {
                     if (!uniqueList.any((item) => item['id'] == option['id'])) {
                       uniqueList.add(option);
                     }
@@ -214,9 +224,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                     .map((record) => Map<String, dynamic>.from(record))
                     .toList();
               } else if (optionsResponse['records'] is List<dynamic>) {
-                aggregatedOptions = (optionsResponse['records'] as List<dynamic>)
-                    .map((record) => Map<String, dynamic>.from(record))
-                    .toList();
+                aggregatedOptions =
+                    (optionsResponse['records'] as List<dynamic>)
+                        .map((record) => Map<String, dynamic>.from(record))
+                        .toList();
               }
             }
 
@@ -231,7 +242,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
               log("Assigned ${aggregatedOptions.length} options to many2manyOptions[0]");
             }
           }
-        } else if (fieldDef['type'] == 'many2one' && fieldDef['relation'] != null) {
+        } else if (fieldDef['type'] == 'many2one' &&
+            fieldDef['relation'] != null) {
           final relatedModel = fieldDef['relation'] as String;
           final domain = field['domain'] ?? '[]';
 
@@ -270,7 +282,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       final fieldsResponse = await widget.client.callKw({
         'model': widget.relationModel,
         'method': 'fields_get',
-        'args': [fieldNames, ['domain', 'relation', 'type', 'string']],
+        'args': [
+          fieldNames,
+          ['domain', 'relation', 'type', 'string']
+        ],
         'kwargs': {},
       });
 
@@ -287,7 +302,6 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       } else {
         throw Exception("Failed to fetch field definitions");
       }
-
 
       final validFieldNames = allFieldNames.map((f) => f['name']).toList();
       final recordsResponse = await widget.client.callKw({
@@ -309,7 +323,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
             .map((record) => Map<String, dynamic>.from(record))
             .toList();
         for (var record in relatedRecords) {
-          print("Relation Model ID: ${record['id']} for ${widget.relationModel}");
+          print(
+              "Relation Model ID: ${record['id']} for ${widget.relationModel}");
         }
       } else {
         throw Exception("Failed to fetch related records");
@@ -317,7 +332,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
       for (var field in widget.relatedFields) {
         final fieldDef = allFieldNames.firstWhere(
-              (f) => f['name'] == field['name'],
+          (f) => f['name'] == field['name'],
           orElse: () => <String, String?>{
             'name': field['name'] as String?,
             'type': field['type'] as String? ?? 'char',
@@ -328,8 +343,11 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
         if (fieldDef['type'] == 'many2many' && fieldDef['relation'] != null) {
           final relatedModel = fieldDef['relation'] as String;
-          final domain = field['domain'] == '[]' ? fieldDef['domain'] : (field['domain'] ?? fieldDef['domain'] ?? '[]');
-          final parsedDomain = await _resolveDomainVariables(domain, widget.relationModel);
+          final domain = field['domain'] == '[]'
+              ? fieldDef['domain']
+              : (field['domain'] ?? fieldDef['domain'] ?? '[]');
+          final parsedDomain =
+              await _resolveDomainVariables(domain, widget.relationModel);
 
           if (widget.mainModel == 'product.template') {
             for (var record in relatedRecords) {
@@ -373,18 +391,20 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         .map((record) => Map<String, dynamic>.from(record))
                         .toList();
                   } else if (optionsResponse['records'] is List<dynamic>) {
-                    recordOptions = (optionsResponse['records'] as List<dynamic>)
-                        .map((record) => Map<String, dynamic>.from(record))
-                        .toList();
+                    recordOptions =
+                        (optionsResponse['records'] as List<dynamic>)
+                            .map((record) => Map<String, dynamic>.from(record))
+                            .toList();
                   } else {
                     final listKeys = optionsResponse.keys.where((key) =>
-                    optionsResponse[key] is List<dynamic> &&
+                        optionsResponse[key] is List<dynamic> &&
                         (optionsResponse[key] as List).isNotEmpty &&
                         (optionsResponse[key] as List).first is Map);
 
                     if (listKeys.isNotEmpty) {
                       final firstListKey = listKeys.first;
-                      recordOptions = (optionsResponse[firstListKey] as List<dynamic>)
+                      recordOptions = (optionsResponse[firstListKey]
+                              as List<dynamic>)
                           .map((record) => Map<String, dynamic>.from(record))
                           .toList();
                     } else {
@@ -395,10 +415,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
                 log("Retrieved ${recordOptions.length} options for record ID ${parentRelationRecord}");
 
-
                 recordOptions = recordOptions.fold<List<Map<String, dynamic>>>(
                   [],
-                      (uniqueList, option) {
+                  (uniqueList, option) {
                     if (!uniqueList.any((item) => item['id'] == option['id'])) {
                       uniqueList.add(option);
                     }
@@ -428,8 +447,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
               },
             });
 
-            print("Non-product.template optionsResponse type: ${optionsResponse.runtimeType}");
-            print("Non-product.template optionsResponse value: $optionsResponse");
+            print(
+                "Non-product.template optionsResponse type: ${optionsResponse.runtimeType}");
+            print(
+                "Non-product.template optionsResponse value: $optionsResponse");
 
             List<Map<String, dynamic>> aggregatedOptions = [];
             if (optionsResponse is List<dynamic>) {
@@ -442,9 +463,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                     .map((record) => Map<String, dynamic>.from(record))
                     .toList();
               } else if (optionsResponse['records'] is List<dynamic>) {
-                aggregatedOptions = (optionsResponse['records'] as List<dynamic>)
-                    .map((record) => Map<String, dynamic>.from(record))
-                    .toList();
+                aggregatedOptions =
+                    (optionsResponse['records'] as List<dynamic>)
+                        .map((record) => Map<String, dynamic>.from(record))
+                        .toList();
               } else {
                 log("Unexpected optionsResponse format: $optionsResponse");
                 aggregatedOptions = [];
@@ -454,18 +476,19 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
               aggregatedOptions = [];
             }
 
-
             if (relatedRecords.isNotEmpty) {
               for (var record in relatedRecords) {
                 many2manyOptions[record['id']] = aggregatedOptions;
                 log("Assigned ${aggregatedOptions.length} options to many2manyOptions[${record['id']}] (non-product.template)");
               }
             } else {
-              many2manyOptions[0] = aggregatedOptions; // Fallback for no records
+              many2manyOptions[0] =
+                  aggregatedOptions; // Fallback for no records
               log("Assigned ${aggregatedOptions.length} options to many2manyOptions[0] (no records)");
             }
           }
-        } else if (fieldDef['type'] == 'many2one' && fieldDef['relation'] != null) {
+        } else if (fieldDef['type'] == 'many2one' &&
+            fieldDef['relation'] != null) {
           final relatedModel = fieldDef['relation'] as String;
           final domain = field['domain'] ?? '[]';
 
@@ -557,7 +580,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
     for (var field in widget.relatedFields) {
       final fieldDef = allFieldNames.firstWhere(
-            (f) => f['name'] == field['name'],
+        (f) => f['name'] == field['name'],
         orElse: () => <String, String?>{
           'name': field['name'] as String?,
           'type': field['type'] as String? ?? 'char',
@@ -608,9 +631,12 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         children: [
                           Text(
                             'Add New Record',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.close),
@@ -626,7 +652,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         child: Column(
                           children: visibleFields.map((field) {
                             final fieldDef = allFieldNames.firstWhere(
-                                  (f) => f['name'] == field['name'],
+                              (f) => f['name'] == field['name'],
                               orElse: () => <String, String?>{
                                 'name': field['name'] as String?,
                                 'type': field['type'] as String? ?? 'char',
@@ -652,7 +678,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
                                         validationErrors[field['name']]!,
-                                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                                        style: const TextStyle(
+                                            color: Colors.red, fontSize: 12),
                                       ),
                                     ),
                                 ],
@@ -683,7 +710,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                               );
 
                               if (!isValid) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
                                   Scrollable.ensureVisible(
                                     context,
                                     alignment: 0.1,
@@ -717,12 +745,12 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
   }
 
   bool _validateForm(
-      Map<String, TextEditingController> controllers,
-      Map<String, List<dynamic>> selectedMany2Many,
-      Map<String, int?> selectedMany2One,
-      Map<String, String?> validationErrors,
-      void Function(void Function()) setState,
-      ) {
+    Map<String, TextEditingController> controllers,
+    Map<String, List<dynamic>> selectedMany2Many,
+    Map<String, int?> selectedMany2One,
+    Map<String, String?> validationErrors,
+    void Function(void Function()) setState,
+  ) {
     bool isValid = true;
 
     setState(() {
@@ -733,14 +761,15 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
     for (var field in widget.relatedFields) {
       final fieldDef = allFieldNames.firstWhere(
-            (f) => f['name'] == field['name'],
+        (f) => f['name'] == field['name'],
         orElse: () => <String, String?>{
           'name': field['name'] as String?,
           'type': field['type'] as String? ?? 'char',
         },
       );
 
-      bool isRequired = field['required'] == true || fieldDef['required'] == true;
+      bool isRequired =
+          field['required'] == true || fieldDef['required'] == true;
       final fieldName = fieldDef['string'] ?? field['name'];
 
       switch (fieldDef['type']) {
@@ -761,7 +790,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
           }
           break;
         default:
-          if (isRequired && (controllers[field['name']]?.text.isEmpty ?? true)) {
+          if (isRequired &&
+              (controllers[field['name']]?.text.isEmpty ?? true)) {
             setState(() {
               validationErrors[field['name']] = '$fieldName is required';
             });
@@ -785,7 +815,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       return StatefulBuilder(
         builder: (context, setState) {
           // Use a default set of options for new records (e.g., from record ID 0 or first record)
-          final options = many2manyOptions[relatedRecords.isNotEmpty ? relatedRecords.first['id'] : 0] ?? [];
+          final options = many2manyOptions[
+                  relatedRecords.isNotEmpty ? relatedRecords.first['id'] : 0] ??
+              [];
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -820,12 +852,13 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   isExpanded: true,
                   items: options
                       .map((option) => DropdownMenuItem<int>(
-                    value: option['id'],
-                    child: Text(option['name'] ?? 'Unknown'),
-                  ))
+                            value: option['id'],
+                            child: Text(option['name'] ?? 'Unknown'),
+                          ))
                       .toList(),
                   onChanged: (value) {
-                    if (value != null && !selectedMany2Many[field['name']]!.contains(value)) {
+                    if (value != null &&
+                        !selectedMany2Many[field['name']]!.contains(value)) {
                       setState(() {
                         selectedMany2Many[field['name']]!.add(value);
                         validationErrors[field['name']] = null;
@@ -834,7 +867,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   },
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 14),
                     errorText: validationErrors[field['name']],
                   ),
                   value: null,
@@ -847,7 +881,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   runSpacing: 8.0,
                   children: selectedMany2Many[field['name']]!.map((id) {
                     final option = options.firstWhere(
-                          (opt) => opt['id'] == id,
+                      (opt) => opt['id'] == id,
                       orElse: () => {'name': 'Unknown'},
                     );
                     return Chip(
@@ -879,9 +913,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
               ),
               ...(many2oneOptions[field['name']] ?? [])
                   .map((option) => DropdownMenuItem<int?>(
-                value: option['id'] as int?,
-                child: Text(option['name'] ?? 'Unknown'),
-              ))
+                        value: option['id'] as int?,
+                        child: Text(option['name'] ?? 'Unknown'),
+                      ))
             ],
             onChanged: (value) {
               setState(() {
@@ -892,7 +926,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
             decoration: InputDecoration(
               labelText: fieldDef['string'] ?? field['name'],
               border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               errorText: validationErrors[field['name']],
             ),
           );
@@ -910,16 +945,16 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
   }
 
   Future<void> _saveNewRecord(
-      Map<String, dynamic> newRecord,
-      Map<String, TextEditingController> controllers,
-      Map<String, List<dynamic>> selectedMany2Many,
-      Map<String, int?> selectedMany2One,
-      BuildContext context,
-      ) async {
+    Map<String, dynamic> newRecord,
+    Map<String, TextEditingController> controllers,
+    Map<String, List<dynamic>> selectedMany2Many,
+    Map<String, int?> selectedMany2One,
+    BuildContext context,
+  ) async {
     // Populate newRecord with field values
     for (var field in widget.relatedFields) {
       final fieldDef = allFieldNames.firstWhere(
-            (f) => f['name'] == field['name'],
+        (f) => f['name'] == field['name'],
         orElse: () => <String, dynamic>{
           'name': field['name'],
           'type': field['type'] ?? 'char',
@@ -976,12 +1011,12 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
           setState(() {
             newRecord['id'] = createResponse;
             final field = widget.relatedFields.firstWhere(
-                  (f) => f['type'] == 'many2many',
+              (f) => f['type'] == 'many2many',
               orElse: () => {},
             );
             if (field.isNotEmpty) {
-              final relatedModel = allFieldNames
-                  .firstWhere((f) => f['name'] == field['name'])['relation'] as String;
+              final relatedModel = allFieldNames.firstWhere(
+                  (f) => f['name'] == field['name'])['relation'] as String;
               final domain = field['domain'] ?? '[]';
               many2manyOptions[createResponse] =
                   many2manyOptions[relatedRecords.first['id']] ?? [];
@@ -1062,11 +1097,13 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     });
 
     if (widget.mainRecordId == 0) {
-
       try {
-        final localRecords = await isarService.getRecordsByTempId(widget.tempRecordId!);
+        final localRecords =
+            await isarService.getRecordsByTempId(widget.tempRecordId!);
         final toDelete = localRecords.firstWhere(
-              (r) => jsonDecode(r.data)['id'] == recordId || jsonDecode(r.data) == record,
+          (r) =>
+              jsonDecode(r.data)['id'] == recordId ||
+              jsonDecode(r.data) == record,
           orElse: () => throw Exception('Record not found in Isar'),
         );
         await isarService.deleteRecord(toDelete.id);
@@ -1075,7 +1112,6 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
           errorMessage = 'Failed to delete local record: $e';
           relatedRecords.insert(recordIndex, record);
           if (recordId != null) many2manyOptions[recordId] = [];
-
         });
       }
     } else if (recordId != null) {
@@ -1084,7 +1120,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         final deleteResponse = await widget.client.callKw({
           'model': widget.relationModel,
           'method': 'unlink',
-          'args': [[recordId]],
+          'args': [
+            [recordId]
+          ],
           'kwargs': {},
         });
 
@@ -1095,7 +1133,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         String errorMsg = 'Failed to delete record: $e';
         // Check if the error is an OdooException and extract the arguments
         if (e.toString().contains('OdooException')) {
-          final match = RegExp(r'arguments: \[([^\]]+)\]').firstMatch(e.toString());
+          final match =
+              RegExp(r'arguments: \[([^\]]+)\]').firstMatch(e.toString());
           if (match != null && match.group(1) != null) {
             errorMsg = match.group(1)!;
           }
@@ -1122,12 +1161,11 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       }
     }
 
-
     widget.onUpdate(relatedRecords);
   }
 
-
-  void _onMany2ManyValuesChanged(String fieldName, int recordIndex, List<dynamic> newValues) async {
+  void _onMany2ManyValuesChanged(
+      String fieldName, int recordIndex, List<dynamic> newValues) async {
     setState(() {
       relatedRecords[recordIndex][fieldName] = newValues;
     });
@@ -1162,7 +1200,10 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       final response = await widget.client.callKw({
         'model': widget.relationModel,
         'method': 'write',
-        'args': [[recordId], updateData],
+        'args': [
+          [recordId],
+          updateData
+        ],
         'kwargs': {},
       });
 
@@ -1180,11 +1221,14 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
-  void _onMany2OneValueChanged(String fieldName, int recordIndex, dynamic newValue) async {
+  void _onMany2OneValueChanged(
+      String fieldName, int recordIndex, dynamic newValue) async {
     log("fieldName  : $fieldName  , recordIndex  : $recordIndex  ,  newValue  :  $newValue");
     int? finalValue = newValue;
     // Check for variants if the field is product_id and relation is sale.order.line
-    if (widget.relationModel == 'sale.order.line' && fieldName == 'product_id' && newValue != null) {
+    if (widget.relationModel == 'sale.order.line' &&
+        fieldName == 'product_id' &&
+        newValue != null) {
       final variants = await _fetchProductVariants(newValue);
       if (variants.length > 1) {
         final selectedVariantId = await _showVariantSelectionDialog(variants);
@@ -1229,10 +1273,12 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       final response = await widget.client.callKw({
         'model': widget.relationModel,
         'method': 'write',
-        'args': [[recordId], updateData],
+        'args': [
+          [recordId],
+          updateData
+        ],
         'kwargs': {},
       });
-
 
       if (response == true) {
         widget.onUpdate(relatedRecords);
@@ -1248,8 +1294,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
-
-  Future<List<Map<String, dynamic>>> _fetchProductVariants(int productId) async {
+  Future<List<Map<String, dynamic>>> _fetchProductVariants(
+      int productId) async {
     try {
       final variantsResponse = await widget.client.callKw({
         'model': 'product.product',
@@ -1277,7 +1323,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
-  Future<int?> _showVariantSelectionDialog(List<Map<String, dynamic>> variants) async {
+  Future<int?> _showVariantSelectionDialog(
+      List<Map<String, dynamic>> variants) async {
     int? selectedVariantId;
 
     await showDialog(
@@ -1332,20 +1379,21 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                 Text(
                   widget.name,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _showAddRecordDialog,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add'),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                if (!widget.readonly) // Add button only shown if not readonly
+                  ElevatedButton.icon(
+                    onPressed: _showAddRecordDialog,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add'),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -1362,19 +1410,20 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                 ),
               )
             else if (relatedRecords.isEmpty)
-                Center(
-                  child: Text(
-                    'No records found',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                )
-              else
-                _buildDataTable(context),
+              Center(
+                child: Text(
+                  'No records found',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              )
+            else
+              _buildDataTable(context),
           ],
         ),
       ),
     );
   }
+
   Widget _buildDataTable(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1383,7 +1432,6 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         List<Map<String, dynamic>> visibleFields = widget.relatedFields
             .where((field) => field['optional'] != 'hide')
             .toList();
-
 
         log("visibleFields   before: $visibleFields");
 
@@ -1417,13 +1465,13 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   label: Text(
                     'ID',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 ...visibleFields.map((field) {
                   final fieldDef = allFieldNames.firstWhere(
-                        (f) => f['name'] == field['name'],
+                    (f) => f['name'] == field['name'],
                     orElse: () => <String, String?>{
                       'name': field['name'] as String?,
                       'string': field['name'] as String?,
@@ -1434,18 +1482,19 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                     label: Text(
                       fieldDef['string'] ?? field['name'] ?? '',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   );
                 }),
-                const DataColumn(
-                  label: Text(
-                    'Actions',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                if (!widget.readonly)
+                  const DataColumn(
+                    label: Text(
+                      'Actions',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
               ],
               rows: relatedRecords.asMap().entries.map((entry) {
                 final recordIndex = entry.key;
@@ -1455,12 +1504,13 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                     DataCell(Text(record['id']?.toString() ?? '')),
                     ...visibleFields.map((field) {
                       // For sale.order.line, use product_id instead of product_template_id
-                      final fieldName = isSaleOrderLine && field['name'] == 'product_id'
-                          ? 'product_id'
-                          : field['name'];
+                      final fieldName =
+                          isSaleOrderLine && field['name'] == 'product_id'
+                              ? 'product_id'
+                              : field['name'];
                       final value = record[fieldName];
                       final fieldDef = allFieldNames.firstWhere(
-                            (f) => f['name'] == field['name'],
+                        (f) => f['name'] == field['name'],
                         orElse: () => <String, String?>{
                           'name': field['name'] as String?,
                           'type': field['type'] as String? ?? 'char',
@@ -1483,12 +1533,14 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.info_outline, color: Colors.orange[700], size: 16),
+                                    Icon(Icons.info_outline,
+                                        color: Colors.orange[700], size: 16),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         'No options available',
-                                        style: TextStyle(color: Colors.grey[700]),
+                                        style:
+                                            TextStyle(color: Colors.grey[700]),
                                       ),
                                     ),
                                   ],
@@ -1498,27 +1550,51 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                           }
 
                           return DataCell(
-                            Many2ManyFieldWidget(
-                              name: fieldDef['string'] ?? field['name'] ?? '',
-                              values: value is List<dynamic> ? value : [],
-                              options: options,
-                              onValuesChanged: (newValues) =>
-                                  _onMany2ManyValuesChanged(
-                                      field['name']!, recordIndex, newValues),
-                              viewType: 'tree',
-                            ),
+                            widget.readonly // Disable editing if readonly
+                                ? Text(
+                                    (value as List<dynamic>?)?.join(', ') ?? '',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  )
+                                : Many2ManyFieldWidget(
+                                    name: fieldDef['string'] ??
+                                        field['name'] ??
+                                        '',
+                                    values: value is List<dynamic> ? value : [],
+                                    options: options,
+                                    onValuesChanged: (newValues) =>
+                                        _onMany2ManyValuesChanged(
+                                            field['name']!,
+                                            recordIndex,
+                                            newValues),
+                                    viewType: 'tree',
+                                  ),
                           );
                         case 'many2one':
                           return DataCell(
-                            Many2OneFieldWidget(
-                              name: fieldDef['string'] ?? field['name'] ?? '',
-                              value: value,
-                              options: many2oneOptions[field['name']] ?? [],
-                              onValueChanged: (newValue) =>
-                                  _onMany2OneValueChanged(
-                                      field['name']!, recordIndex, newValue),
-                              viewType: 'tree',
-                            ),
+                            widget.readonly // Disable editing if readonly
+                                ? Text(
+                                    (many2oneOptions[field['name']] ?? [])
+                                            .firstWhere(
+                                          (opt) => opt['id'] == value,
+                                          orElse: () => {'name': 'Unknown'},
+                                        )['name'] ??
+                                        '',
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
+                                  )
+                                : Many2OneFieldWidget(
+                                    name: fieldDef['string'] ??
+                                        field['name'] ??
+                                        '',
+                                    value: value,
+                                    options:
+                                        many2oneOptions[field['name']] ?? [],
+                                    onValueChanged: (newValue) =>
+                                        _onMany2OneValueChanged(field['name']!,
+                                            recordIndex, newValue),
+                                    viewType: 'tree',
+                                  ),
                           );
                         default:
                           return DataCell(
@@ -1530,13 +1606,14 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                           );
                       }
                     }),
-                    DataCell(
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteRecord(recordIndex),
-                        tooltip: 'Delete Record',
+                    if (!widget.readonly)
+                      DataCell(
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteRecord(recordIndex),
+                          tooltip: 'Delete Record',
+                        ),
                       ),
-                    ),
                   ],
                 );
               }).toList(),
