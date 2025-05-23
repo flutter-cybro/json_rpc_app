@@ -846,49 +846,58 @@ class _FormViewState extends State<FormView>
       if (responseData.containsKey('body_fields')) {
         final List<dynamic> bodyFields =
             responseData['body_fields'] as List<dynamic>;
+        log("bodyfield - $bodyFields ");
         setState(() {
           bodyField = bodyFields.map((field) {
 
             final fieldMap = field as Map<String, dynamic>;
-            final fieldName =
-                fieldMap['main_field_name'] as String? ?? 'unknown_field';
-            final fieldType =
-                allPythonFields[fieldName]?['type'] as String? ?? 'char';
-            log("bodyfield - $fieldName , $fieldType");
 
-            final xmlAttributes =
-                fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
-            final pythonAttributes =
-                fieldMap['python_attributes'] as Map<String, dynamic>?;
-            final invisible = parseInvisibleValue(
-                xmlAttributes.containsKey('invisible')
-                    ? xmlAttributes['invisible']
-                    : (pythonAttributes != null &&
-                            pythonAttributes.containsKey('invisible')
-                        ? pythonAttributes['invisible']
-                        : null));
-
-            print(
-                "invisible  in body : ${fieldName}  ${xmlAttributes.containsKey('invisible') ? xmlAttributes['invisible'] : (pythonAttributes != null && pythonAttributes.containsKey('invisible') ? pythonAttributes['invisible'] : null)}  parsed invisible : ${invisible}");
-            final readonly = parseInvisibleValue(xmlAttributes['readonly'] ??
-                (pythonAttributes != null &&
-                        pythonAttributes.containsKey('readonly')
-                    ? pythonAttributes['readonly']
-                    : false));
-            final fieldString =
-                allPythonFields[fieldName]?['string'] as String? ?? fieldName;
-            final subFieldName = fieldMap['sub_field_name'] as String?;
-
-            return {
-              'main_field_name': fieldName,
-              'type': fieldType,
-              'invisible': invisible,
-              'string': fieldString,
-              'widget': xmlAttributes['widget'],
-              'readonly': readonly,
-              'sub_field_name': subFieldName,
-            };
-          }).toList();
+          //   if (fieldMap.containsKey('div_tag')) {}
+          //   else{}
+          //   final fieldName =
+          //       fieldMap['main_field_name'] as String? ?? 'unknown_field';
+          //   final fieldType =
+          //       allPythonFields[fieldName]?['type'] as String? ?? 'char';
+          //
+          //   final xmlAttributes =
+          //       fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
+          //   final pythonAttributes =
+          //       fieldMap['python_attributes'] as Map<String, dynamic>?;
+          //   final invisible = parseInvisibleValue(
+          //       xmlAttributes.containsKey('invisible')
+          //           ? xmlAttributes['invisible']
+          //           : (pythonAttributes != null &&
+          //                   pythonAttributes.containsKey('invisible')
+          //               ? pythonAttributes['invisible']
+          //               : null));
+          //
+          //   print(
+          //       "invisible  in body : ${fieldName}  ${xmlAttributes.containsKey('invisible') ? xmlAttributes['invisible'] : (pythonAttributes != null && pythonAttributes.containsKey('invisible') ? pythonAttributes['invisible'] : null)}  parsed invisible : ${invisible}");
+          //   final readonly = parseInvisibleValue(xmlAttributes['readonly'] ??
+          //       (pythonAttributes != null &&
+          //               pythonAttributes.containsKey('readonly')
+          //           ? pythonAttributes['readonly']
+          //           : false));
+          //   final fieldString =
+          //       allPythonFields[fieldName]?['string'] as String? ?? fieldName;
+          //   final subFieldName = fieldMap['sub_field_name'] as String?;
+          //
+          //   return {
+          //     'main_field_name': fieldName,
+          //     'type': fieldType,
+          //     'invisible': invisible,
+          //     'string': fieldString,
+          //     'widget': xmlAttributes['widget'],
+          //     'readonly': readonly,
+          //     'sub_field_name': subFieldName,
+          //   };
+          // }).toList();
+            if (fieldMap.containsKey('div_tag')) {
+              return _parseDivField(fieldMap);
+            } else {
+              return _parseRegularField(fieldMap);
+            }
+          }).where((field) => field != null).cast<Map<String, dynamic>>().toList();
         });
       }
 
@@ -1255,6 +1264,76 @@ class _FormViewState extends State<FormView>
           log("Parsed footerButtons: $footerButtons");
         });
       }
+    }
+  }
+
+
+  Map<String, dynamic>? _parseDivField(Map<String, dynamic> fieldMap) {
+    try {
+      final divTag = fieldMap['div_tag'] as String?;
+      final divAttributes = fieldMap['div_attributes'] as Map<String, dynamic>? ?? {};
+      final fields = fieldMap['fields'] as List<dynamic>? ?? [];
+      final children = fieldMap['children'] as List<dynamic>? ?? [];
+
+      final parsedFields = fields.map((field) {
+        final subFieldMap = field as Map<String, dynamic>;
+        return _parseRegularField(subFieldMap);
+      }).where((field) => field != null).toList();
+
+      final parsedChildren = children.map((child) {
+        final childMap = child as Map<String, dynamic>;
+        return _parseDivField(childMap);
+      }).where((child) => child != null).toList();
+
+      return {
+        'type': 'div',
+        'div_tag': divTag,
+        'div_attributes': divAttributes,
+        'fields': parsedFields,
+        'children': parsedChildren,
+        'invisible': parseInvisibleValue(divAttributes['invisible']),
+      };
+    } catch (e) {
+      print('Error parsing div field: $e');
+      return null;
+    }
+  }
+
+  Map<String, dynamic>? _parseRegularField(Map<String, dynamic> fieldMap) {
+    try {
+      final fieldName = fieldMap['main_field_name'] as String? ?? 'unknown_field';
+      if (fieldName == 'unknown_field') return null;
+
+      final fieldType = allPythonFields[fieldName]?['type'] as String? ?? 'char';
+      final xmlAttributes = fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
+      final pythonAttributes = fieldMap['python_attributes'] as Map<String, dynamic>? ?? {};
+
+      final invisible = parseInvisibleValue(
+          xmlAttributes.containsKey('invisible')
+              ? xmlAttributes['invisible']
+              : pythonAttributes['invisible']);
+
+      if (invisible) return null;
+
+      final readonly = parseInvisibleValue(
+          xmlAttributes['readonly'] ?? pythonAttributes['readonly'] ?? false);
+      final fieldString = allPythonFields[fieldName]?['string'] as String? ?? fieldName;
+      final subFieldName = fieldMap['sub_field_name'] as String?;
+
+      return {
+        'main_field_name': fieldName,
+        'type': fieldType,
+        'invisible': invisible,
+        'string': fieldString,
+        'widget': xmlAttributes['widget'],
+        'readonly': readonly,
+        'sub_field_name': subFieldName,
+        'xml_attributes': xmlAttributes,
+        'python_attributes': pythonAttributes,
+      };
+    } catch (e) {
+      print('Error parsing regular field: $e');
+      return null;
     }
   }
 
@@ -2036,21 +2115,25 @@ class _FormViewState extends State<FormView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...bodyField.where((field) {
+                if (field == null) return false;
                 final invisible = field['invisible'];
-                return invisible != true &&
-                    invisible != 'True' &&
-                    invisible != 1;
-              }).map((field) => _buildFieldWidget(field['main_field_name'],
-                  fieldData: field)),
+                return invisible != true && invisible != 'True' && invisible != 1;
+              }).map((field) {
+                final fieldName = field?['main_field_name'];
+                if (fieldName == null) return SizedBox.shrink();
+                return _buildFieldWidget(fieldName, fieldData: field);
+              }).where((widget) => widget != SizedBox.shrink()),
               if (bodyField.isEmpty)
                 ...wizardData.where((field) {
+                  if (field == null) return false;
                   log("field  : $field");
                   final invisible = field['invisible'];
-                  return invisible != true &&
-                      invisible != 'True' &&
-                      invisible != 1;
-                }).map((field) =>
-                    _buildFieldWidget(field['name'], fieldData: field)),
+                  return invisible != true && invisible != 'True' && invisible != 1;
+                }).map((field) {
+                  final fieldName = field?['name'];
+                  if (fieldName == null) return SizedBox.shrink();
+                  return _buildFieldWidget(fieldName, fieldData: field);
+                }).where((widget) => widget != SizedBox.shrink()),
             ],
           ),
         ),
@@ -2108,6 +2191,9 @@ class _FormViewState extends State<FormView>
 
   Widget _buildFieldWidget(String fieldName,
       {Map<String, dynamic>? fieldData}) {
+    final isReadonly = fieldData?['readonly'] ??
+        allPythonFields[fieldName]?['readonly'] ??
+        false;
     final relational_field = fieldData?['name'];
     final label = fieldData?['string'] ??
         allPythonFields[fieldName]?['string'] ??
@@ -2224,9 +2310,6 @@ class _FormViewState extends State<FormView>
       }
 
       if (widgetType == 'image' && type == 'binary') {
-        final isReadonly = fieldData?['readonly'] ??
-            allPythonFields[fieldName]?['readonly'] ??
-            false;
         return ImageFieldWidget(
           name: label,
           value: value?.toString() ?? '',
@@ -2440,6 +2523,7 @@ class _FormViewState extends State<FormView>
           ),
         );
       case 'selection':
+        print("second selection field");
         final selectionOptions = allPythonFields[fieldName]?['selection'] ?? [];
         final readonlyValue = fieldData?['readonly'] ??
             allPythonFields[fieldName]?['readonly'] ??
@@ -2505,26 +2589,7 @@ class _FormViewState extends State<FormView>
             onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
           ),
         );
-      case 'selection':
-        final selectionOptions = allPythonFields[fieldName]?['selection'] ?? [];
-        final readonlyValue = fieldData?['readonly'] ??
-            allPythonFields[fieldName]?['readonly'] ??
-            false;
-        final isReadonly = readonlyValue is bool
-            ? readonlyValue
-            : readonlyValue.toString().toLowerCase() == 'true';
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: SelectionFieldWidget(
-            name: label,
-            value: value as String?,
-            options: selectionOptions,
-            onChanged: isReadonly
-                ? null
-                : (newValue) => _updateFieldValue(fieldName, newValue),
-            readonly: isReadonly,
-          ),
-        );
+
       case 'date':
         print("fieldname : $fieldName");
         return Padding(
@@ -2826,7 +2891,7 @@ class _FormViewState extends State<FormView>
           child: CharFieldWidget(
             name: label,
             value: value?.toString() != 'false' ? value.toString() : '',
-            onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
+            onChanged: isReadonly ? null : (newValue) => _updateFieldValue(fieldName, newValue),
           ),
         );
       case 'many2one':
