@@ -1037,63 +1037,14 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
-  // Future<void> _deleteRecord(int recordIndex) async {
-  //   final record = relatedRecords[recordIndex];
-  //   final recordId = record['id'];
-  //
-  //   setState(() {
-  //     relatedRecords.removeAt(recordIndex);
-  //     many2manyOptions.remove(recordId); // Clean up options
-  //   });
-  //
-  //   if (widget.mainRecordId == 0) {
-  //
-  //     try {
-  //       final localRecords = await isarService.getRecordsByTempId(widget.tempRecordId!);
-  //       final toDelete = localRecords.firstWhere(
-  //             (r) => jsonDecode(r.data)['id'] == recordId || jsonDecode(r.data) == record,
-  //         orElse: () => throw Exception('Record not found in Isar'),
-  //       );
-  //       await isarService.deleteRecord(toDelete.id);
-  //     } catch (e) {
-  //       setState(() {
-  //         errorMessage = 'Failed to delete local record: $e';
-  //         relatedRecords.insert(recordIndex, record);
-  //         if (recordId != null) many2manyOptions[recordId] = [];
-  //
-  //       });
-  //     }
-  //   } else if (recordId != null) {
-  //     // Delete from Odoo
-  //     try {
-  //       final deleteResponse = await widget.client.callKw({
-  //         'model': widget.relationModel,
-  //         'method': 'unlink',
-  //         'args': [[recordId]],
-  //         'kwargs': {},
-  //       });
-  //
-  //       if (deleteResponse != true) {
-  //         throw Exception("Failed to delete record: $deleteResponse");
-  //       }
-  //     } catch (e) {
-  //       setState(() {
-  //         errorMessage = 'Failed to delete record: $e';
-  //         relatedRecords.insert(recordIndex, record);
-  //         many2manyOptions[recordId] = []; // Restore if needed
-  //       });
-  //     }
-  //   }
-  //
-  //   widget.onUpdate(relatedRecords);
-  // }
+
   Future<void> _deleteRecord(int recordIndex) async {
     final record = relatedRecords[recordIndex];
     final recordId = record['id'];
 
     setState(() {
       relatedRecords.removeAt(recordIndex);
-      many2manyOptions.remove(recordId); // Clean up options
+      many2manyOptions.remove(recordId);
     });
 
     if (widget.mainRecordId == 0) {
@@ -1115,7 +1066,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         });
       }
     } else if (recordId != null) {
-      // Delete from Odoo
+
       try {
         final deleteResponse = await widget.client.callKw({
           'model': widget.relationModel,
@@ -1131,7 +1082,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
         }
       } catch (e) {
         String errorMsg = 'Failed to delete record: $e';
-        // Check if the error is an OdooException and extract the arguments
+
         if (e.toString().contains('OdooException')) {
           final match =
               RegExp(r'arguments: \[([^\]]+)\]').firstMatch(e.toString());
@@ -1139,7 +1090,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
             errorMsg = match.group(1)!;
           }
         }
-        // Show error message in a popup dialog
+
         showDialog(
           context: context,
           builder: (context) => AlertDialog(

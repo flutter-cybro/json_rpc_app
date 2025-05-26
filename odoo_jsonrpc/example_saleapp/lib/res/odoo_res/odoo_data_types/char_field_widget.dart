@@ -1,62 +1,16 @@
-//
-// import 'package:flutter/material.dart';
-//
-// class CharFieldWidget extends StatelessWidget {
-//   final String name;
-//   final String value;
-//   final Function(String)? onChanged;
-//
-//   const CharFieldWidget({
-//     required this.name,
-//     required this.value,
-//     this.onChanged,
-//     Key? key,
-//   }) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 8.0),
-//       child: Row(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           SizedBox(
-//             width: 150,
-//             child: Text(
-//               '$name:',
-//               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
-//             ),
-//           ),
-//           Expanded(
-//             child: TextField(
-//               controller: TextEditingController(text: value),
-//               decoration: InputDecoration(
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(8.0),
-//                 ),
-//                 contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-//               ),
-//               onChanged: onChanged,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 
 class CharFieldWidget extends StatefulWidget {
   final String name;
   final String value;
   final Function(String)? onChanged;
-  final bool readonly; // Add readonly parameter
+  final bool readonly;
 
   const CharFieldWidget({
     required this.name,
     required this.value,
     this.onChanged,
-    this.readonly = false, // Default to false
+    this.readonly = false,
     Key? key,
   }) : super(key: key);
 
@@ -66,11 +20,21 @@ class CharFieldWidget extends StatefulWidget {
 
 class _CharFieldWidgetState extends State<CharFieldWidget> {
   late TextEditingController _controller;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange); // Add listener for focus changes
+  }
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus && !widget.readonly) {
+      // Only trigger onChanged when focus is lost and not readonly
+      widget.onChanged?.call(_controller.text);
+    }
   }
 
   @override
@@ -83,6 +47,8 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange); // Clean up listener
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -104,6 +70,7 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
           Expanded(
             child: TextField(
               controller: _controller,
+              focusNode: _focusNode, // Assign FocusNode
               enabled: !widget.readonly, // Disable input if readonly
               decoration: InputDecoration(
                 border: OutlineInputBorder(
@@ -120,7 +87,7 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
                   borderSide: BorderSide(color: Colors.grey, width: 1),
                 ),
               ),
-              onChanged: widget.onChanged,
+              // Remove onChanged to avoid immediate updates
             ),
           ),
         ],

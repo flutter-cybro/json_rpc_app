@@ -141,7 +141,7 @@ class _FormViewState extends State<FormView>
       },
     });
 
-    log("fieldsResponse : $fieldsResponse");
+    // log("fieldsResponse : $fieldsResponse");
   }
 
   Future<void> _initializeFormData() async {
@@ -159,7 +159,7 @@ class _FormViewState extends State<FormView>
             ...widget.defaultValues,
           };
         });
-        log("_recordState  :  $_recordState");
+        // log("_recordState  :  $_recordState");
       } else if (widget.recordId != 0) {
         await _loadRecordState();
       }
@@ -290,7 +290,7 @@ class _FormViewState extends State<FormView>
     }
 
     valuesToSave['company_id'] = _companyId ?? 1;
-    log('valuesToSave : $valuesToSave');
+    // log('valuesToSave : $valuesToSave');
     final saveResult = await _odooClientController.client.callKw({
       'model': 'res.config.settings',
       'method': 'set_values',
@@ -300,7 +300,7 @@ class _FormViewState extends State<FormView>
         'values': valuesToSave,
       },
     });
-    log('saveResult : $saveResult');
+    // log('saveResult : $saveResult');
 
     if (saveResult == null || saveResult == true) {
       if (moduleToInstall != null) {
@@ -360,7 +360,7 @@ class _FormViewState extends State<FormView>
       _isLoading = true;
     });
     try {
-      log('Calling install_uninstall_apps_settings with fieldName: $fieldName, fieldValue: $fieldValue');
+      // log('Calling install_uninstall_apps_settings with fieldName: $fieldName, fieldValue: $fieldValue');
 
       final result = await _odooClientController.client.callKw({
         'model': 'ir.actions.act_window',
@@ -439,7 +439,7 @@ class _FormViewState extends State<FormView>
     final hasRecordId = widget.recordId != 0;
 
     if (!hasRecordId && (widget.wizard ?? false)) {
-      log("Processing wizard field update for ${widget.parentId}");
+      // log("Processing wizard field update for ${widget.parentId}");
       try {
         final response = await _odooClientController.client.callKw({
           'model': 'ir.actions.act_window',
@@ -453,9 +453,9 @@ class _FormViewState extends State<FormView>
           },
         });
 
-        log("Wizard response: $response");
+        // log("Wizard response: $response");
         setState(() => _recordState[fieldName] = value);
-        log("Wizard after response: $_recordState");
+        // log("Wizard after response: $_recordState");
         await _fetchFormFields();
         _showSuccessSnackBar('$fieldName processed in wizard');
         return; // Exit after processing wizard action
@@ -467,7 +467,7 @@ class _FormViewState extends State<FormView>
     }
 
     if (!hasRecordId || isOne2Many) {
-      log("sadiq is here");
+      // log("sadiq is here");
       _showSuccessSnackBar('$fieldName updated successfully');
       return;
     }
@@ -575,6 +575,8 @@ class _FormViewState extends State<FormView>
         return;
       }
 
+      log("_fieldData  :  $response");
+
       setState(() {
         _fieldData = response;
         _parseResponseData();
@@ -615,7 +617,7 @@ class _FormViewState extends State<FormView>
           setState(() {
             configSettingsValues = valuesResponse;
           });
-          log('=== res.config.settings Parameters ===');
+          // log('=== res.config.settings Parameters ===');
           valuesResponse.forEach((key, value) {});
           log('==============res.config.settings Parameters==============');
         } else {
@@ -644,12 +646,12 @@ class _FormViewState extends State<FormView>
 
     final Map<String, dynamic> responseData =
         _fieldData as Map<String, dynamic>;
-    log('\n\n **********  $_recordState \n\n');
-    print(responseData.containsKey('apps_data'));
-    print('********** ');
+    // log('\n\n **********  $_recordState \n\n');
+    // print(responseData.containsKey('apps_data'));
+    // print('********** ');
 
     if (_isSettingsForm() && responseData.containsKey('apps_data')) {
-      log("jimster : ${responseData['apps_data']}");
+      // log("jimster : ${responseData['apps_data']}");
       final appsRaw = responseData['apps_data'] as Map<String, dynamic>;
       print(
           'Unexpected type for apps_data: ${responseData['apps_data'].runtimeType}');
@@ -660,8 +662,8 @@ class _FormViewState extends State<FormView>
               if (widget.moduleName != null && widget.moduleName!.isNotEmpty) {
                 final appData = entry.value as Map<String, dynamic>;
                 final appModule = appData['app_name'] as String?;
-                log("appModule  : $appModule");
-                log("moduleName  : ${widget.moduleName}");
+                // log("appModule  : $appModule");
+                // log("moduleName  : ${widget.moduleName}");
                 if (widget.moduleName == "Settings" &&
                     appModule == "General Settings") {
                   return true;
@@ -671,7 +673,7 @@ class _FormViewState extends State<FormView>
               return true;
             })
             .map((entry) {
-              log("entry of the appdata  : $entry");
+              // log("entry of the appdata  : $entry");
               final appKey = entry.key;
               final appData = entry.value as Map<String, dynamic>;
 
@@ -679,7 +681,7 @@ class _FormViewState extends State<FormView>
                   (appData['attributes']?['data-string'] as String?)?.trim() ??
                   appKey;
 
-              log("appName  : $appName");
+              // log("appName  : $appName");
 
               final logo = appData['attributes']?['logo'] as String?;
 
@@ -846,12 +848,12 @@ class _FormViewState extends State<FormView>
       if (responseData.containsKey('body_fields')) {
         final List<dynamic> bodyFields =
             responseData['body_fields'] as List<dynamic>;
-        log("bodyfield - $bodyFields ");
+
         setState(() {
           bodyField = bodyFields.map((field) {
-
             final fieldMap = field as Map<String, dynamic>;
 
+            log("bodyfield - $bodyFields ");
           //   if (fieldMap.containsKey('div_tag')) {}
           //   else{}
           //   final fieldName =
@@ -893,6 +895,7 @@ class _FormViewState extends State<FormView>
           //   };
           // }).toList();
             if (fieldMap.containsKey('div_tag')) {
+              log("entered into _parseDivField");
               return _parseDivField(fieldMap);
             } else {
               return _parseRegularField(fieldMap);
@@ -955,6 +958,8 @@ class _FormViewState extends State<FormView>
       if (responseData.containsKey('notebook_fields')) {
         final notebookSections =
             responseData['notebook_fields'] as List<dynamic>;
+
+        log("notebookSections  :  $notebookSections");
         setState(() {
           notebookPages = notebookSections
               .map((page) {
@@ -972,6 +977,7 @@ class _FormViewState extends State<FormView>
 
                 final fields = (pageMap['fields'] as List<dynamic>)
                     .map((field) {
+                      log("map((field) : $field");
                       final fieldMap = field as Map<String, dynamic>;
                       final fieldName =
                           fieldMap['main_field_name'] as String? ??
@@ -1270,6 +1276,8 @@ class _FormViewState extends State<FormView>
 
   Map<String, dynamic>? _parseDivField(Map<String, dynamic> fieldMap) {
     try {
+
+      log("_parseDivField  :  $fieldMap");
       final divTag = fieldMap['div_tag'] as String?;
       final divAttributes = fieldMap['div_attributes'] as Map<String, dynamic>? ?? {};
       final fields = fieldMap['fields'] as List<dynamic>? ?? [];
@@ -1448,6 +1456,7 @@ class _FormViewState extends State<FormView>
   void _showHeaderButtonsMenu() {
     final visibleButtons = headerButtons.where((button) {
       final invisible = button['invisible'];
+      log("_showHeaderButtonsMenu invisible : $invisible");
       return invisible != true && invisible != 'True' && invisible != 1;
     }).toList();
 
@@ -2464,6 +2473,7 @@ class _FormViewState extends State<FormView>
             onChanged: isReadonly
                 ? null
                 : (newValue) => _updateFieldValue(fieldName, newValue),
+            readonly: isReadonly,
           ),
         );
       case 'many2one':
@@ -2845,6 +2855,8 @@ class _FormViewState extends State<FormView>
           );
         }
 
+
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: BooleanFieldWidget(
@@ -2852,6 +2864,7 @@ class _FormViewState extends State<FormView>
             label: label,
             viewType: 'form',
             onChanged: isReadonly ? null : handleBooleanChange,
+            readOnly: isReadonly,
           ),
         );
 
@@ -2892,6 +2905,7 @@ class _FormViewState extends State<FormView>
             name: label,
             value: value?.toString() != 'false' ? value.toString() : '',
             onChanged: isReadonly ? null : (newValue) => _updateFieldValue(fieldName, newValue),
+            readonly: isReadonly,
           ),
         );
       case 'many2one':

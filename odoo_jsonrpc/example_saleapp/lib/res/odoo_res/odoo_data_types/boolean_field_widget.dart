@@ -5,6 +5,7 @@ class BooleanFieldWidget extends StatefulWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
   final String viewType;
+  final bool readOnly;
 
   const BooleanFieldWidget({
     super.key,
@@ -12,6 +13,7 @@ class BooleanFieldWidget extends StatefulWidget {
     required this.value,
     this.onChanged,
     required this.viewType,
+    this.readOnly = false,
   });
 
   @override
@@ -28,7 +30,7 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
   }
 
   void _onChanged(bool? newValue) {
-    if (newValue != null) {
+    if (newValue != null && !widget.readOnly) { // Check readOnly before updating
       setState(() {
         _currentValue = newValue;
       });
@@ -56,12 +58,18 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
   Widget _buildTreeView() {
     return Checkbox(
       value: _currentValue,
-      onChanged: _onChanged,
+      onChanged: widget.readOnly ? null : _onChanged, // Disable if readOnly
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       activeColor: Theme.of(context).primaryColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4.0),
       ),
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (widget.readOnly && states.contains(WidgetState.disabled)) {
+          return Theme.of(context).disabledColor.withOpacity(0.5); // Gray out when disabled
+        }
+        return null; // Use default colors otherwise
+      }),
     );
   }
 
@@ -92,7 +100,9 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
                     widget.label!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.9),
+                      color: widget.readOnly
+                          ? Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6)
+                          : Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.9),
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
@@ -102,13 +112,18 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
               ],
               Checkbox(
                 value: _currentValue,
-                onChanged: widget.onChanged != null ? _onChanged : null,
-                // onChanged: _onChanged,
+                onChanged: widget.readOnly ? null : _onChanged, // Disable if readOnly
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 activeColor: Theme.of(context).primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4.0),
                 ),
+                fillColor: WidgetStateProperty.resolveWith((states) {
+                  if (widget.readOnly && states.contains(WidgetState.disabled)) {
+                    return Theme.of(context).disabledColor.withOpacity(0.5); // Gray out when disabled
+                  }
+                  return null; // Use default colors otherwise
+                }),
               ),
             ],
           ),
