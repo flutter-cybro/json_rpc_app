@@ -167,7 +167,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         }
       }
 
-      // Handle priority widget for selection fields
+
       if (widgetType == 'priority') {
         return PriorityWidget(
           value: displayValue,

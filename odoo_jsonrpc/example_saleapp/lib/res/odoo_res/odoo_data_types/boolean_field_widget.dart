@@ -30,7 +30,7 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
   }
 
   void _onChanged(bool? newValue) {
-    if (newValue != null && !widget.readOnly) { // Check readOnly before updating
+    if (newValue != null && !widget.readOnly) {
       setState(() {
         _currentValue = newValue;
       });
