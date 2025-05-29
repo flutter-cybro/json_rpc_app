@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class Many2ManyFieldWidget extends StatefulWidget {
@@ -26,6 +28,7 @@ class _Many2ManyFieldWidgetState extends State<Many2ManyFieldWidget> {
   @override
   void initState() {
     super.initState();
+    log("widget.values  : ${widget.values}");
     selectedValues = List.from(widget.values);
   }
 

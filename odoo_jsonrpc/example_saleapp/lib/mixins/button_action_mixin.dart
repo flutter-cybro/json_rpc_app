@@ -13,7 +13,8 @@ import '../pages/tree_view.dart';
 import 'action_mixier.dart';
 
 /// Abstract mixin to handle Odoo button actions (e.g., object, action, act_window).
-mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMixin<T> {
+mixin ButtonActionMixin<T extends StatefulWidget>
+    on State<T>, ActWindowActionMixin<T> {
   // Abstract getter for OdooClientController (must be implemented by the widget)
   OdooClientController get odooClient;
 
@@ -41,18 +42,21 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
 
       // Merge button context with default values
       final actionContext = <String, dynamic>{
-        if (buttonData['context'] is Map) ...Map<String, dynamic>.from(buttonData['context'] as Map),
+        if (buttonData['context'] is Map)
+          ...Map<String, dynamic>.from(buttonData['context'] as Map),
         if (recordId != null) 'active_id': recordId,
         if (recordId != null) 'active_ids': [recordId],
       };
 
       switch (actionType) {
         case 'object':
-          return await _handleObjectAction(actionName, actionContext, buildContext);
+          return await _handleObjectAction(
+              actionName, actionContext, buildContext);
         case 'action':
           return await _handleAction(actionName, actionContext, buildContext);
         case 'act_window':
-          return await _handleWindowAction(buttonData, actionContext, buildContext);
+          return await _handleWindowAction(
+              buttonData, actionContext, buildContext);
         default:
           throw Exception('Unsupported action type: $actionType');
       }
@@ -66,10 +70,10 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
 
   /// Handles 'object' type actions (calls a method on the model).
   Future<bool> _handleObjectAction(
-      String methodName,
-      Map<String, dynamic> context,
-      BuildContext buildContext,
-      ) async {
+    String methodName,
+    Map<String, dynamic> context,
+    BuildContext buildContext,
+  ) async {
     if (modelName.isEmpty) {
       throw Exception('Model name is required for object actions');
     }
@@ -79,7 +83,9 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
     final response = await odooClient.client.callKw({
       'model': modelName,
       'method': methodName,
-      'args': [if (recordId != null) [recordId] else []],
+      'args': [
+        if (recordId != null) [recordId] else []
+      ],
       'kwargs': {'context': context},
     });
 
@@ -101,9 +107,9 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
 
   /// Handles 'ir.actions.act_url' type actions (launches URL or downloads file).
   Future<bool> _handleUrlAction(
-      Map<String, dynamic> action,
-      BuildContext buildContext,
-      ) async {
+    Map<String, dynamic> action,
+    BuildContext buildContext,
+  ) async {
     try {
       // Retrieve server address from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
@@ -118,14 +124,16 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
       }
 
       // Ensure serverUrl ends with a slash and remove trailing slash from url
-      final normalizedServerUrl = serverUrl.endsWith('/') ? serverUrl : '$serverUrl/';
+      final normalizedServerUrl =
+          serverUrl.endsWith('/') ? serverUrl : '$serverUrl/';
       // Extract URL and target from the action
       final String? relativeUrl = action['url']?.toString();
       final String? target = action['target']?.toString();
 
       if (relativeUrl == null || relativeUrl.isEmpty) {
         if (mounted) {
-          _showActionResult(buildContext, 'Error: No URL provided in act_url action.');
+          _showActionResult(
+              buildContext, 'Error: No URL provided in act_url action.');
         }
         return false;
       }
@@ -142,12 +150,14 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
         if (await canLaunchUrl(uri)) {
           await launchUrl(
             uri,
-            mode: LaunchMode.externalApplication, // Opens in Chrome/default browser
+            mode: LaunchMode
+                .externalApplication, // Opens in Chrome/default browser
           );
           return true;
         } else {
           if (mounted) {
-            _showActionResult(buildContext, 'Error: Could not launch URL: $fullUrl');
+            _showActionResult(
+                buildContext, 'Error: Could not launch URL: $fullUrl');
           }
           return false;
         }
@@ -179,7 +189,8 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
         var status = await Permission.storage.request();
         if (!status.isGranted) {
           if (mounted) {
-            _showActionResult(buildContext, 'Error: Storage permission denied.');
+            _showActionResult(
+                buildContext, 'Error: Storage permission denied.');
           }
           return false;
         }
@@ -189,7 +200,8 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
       final directory = await getDownloadsDirectory();
       if (directory == null) {
         if (mounted) {
-          _showActionResult(buildContext, 'Error: Could not access downloads directory.');
+          _showActionResult(
+              buildContext, 'Error: Could not access downloads directory.');
         }
         return false;
       }
@@ -210,7 +222,8 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
       });
 
       if (mounted) {
-        _showActionResult(buildContext, 'File downloaded successfully to: $filePath');
+        _showActionResult(
+            buildContext, 'File downloaded successfully to: $filePath');
       }
       return true;
     } catch (e) {
@@ -223,10 +236,10 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
 
   /// Handles 'action' type actions (loads action via /web/action/load).
   Future<bool> _handleAction(
-      String actionId,
-      Map<String, dynamic> context,
-      BuildContext buildContext,
-      ) async {
+    String actionId,
+    Map<String, dynamic> context,
+    BuildContext buildContext,
+  ) async {
     final action = await odooClient.client.callRPC(
       '/web/action/load',
       'call',
@@ -243,7 +256,8 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
     } else if (action['type'] == 'ir.actions.client') {
       // Handle client action (e.g., reload view or custom JS action)
       if (mounted) {
-        _showActionResult(buildContext, 'Client action executed: ${action['tag']}');
+        _showActionResult(
+            buildContext, 'Client action executed: ${action['tag']}');
       }
       return true;
     } else {
@@ -253,10 +267,10 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
 
   /// Handles 'act_window' type actions (navigates to a view or shows a dialog).
   Future<bool> _handleWindowAction(
-      Map<String, dynamic> action,
-      Map<String, dynamic> context,
-      BuildContext buildContext,
-      ) async {
+    Map<String, dynamic> action,
+    Map<String, dynamic> context,
+    BuildContext buildContext,
+  ) async {
     log("Entered _handleWindowAction $action");
 
     try {
@@ -285,7 +299,8 @@ mixin ButtonActionMixin<T extends StatefulWidget> on State<T>, ActWindowActionMi
   }
 
   /// Fetches field metadata for a model and view type.
-  Future<List<Map<String, dynamic>>> _getFieldMetadata(String model, String viewType) async {
+  Future<List<Map<String, dynamic>>> _getFieldMetadata(
+      String model, String viewType) async {
     try {
       final response = await odooClient.client.callKw({
         'model': model,

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:developer';
+
+import 'package:flutter/material.dart';
 
 class Many2OneFieldWidget extends StatefulWidget {
   final String name;
@@ -8,6 +9,7 @@ class Many2OneFieldWidget extends StatefulWidget {
   final Function(dynamic) onValueChanged;
   final String viewType;
   final bool readonly;
+  final String? hintText;
 
   const Many2OneFieldWidget({
     required this.name,
@@ -17,6 +19,7 @@ class Many2OneFieldWidget extends StatefulWidget {
     super.key,
     this.viewType = 'form',
     this.readonly = false,
+    this.hintText,
   });
 
   @override
@@ -29,7 +32,7 @@ class _Many2OneFieldWidgetState extends State<Many2OneFieldWidget> {
   @override
   void initState() {
     super.initState();
-    print("Many2OneFieldWidget  : ${widget.readonly}  ${widget.name}");
+    log("widget : ${widget.readonly}");
     _updateSelectedValue(widget.value);
   }
 
@@ -49,10 +52,9 @@ class _Many2OneFieldWidgetState extends State<Many2OneFieldWidget> {
     });
   }
 
-  // Helper method to get the display name for the selected value
   String _getDisplayName(dynamic valueId) {
     if (valueId == null || widget.options.isEmpty) {
-      return 'N/A';
+      return widget.hintText ?? 'Select an option';
     }
 
     for (var option in widget.options) {
@@ -61,174 +63,188 @@ class _Many2OneFieldWidgetState extends State<Many2OneFieldWidget> {
       }
     }
 
-    return 'N/A'; // Fallback if no matching option is found
+    return widget.hintText ?? 'Select an option';
   }
 
   @override
   Widget build(BuildContext context) {
     final uniqueOptions = _removeDuplicateOptions(widget.options);
-
-    // Define common styling for readonly and editable fields
-    final borderRadius = BorderRadius.circular(8.0);
-    const contentPadding =
-        EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0);
+    final theme = Theme.of(context);
 
     if (widget.viewType == 'tree') {
-      return widget.readonly
-          ? Container(
-              padding: contentPadding,
-              decoration: BoxDecoration(
-                color: Colors.grey[100], // Muted background for readonly
-                border: Border.all(color: Colors.grey[400]!, width: 1.0),
-                borderRadius: borderRadius,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                _getDisplayName(selectedValue),
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey[600], // Grey text for readonly
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            )
-          : DropdownButtonFormField<dynamic>(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                    value: selectedValue,
-                    items: uniqueOptions
-                        .map((option) => DropdownMenuItem<dynamic>(
-                      value: option['id'],
-                      child: Text(option['name']?.toString() ?? 'Unnamed'),
-                    ))
-                        .toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedValue = newValue;
-                      });
-                      widget.onValueChanged(newValue);
-                    },
-                    isExpanded: true,
-                    hint: const Text('Select an option'),
-                  );
+      return _buildCompactView(theme, uniqueOptions);
     } else {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 150,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0, right: 8.0),
-                child: Text(
-                  '${widget.name}:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.0,
-                    color: widget.readonly ? Colors.grey : Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: widget.readonly
-                  ? Container(
-                      padding: contentPadding,
-                      decoration: BoxDecoration(
-                        color:
-                            Colors.grey[100], // Muted background for readonly
-                        border:
-                            Border.all(color: Colors.grey[400]!, width: 1.0),
-                        borderRadius: borderRadius,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        _getDisplayName(selectedValue),
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.grey[600], // Grey text for readonly
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    )
-                  : DropdownButtonFormField<dynamic>(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: borderRadius,
-                          borderSide: BorderSide(color: Colors.grey[400]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: borderRadius,
-                          borderSide: BorderSide(color: Colors.grey[400]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: borderRadius,
-                          borderSide:
-                              BorderSide(color: Theme.of(context).primaryColor),
-                        ),
-                        contentPadding: contentPadding,
-                        filled: true,
-                        fillColor: Colors.white,
-                      ),
-                      value: selectedValue,
-                      items: uniqueOptions
-                          .map((option) => DropdownMenuItem<dynamic>(
-                                value: option['id'],
-                                child: Text(
-                                  option['name']?.toString() ?? 'Unnamed',
-                                  style: const TextStyle(fontSize: 14.0),
-                                ),
-                              ))
-                          .toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedValue = newValue;
-                        });
-                        widget.onValueChanged(newValue);
-                      },
-                      isExpanded: true,
-                      hint: const Text(
-                        'Select an option',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      );
+      return _buildFormView(theme, uniqueOptions);
     }
+  }
+
+  Widget _buildFormView(ThemeData theme, List<Map<String, dynamic>> options) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Text(
+            widget.name,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: widget.readonly ? theme.disabledColor : theme.textTheme.bodyMedium?.color,
+            ),
+          ),
+        ),
+        widget.readonly
+            ? Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.dividerColor.withOpacity(0.5),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            _getDisplayName(selectedValue),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: widget.readonly ? theme.disabledColor : theme.textTheme.bodyLarge?.color,
+            ),
+          ),
+        )
+            : DropdownButtonFormField<dynamic>(
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.dividerColor),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.dividerColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+            ),
+            filled: true,
+            fillColor: theme.colorScheme.surface,
+          ),
+          value: selectedValue,
+          items: options
+              .map((option) => DropdownMenuItem<dynamic>(
+            value: option['id'],
+            child: Text(
+              option['name']?.toString() ?? 'Unnamed',
+              style: theme.textTheme.bodyLarge,
+            ),
+          ))
+              .toList(),
+          onChanged: (newValue) {
+            setState(() {
+              selectedValue = newValue;
+            });
+            widget.onValueChanged(newValue);
+          },
+          isExpanded: true,
+          hint: Text(
+            widget.hintText ?? 'Select an option',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.hintColor,
+            ),
+          ),
+          style: theme.textTheme.bodyLarge,
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
+          ),
+          dropdownColor: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactView(ThemeData theme, List<Map<String, dynamic>> options) {
+    return widget.readonly
+        ? Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: theme.dividerColor.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        _getDisplayName(selectedValue),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: widget.readonly ? theme.disabledColor : theme.textTheme.bodyMedium?.color,
+        ),
+      ),
+    )
+        : DropdownButtonFormField<dynamic>(
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: theme.dividerColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: theme.dividerColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+        ),
+        filled: true,
+        fillColor: theme.colorScheme.surface,
+      ),
+      value: selectedValue,
+      items: options
+          .map((option) => DropdownMenuItem<dynamic>(
+        value: option['id'],
+        child: Text(
+          option['name']?.toString() ?? 'Unnamed',
+          style: theme.textTheme.bodyMedium,
+        ),
+      ))
+          .toList(),
+      onChanged: (newValue) {
+        setState(() {
+          selectedValue = newValue;
+        });
+        widget.onValueChanged(newValue);
+      },
+      isExpanded: true,
+      hint: Text(
+        widget.hintText ?? 'Select',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.hintColor,
+        ),
+      ),
+      style: theme.textTheme.bodyMedium,
+      icon: Icon(
+        Icons.arrow_drop_down,
+        color: theme.colorScheme.onSurface.withOpacity(0.6),
+        size: 20,
+      ),
+      dropdownColor: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(8),
+    );
   }
 
   List<Map<String, dynamic>> _removeDuplicateOptions(List<Map<String, dynamic>> options) {
     final seenIds = <dynamic>{};
-    final uniqueOptions = <Map<String, dynamic>>[];
-
-    for (var option in options) {
+    return options.where((option) {
       final id = option['id'];
       if (id != null && !seenIds.contains(id)) {
         seenIds.add(id);
-        uniqueOptions.add(option);
-      } else if (id != null) {
+        return true;
       }
-    }
-
-    return uniqueOptions;
+      return false;
+    }).toList();
   }
 }

@@ -62,7 +62,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     print("relationModel  :  ${widget.relationModel}");
     print("relationField  :  ${widget.relationField}");
     print("mainRecordId  :  ${widget.mainRecordId}");
-    print("relationField  :  ${widget.relatedFields}");
+    print("relationField  :  ${widget.readonly}");
   }
 
   Future<void> _fetchLocalRecords() async {
@@ -1484,14 +1484,12 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.info_outline,
-                                        color: Colors.orange[700], size: 16),
+                                    Icon(Icons.info_outline, color: Colors.orange[700], size: 16),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         'No options available',
-                                        style:
-                                            TextStyle(color: Colors.grey[700]),
+                                        style: TextStyle(color: Colors.grey[700]),
                                       ),
                                     ),
                                   ],
@@ -1501,51 +1499,37 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                           }
 
                           return DataCell(
-                            widget.readonly // Disable editing if readonly
+                            widget.readonly
                                 ? Text(
-                                    (value as List<dynamic>?)?.join(', ') ?? '',
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  )
+                              (value as List<dynamic>?)?.map((id) {
+                                final option = options.firstWhere(
+                                      (opt) => opt['id'] == id,
+                                  orElse: () => {'name': 'Unknown'},
+                                );
+                                return option['name'] ?? 'Unknown';
+                              }).join(', ') ??
+                                  '',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            )
                                 : Many2ManyFieldWidget(
-                                    name: fieldDef['string'] ??
-                                        field['name'] ??
-                                        '',
-                                    values: value is List<dynamic> ? value : [],
-                                    options: options,
-                                    onValuesChanged: (newValues) =>
-                                        _onMany2ManyValuesChanged(
-                                            field['name']!,
-                                            recordIndex,
-                                            newValues),
-                                    viewType: 'tree',
-                                  ),
+                              name: fieldDef['string'] ?? field['name'] ?? '',
+                              values: value is List<dynamic> ? value : [],
+                              options: options,
+                              onValuesChanged: (newValues) => _onMany2ManyValuesChanged(
+                                  field['name']!, recordIndex, newValues),
+                              viewType: 'tree',
+                            ),
                           );
                         case 'many2one':
                           return DataCell(
-                            widget.readonly // Disable editing if readonly
-                                ? Text(
-                                    (many2oneOptions[field['name']] ?? [])
-                                            .firstWhere(
-                                          (opt) => opt['id'] == value,
-                                          orElse: () => {'name': 'Unknown'},
-                                        )['name'] ??
-                                        '',
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  )
-                                : Many2OneFieldWidget(
-                                    name: fieldDef['string'] ??
-                                        field['name'] ??
-                                        '',
-                                    value: value,
-                                    options:
-                                        many2oneOptions[field['name']] ?? [],
-                                    onValueChanged: (newValue) =>
-                                        _onMany2OneValueChanged(field['name']!,
-                                            recordIndex, newValue),
-                                    viewType: 'tree',
-                                  ),
+                            Many2OneFieldWidget(
+                              name: fieldDef['string'] ?? field['name'] ?? '',
+                              value: value,
+                              options: many2oneOptions[field['name']] ?? [],
+                              onValueChanged: (newValue) => _onMany2OneValueChanged(field['name']!, recordIndex, newValue),
+                              viewType: 'tree',
+                              readonly: widget.readonly,
+                            ),
                           );
                         default:
                           return DataCell(
