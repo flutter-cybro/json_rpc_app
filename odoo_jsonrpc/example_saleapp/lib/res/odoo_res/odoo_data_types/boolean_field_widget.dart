@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 class BooleanFieldWidget extends StatefulWidget {
@@ -26,6 +28,7 @@ class _BooleanFieldWidgetState extends State<BooleanFieldWidget> {
   @override
   void initState() {
     super.initState();
+    log("BooleanFieldWidget  : ${widget.readOnly}");
     _currentValue = widget.value;
   }
 

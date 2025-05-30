@@ -32,7 +32,7 @@ class _Many2OneFieldWidgetState extends State<Many2OneFieldWidget> {
   @override
   void initState() {
     super.initState();
-    log("widget : ${widget.readonly}");
+    log("_Many2OneFieldWidgetState : ${widget.readonly}  , ${widget.value} , ${widget.options}");
     _updateSelectedValue(widget.value);
   }
 

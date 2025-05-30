@@ -287,7 +287,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
     if (metadata['type'] == 'boolean') {
       bool boolValue = fieldValue is bool ? fieldValue : false;
-      return Checkbox( // Temporary replacement until BooleanFieldWidget is resolved
+      return Checkbox(
         value: boolValue,
         onChanged: (newValue) {
           if (newValue != null) {
