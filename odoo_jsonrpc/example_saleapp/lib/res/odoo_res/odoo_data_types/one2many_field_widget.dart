@@ -580,11 +580,11 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
     for (var field in widget.relatedFields) {
       final fieldDef = allFieldNames.firstWhere(
-        (f) => f['name'] == field['name'],
-        orElse: () => <String, String?>{
-          'name': field['name'] as String?,
-          'type': field['type'] as String? ?? 'char',
-          'string': field['name'] as String?,
+            (f) => f['name'] == field['name'],
+        orElse: () => <String, dynamic>{
+          'name': field['name'],
+          'type': field['type'] ?? 'char',
+          'string': field['name'],
         },
       );
       switch (fieldDef['type']) {
@@ -594,20 +594,30 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
           validationErrors[field['name']] = null;
           break;
         case 'many2one':
-          newRecord[field['name']] = null;
-          selectedMany2One[field['name']] = null;
-          validationErrors[field['name']] = null;
+          final fieldName = field['name'] == 'product_template_id' ? 'product_id' : field['name'];
+          newRecord[fieldName] = null;
+          selectedMany2One[fieldName] = null;
+          validationErrors[fieldName] = null;
           break;
         default:
           newRecord[field['name']] = '';
           controllers[field['name']] = TextEditingController();
+          // Set default quantity to empty for product_uom_qty
+          if (widget.relationModel == 'sale.order.line' && field['name'] == 'product_uom_qty') {
+            controllers[field['name']]!.text = '';
+          }
       }
     }
 
     final isSaleOrderLine = widget.relationModel == 'sale.order.line';
     List<Map<String, dynamic>> visibleFields = widget.relatedFields
         .where((field) => field['optional'] != 'hide')
-        .toList();
+        .map((field) {
+      if (field['name'] == 'product_template_id') {
+        return {...field, 'name': 'product_id'};
+      }
+      return field;
+    }).toList();
 
     await showDialog(
       context: context,
@@ -631,12 +641,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         children: [
                           Text(
                             'Add New Record',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.close),
@@ -652,11 +659,11 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                         child: Column(
                           children: visibleFields.map((field) {
                             final fieldDef = allFieldNames.firstWhere(
-                              (f) => f['name'] == field['name'],
-                              orElse: () => <String, String?>{
-                                'name': field['name'] as String?,
-                                'type': field['type'] as String? ?? 'char',
-                                'string': field['name'] as String?,
+                                  (f) => f['name'] == (field['name'] == 'product_template_id' ? 'product_id' : field['name']),
+                              orElse: () => <String, dynamic>{
+                                'name': field['name'] == 'product_template_id' ? 'product_id' : field['name'],
+                                'type': field['type'] ?? 'char',
+                                'string': field['name'],
                               },
                             );
 
@@ -666,20 +673,24 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildFormField(
-                                    field: field,
+                                    field: fieldDef,
                                     fieldDef: fieldDef,
                                     controllers: controllers,
                                     selectedMany2Many: selectedMany2Many,
                                     selectedMany2One: selectedMany2One,
                                     validationErrors: validationErrors,
+                                    setState: setState, // Pass setState for updating dialog
+                                    newRecord: newRecord, // Pass newRecord for updates
                                   ),
-                                  if (validationErrors[field['name']] != null)
+                                  if (validationErrors[fieldDef['name']] != null)
                                     Padding(
                                       padding: const EdgeInsets.only(top: 8),
                                       child: Text(
-                                        validationErrors[field['name']]!,
+                                        validationErrors[fieldDef['name']]!,
                                         style: const TextStyle(
-                                            color: Colors.red, fontSize: 12),
+                                          color: Colors.red,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -710,8 +721,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                               );
 
                               if (!isValid) {
-                                WidgetsBinding.instance
-                                    .addPostFrameCallback((_) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
                                   Scrollable.ensureVisible(
                                     context,
                                     alignment: 0.1,
@@ -810,13 +820,14 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     required Map<String, List<dynamic>> selectedMany2Many,
     required Map<String, int?> selectedMany2One,
     required Map<String, String?> validationErrors,
+    required void Function(void Function()) setState, // For updating dialog
+    required Map<String, dynamic> newRecord, // For updating newRecord
   }) {
     if (fieldDef['type'] == 'many2many') {
       return StatefulBuilder(
         builder: (context, setState) {
-          // Use a default set of options for new records (e.g., from record ID 0 or first record)
           final options = many2manyOptions[
-                  relatedRecords.isNotEmpty ? relatedRecords.first['id'] : 0] ??
+          relatedRecords.isNotEmpty ? relatedRecords.first['id'] : 0] ??
               [];
 
           return Column(
@@ -852,9 +863,9 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   isExpanded: true,
                   items: options
                       .map((option) => DropdownMenuItem<int>(
-                            value: option['id'],
-                            child: Text(option['name'] ?? 'Unknown'),
-                          ))
+                    value: option['id'],
+                    child: Text(option['name'] ?? 'Unknown'),
+                  ))
                       .toList(),
                   onChanged: (value) {
                     if (value != null &&
@@ -867,8 +878,8 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   },
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
+                    contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                     errorText: validationErrors[field['name']],
                   ),
                   value: null,
@@ -881,7 +892,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                   runSpacing: 8.0,
                   children: selectedMany2Many[field['name']]!.map((id) {
                     final option = options.firstWhere(
-                      (opt) => opt['id'] == id,
+                          (opt) => opt['id'] == id,
                       orElse: () => {'name': 'Unknown'},
                     );
                     return Chip(
@@ -909,25 +920,37 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
             items: [
               DropdownMenuItem<int?>(
                 value: null,
-                child: Text('Select ${fieldDef['string'] ?? field['name']}'),
+                child: Text('Select ${fieldDef['string'] ?? field['name'] ?? ''}'),
               ),
               ...(many2oneOptions[field['name']] ?? [])
                   .map((option) => DropdownMenuItem<int?>(
-                        value: option['id'] as int?,
-                        child: Text(option['name'] ?? 'Unknown'),
-                      ))
+                value: option['id'] as int?,
+                child: Text(option['name'] ?? 'Unknown'),
+              ))
             ],
             onChanged: (value) {
               setState(() {
                 selectedMany2One[field['name']] = value;
                 validationErrors[field['name']] = null;
+                // Set product_uom_qty to 1 when product_id is selected in sale.order.line
+                if (widget.relationModel == 'sale.order.line' &&
+                    field['name'] == 'product_id' &&
+                    value != null) {
+                  if (controllers.containsKey('product_uom_qty')) {
+                    controllers['product_uom_qty']!.text = '1';
+                    newRecord['product_uom_qty'] = '1';
+                    log("Set product_uom_qty to 1 in dialog for product_id: $value");
+                  } else {
+                    log("Warning: product_uom_qty controller not found");
+                  }
+                }
               });
             },
             decoration: InputDecoration(
               labelText: fieldDef['string'] ?? field['name'],
               border: const OutlineInputBorder(),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               errorText: validationErrors[field['name']],
             ),
           );
@@ -944,6 +967,108 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
+  void _onMany2OneValueChanged(
+      String fieldName, int recordIndex, dynamic newValue) async {
+    log("fieldName: $fieldName, recordIndex: $recordIndex, newValue: $newValue");
+    int? finalValue = newValue;
+
+    // Handle product variants for sale.order.line product_id
+    if (widget.relationModel == 'sale.order.line' &&
+        fieldName == 'product_id' &&
+        newValue != null) {
+      final variants = await _fetchProductVariants(newValue);
+      if (variants.length > 1) {
+        final selectedVariantId = await _showVariantSelectionDialog(variants);
+        finalValue = selectedVariantId ?? newValue;
+      }
+    }
+
+    setState(() {
+      relatedRecords[recordIndex][fieldName] = finalValue;
+      // Set quantity to 1 if product_id is selected in sale.order.line
+      if (widget.relationModel == 'sale.order.line' &&
+          fieldName == 'product_id' &&
+          finalValue != null) {
+        if (allFieldNames.any((f) => f['name'] == 'product_uom_qty')) {
+          relatedRecords[recordIndex]['product_uom_qty'] = 1;
+          log("Set product_uom_qty to 1 for recordIndex: $recordIndex");
+        } else {
+          log("Warning: product_uom_qty field not found in allFieldNames");
+        }
+      }
+    });
+
+    try {
+      final recordId = relatedRecords[recordIndex]['id'];
+      log("relatedRecords[recordIndex]['id']: $recordId");
+
+      if (recordId == null) {
+        // New record: create with product_id and quantity
+        final createData = {
+          widget.relationField: widget.mainRecordId,
+          fieldName: finalValue,
+        };
+        // Include quantity for sale.order.line product_id
+        if (widget.relationModel == 'sale.order.line' &&
+            fieldName == 'product_id' &&
+            finalValue != null &&
+            allFieldNames.any((f) => f['name'] == 'product_uom_qty')) {
+          createData['product_uom_qty'] = 1;
+        }
+
+        final createResponse = await widget.client.callKw({
+          'model': widget.relationModel,
+          'method': 'create',
+          'args': [createData],
+          'kwargs': {},
+        });
+
+        if (createResponse is int) {
+          setState(() {
+            relatedRecords[recordIndex]['id'] = createResponse;
+          });
+          widget.onUpdate(relatedRecords);
+          return;
+        } else {
+          log("Failed to create new record: $createResponse");
+          throw Exception("Failed to create new record: $createResponse");
+        }
+      }
+
+      // Existing record: update with product_id and quantity
+      final updateData = {fieldName: finalValue};
+      // Include quantity for sale.order.line product_id
+      if (widget.relationModel == 'sale.order.line' &&
+          fieldName == 'product_id' &&
+          finalValue != null &&
+          allFieldNames.any((f) => f['name'] == 'product_uom_qty')) {
+        updateData['product_uom_qty'] = 1;
+      }
+
+      final response = await widget.client.callKw({
+        'model': widget.relationModel,
+        'method': 'write',
+        'args': [
+          [recordId],
+          updateData,
+        ],
+        'kwargs': {},
+      });
+
+      if (response == true) {
+        widget.onUpdate(relatedRecords);
+      } else {
+        throw Exception("Unexpected response from backend: $response");
+      }
+    } catch (e) {
+      log("Failed to update record in backend: many2one $e");
+      setState(() {
+        errorMessage = 'Failed to update record in backend: $e';
+      });
+      widget.onUpdate(relatedRecords);
+    }
+  }
+
   Future<void> _saveNewRecord(
     Map<String, dynamic> newRecord,
     Map<String, TextEditingController> controllers,
@@ -951,7 +1076,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     Map<String, int?> selectedMany2One,
     BuildContext context,
   ) async {
-    // Populate newRecord with field values
+    log("selectedMany2Many : $selectedMany2Many");
     for (var field in widget.relatedFields) {
       final fieldDef = allFieldNames.firstWhere(
         (f) => f['name'] == field['name'],
@@ -970,14 +1095,13 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
 
     if (widget.mainRecordId == 0) {
-      // Save to Isar only
       final isarRecord = One2ManyRecord()
         ..tempRecordId = widget.tempRecordId!
         ..mainModel = widget.mainModel
         ..mainRecordId = widget.mainRecordId
         ..relationModel = widget.relationModel
         ..relationField = widget.relationField
-        ..fieldName = widget.fieldName // Store fieldName
+        ..fieldName = widget.fieldName
         ..data = jsonEncode(newRecord)
         ..isSynced = false;
 
@@ -1034,6 +1158,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
       widget.onUpdate(relatedRecords);
       Navigator.of(context).pop();
+
     }
   }
 
@@ -1172,78 +1297,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     }
   }
 
-  void _onMany2OneValueChanged(
-      String fieldName, int recordIndex, dynamic newValue) async {
-    log("fieldName  : $fieldName  , recordIndex  : $recordIndex  ,  newValue  :  $newValue");
-    int? finalValue = newValue;
-    // Check for variants if the field is product_id and relation is sale.order.line
-    if (widget.relationModel == 'sale.order.line' &&
-        fieldName == 'product_id' &&
-        newValue != null) {
-      final variants = await _fetchProductVariants(newValue);
-      if (variants.length > 1) {
-        final selectedVariantId = await _showVariantSelectionDialog(variants);
-        finalValue = selectedVariantId ?? newValue;
-      }
-    }
 
-    setState(() {
-      relatedRecords[recordIndex][fieldName] = finalValue;
-    });
-
-    try {
-      final recordId = relatedRecords[recordIndex]['id'];
-
-      log("relatedRecords[recordIndex]['id']  : ${recordId}");
-      if (recordId == null) {
-        final createResponse = await widget.client.callKw({
-          'model': widget.relationModel,
-          'method': 'create',
-          'args': [
-            {
-              widget.relationField: widget.mainRecordId,
-              fieldName: finalValue,
-            },
-          ],
-          'kwargs': {},
-        });
-        if (createResponse is int) {
-          setState(() {
-            relatedRecords[recordIndex]['id'] = createResponse;
-          });
-          widget.onUpdate(relatedRecords);
-          return;
-        } else {
-          log("Failed to create new record: $createResponse");
-          throw Exception("Failed to create new record: $createResponse");
-        }
-      }
-      log("create relatedRecords : ${recordId}");
-
-      final updateData = {fieldName: finalValue};
-      final response = await widget.client.callKw({
-        'model': widget.relationModel,
-        'method': 'write',
-        'args': [
-          [recordId],
-          updateData
-        ],
-        'kwargs': {},
-      });
-
-      if (response == true) {
-        widget.onUpdate(relatedRecords);
-      } else {
-        throw Exception("Unexpected response from backend: $response");
-      }
-    } catch (e) {
-      log("Failed to update record in backend: many2one $e");
-      setState(() {
-        errorMessage = 'Failed to update record in backend: $e';
-      });
-      widget.onUpdate(relatedRecords);
-    }
-  }
 
   Future<List<Map<String, dynamic>>> _fetchProductVariants(
       int productId) async {

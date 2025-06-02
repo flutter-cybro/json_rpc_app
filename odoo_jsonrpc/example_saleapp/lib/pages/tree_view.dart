@@ -178,7 +178,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       return displayValue;
     }
 
-    if (metadata['type'] == 'many2many' && widgetType == 'many2many_tags') {
+    if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags') {
       return FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'], fieldValue as List<dynamic>),
         builder: (context, snapshot) {

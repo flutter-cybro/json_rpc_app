@@ -28,6 +28,7 @@ import '../res/odoo_res/odoo_xml_widget/color_picker.dart';
 import '../res/odoo_res/odoo_xml_widget/email.dart';
 import '../res/odoo_res/odoo_xml_widget/float_time.dart';
 import '../res/odoo_res/odoo_xml_widget/image.dart';
+import '../res/odoo_res/odoo_xml_widget/image_url.dart';
 import '../res/odoo_res/odoo_xml_widget/phone.dart';
 import '../res/odoo_res/odoo_xml_widget/tax_total_custom.dart';
 import '../res/odoo_res/odoo_xml_widget/text.dart';
@@ -221,7 +222,7 @@ class _FormViewState extends State<FormView>
       'kwargs': {},
     });
 
-    log("fields_get");
+    // log("fields_get");
     setState(() {
       allPythonFields = fieldsResponse as Map<String, dynamic>;
     });
@@ -1006,7 +1007,7 @@ class _FormViewState extends State<FormView>
               .map((field) {
                 final fieldMap = field as Map<String, dynamic>;
 
-                log("bodyfield - $bodyFields ");
+                // log("bodyfield - $bodyFields ");
                 //   if (fieldMap.containsKey('div_tag')) {}
                 //   else{}
                 //   final fieldName =
@@ -1048,7 +1049,7 @@ class _FormViewState extends State<FormView>
                 //   };
                 // }).toList();
                 if (fieldMap.containsKey('div_tag')) {
-                  log("entered into _parseDivField");
+                  // log("entered into _parseDivField");
                   return _parseDivField(fieldMap);
                 } else {
                   return _parseRegularField(fieldMap);
@@ -1065,7 +1066,7 @@ class _FormViewState extends State<FormView>
             responseData['header_buttons'] as List<dynamic>;
         setState(() {
           headerButtons = headerButtonsData.map((button) {
-            log("headerButtonsData  : $button");
+            // log("headerButtonsData  : $button");
             final buttonMap = button as Map<String, dynamic>;
 
             dynamic attributesRaw = buttonMap['attributes'];
@@ -1096,7 +1097,7 @@ class _FormViewState extends State<FormView>
 
             final invisible = parseInvisibleValue(attributes['invisible']);
 
-            log("name  : ${attributes['name']}  , string  : ${attributes['string']} , $invisible");
+            // log("name  : ${attributes['name']}  , string  : ${attributes['string']} , $invisible  ${attributes['invisible']}");
 
             return {
               'name': attributes['name'] as String? ?? 'unnamed_button',
@@ -1115,11 +1116,11 @@ class _FormViewState extends State<FormView>
         final notebookSections =
             responseData['notebook_fields'] as List<dynamic>;
 
-        log("notebookSections  :  $notebookSections");
+        // log("notebookSections  :  $notebookSections");
         setState(() {
           notebookPages = notebookSections
               .map((page) {
-                log("page : $page");
+                // log("page : $page");
                 final pageMap = page as Map<String, dynamic>;
                 final xmlAttrs =
                     pageMap['xml_attributes'] as Map<String, dynamic>? ?? {};
@@ -1133,7 +1134,7 @@ class _FormViewState extends State<FormView>
 
                 final fields = (pageMap['fields'] as List<dynamic>)
                     .map((field) {
-                      log("map((field) : $field");
+                      // log("map((field) : $field");
                       final fieldMap = field as Map<String, dynamic>;
                       final fieldName =
                           fieldMap['main_field_name'] as String? ??
@@ -1341,7 +1342,7 @@ class _FormViewState extends State<FormView>
       if (responseData.containsKey('wizard_data')) {
         final List<dynamic> wizardFields =
             responseData['wizard_data'] as List<dynamic>;
-        log("wizardFields  : $wizardFields");
+        // log("wizardFields  : $wizardFields");
         setState(() {
           wizardData = wizardFields
               .where((field) {
@@ -1351,7 +1352,7 @@ class _FormViewState extends State<FormView>
                 return fieldName.isNotEmpty && fieldName != 'unknown';
               })
               .map((field) {
-                log("field kimster : $field");
+                // log("field kimster : $field");
                 final fieldMap = field as Map<String, dynamic>;
                 final fieldName =
                     fieldMap['main_field_name'] as String? ?? 'unknown';
@@ -1379,7 +1380,7 @@ class _FormViewState extends State<FormView>
                 final options =
                     xmlAttributes['options'] ?? pythonAttributes['options'];
 
-                log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
+                // log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
 
                 return {
                   'name': fieldName,
@@ -1403,7 +1404,7 @@ class _FormViewState extends State<FormView>
               print("inside the footer");
               final List<dynamic> footerButtonsData =
                   fieldMap['footer'] as List<dynamic>;
-              log("footerButtonsData: $footerButtonsData");
+              // log("footerButtonsData: $footerButtonsData");
               footerButtons.addAll(footerButtonsData.map((button) {
                 final buttonMap = button as Map<String, dynamic>;
                 final attributes =
@@ -1423,7 +1424,7 @@ class _FormViewState extends State<FormView>
               }).toList());
             }
           }
-          log("Parsed footerButtons: $footerButtons");
+          // log("Parsed footerButtons: $footerButtons");
         });
       }
     }
@@ -1432,7 +1433,7 @@ class _FormViewState extends State<FormView>
   Map<String, dynamic>? _parseDivField(Map<String, dynamic> fieldMap) {
     try {
       // Log 1: Input map
-      log("_parseDivField: Input map = $fieldMap");
+      // log("_parseDivField: Input map = $fieldMap");
 
       final divTag = fieldMap['div_tag'] as String?;
       final divAttributes =
@@ -1441,7 +1442,7 @@ class _FormViewState extends State<FormView>
       final children = fieldMap['children'] as List<dynamic>? ?? [];
 
       // Log 2: Extracted div attributes and counts
-      log("_parseDivField: divTag = $divTag, divAttributes = $divAttributes, fieldsCount = ${fields.length}, childrenCount = ${children.length}");
+      // log("_parseDivField: divTag = $divTag, divAttributes = $divAttributes, fieldsCount = ${fields.length}, childrenCount = ${children.length}");
 
       final parsedFields = fields
           .asMap()
@@ -1451,20 +1452,20 @@ class _FormViewState extends State<FormView>
             final field = entry.value as Map<String, dynamic>;
 
             // Log 3: Processing each field
-            log("_parseDivField: Processing field at index $index, main_field_name = ${field['main_field_name']}");
+            // log("_parseDivField: Processing field at index $index, main_field_name = ${field['main_field_name']}");
 
             // Avoid duplicate fields by checking main_field_name
             if (fields.sublist(0, index).any((f) =>
                 (f as Map<String, dynamic>)['main_field_name'] ==
                 field['main_field_name'])) {
               // Log 4: Duplicate field detected
-              log("_parseDivField: Skipping duplicate field: ${field['main_field_name']}");
+              // log("_parseDivField: Skipping duplicate field: ${field['main_field_name']}");
               return null;
             }
             final parsedField = _parseRegularField(field);
 
             // Log 5: Result of parsing field
-            log("_parseDivField: Parsed field ${field['main_field_name']}, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}");
+            // log("_parseDivField: Parsed field ${field['main_field_name']}, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}");
 
             // Check field visibility (assuming _parseRegularField returns an 'invisible' key)
             return parsedField != null && !(parsedField['invisible'] ?? false)
@@ -1476,7 +1477,7 @@ class _FormViewState extends State<FormView>
           .toList();
 
       // Log 6: Parsed fields summary
-      log("_parseDivField: Parsed fields count = ${parsedFields.length}, fields = $parsedFields");
+      // log("_parseDivField: Parsed fields count = ${parsedFields.length}, fields = $parsedFields");
 
       // Parse children recursively
       final parsedChildren = children
@@ -1484,7 +1485,7 @@ class _FormViewState extends State<FormView>
             final childMap = child as Map<String, dynamic>;
 
             // Log 7: Processing each child
-            log("_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}");
+            // log("_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}");
 
             return _parseDivField(childMap);
           })
@@ -1493,19 +1494,19 @@ class _FormViewState extends State<FormView>
           .toList();
 
       // Log 8: Parsed children summary
-      log("_parseDivField: Parsed children count = ${parsedChildren.length}, children = $parsedChildren");
+      // log("_parseDivField: Parsed children count = ${parsedChildren.length}, children = $parsedChildren");
 
       // Determine div visibility (default to visible if 'invisible' is absent)
       final isInvisible =
           parseInvisibleValue(divAttributes['invisible']) ?? false;
 
       // Log 9: Visibility decision
-      log("_parseDivField: divAttributes['invisible'] = ${divAttributes['invisible']}, isInvisible = $isInvisible");
+      // log("_parseDivField: divAttributes['invisible'] = ${divAttributes['invisible']}, isInvisible = $isInvisible");
 
       // Only return the div if it's visible or has visible fields/children
       if (isInvisible && parsedFields.isEmpty && parsedChildren.isEmpty) {
         // Log 10: Skipping invisible div with no visible content
-        log("_parseDivField: Skipping invisible div with no visible fields or children");
+        // log("_parseDivField: Skipping invisible div with no visible fields or children");
         return null;
       }
 
@@ -1519,7 +1520,7 @@ class _FormViewState extends State<FormView>
       };
 
       // Log 11: Final output
-      log("_parseDivField: Output = $result");
+      // log("_parseDivField: Output = $result");
 
       return result;
     } catch (e) {
@@ -1683,8 +1684,8 @@ class _FormViewState extends State<FormView>
   void _showHeaderButtonsMenu() {
     final visibleButtons = headerButtons.where((button) {
       final invisible = button['invisible'];
-      log("_showHeaderButtonsMenu invisible : $invisible");
-      return invisible != true && invisible != 'True' && invisible != 1;
+      log("_showHeaderButtonsMenu invisible : $invisible  , ${button}");
+      return invisible != true && invisible.toString().toLowerCase() != 'true' && invisible != 1;
     }).toList();
 
     if (visibleButtons.isEmpty) {
@@ -2778,6 +2779,11 @@ class _FormViewState extends State<FormView>
           onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
         );
       }
+      if (widgetType == 'image_url' && type == 'char') {
+        return ImageUrlFieldWidget(
+          value: value?.toString() ?? '',
+        );
+      }
       if (widgetType == 'text' && type == 'char') {
         return TextXmlFieldWidget(
           name: label,
@@ -3484,8 +3490,10 @@ class _FormViewState extends State<FormView>
           mainModel: widget.modelName,
           fieldName: fieldName,
           name: label,
-          relationModel: fieldData?['relation_model'] as String? ?? '',
-          relationField: fieldData?['relation_field'] as String? ?? '',
+          // relationModel: fieldData?['relation_model'] as String? ?? '',
+          // relationField: fieldData?['relation_field'] as String? ?? '',
+          relationModel: fieldData?['relation_model'] as String? ?? fieldData?['python_attributes']?['relation'] as String? ?? '',
+          relationField: fieldData?['relation_field'] as String? ?? fieldData?['python_attributes']?['relation_field'] as String? ??'',
           mainRecordId: widget.recordId,
           tempRecordId: tempRecordId,
           client: _odooClientController.client,
