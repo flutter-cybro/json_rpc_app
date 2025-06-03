@@ -1007,7 +1007,7 @@ class _FormViewState extends State<FormView>
               .map((field) {
                 final fieldMap = field as Map<String, dynamic>;
 
-                // log("bodyfield - $bodyFields ");
+                log("bodyfield - $fieldMap ");
                 //   if (fieldMap.containsKey('div_tag')) {}
                 //   else{}
                 //   final fieldName =
@@ -1431,82 +1431,99 @@ class _FormViewState extends State<FormView>
   }
 
   Map<String, dynamic>? _parseDivField(Map<String, dynamic> fieldMap) {
+    log('_parseDivField: Input map = $fieldMap'); // Log 1: Input map
     try {
-      // Log 1: Input map
-      // log("_parseDivField: Input map = $fieldMap");
-
       final divTag = fieldMap['div_tag'] as String?;
       final divAttributes =
           fieldMap['div_attributes'] as Map<String, dynamic>? ?? {};
       final fields = fieldMap['fields'] as List<dynamic>? ?? [];
       final children = fieldMap['children'] as List<dynamic>? ?? [];
 
-      // Log 2: Extracted div attributes and counts
-      // log("_parseDivField: divTag = $divTag, divAttributes = $divAttributes, fieldsCount = ${fields.length}, childrenCount = ${children.length}");
+      log('_parseDivField: divTag = $divTag, divAttributes = $divAttributes, fieldsCount = ${fields.length}, childrenCount = ${children.length}'); // Log 2: Extracted div attributes and counts
+
+      // Map to store fields by main_field_name, prioritizing visible ones
+      final fieldMapByName = <String, Map<String, dynamic>?>{};
 
       final parsedFields = fields
           .asMap()
           .entries
           .map((entry) {
-            final index = entry.key;
-            final field = entry.value as Map<String, dynamic>;
+        final index = entry.key;
+        final field = entry.value as Map<String, dynamic>;
 
-            // Log 3: Processing each field
-            // log("_parseDivField: Processing field at index $index, main_field_name = ${field['main_field_name']}");
+        log('_parseDivField: Processing field at index $index, field = $field'); // Log 3: Processing each field
 
-            // Avoid duplicate fields by checking main_field_name
-            if (fields.sublist(0, index).any((f) =>
-                (f as Map<String, dynamic>)['main_field_name'] ==
-                field['main_field_name'])) {
-              // Log 4: Duplicate field detected
-              // log("_parseDivField: Skipping duplicate field: ${field['main_field_name']}");
-              return null;
-            }
-            final parsedField = _parseRegularField(field);
+        final mainFieldName = field['main_field_name'] as String?;
+        if (mainFieldName == null) {
+          log('_parseDivField: Skipping field at index $index due to null main_field_name');
+          return null;
+        }
 
-            // Log 5: Result of parsing field
-            // log("_parseDivField: Parsed field ${field['main_field_name']}, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}");
+        final parsedField = _parseRegularField(field);
+        log('_parseDivField: Parsed field $mainFieldName, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}'); // Log 5: Result of parsing field
 
-            // Check field visibility (assuming _parseRegularField returns an 'invisible' key)
-            return parsedField != null && !(parsedField['invisible'] ?? false)
-                ? parsedField
-                : null;
-          })
+        if (parsedField == null) {
+          log('_parseDivField: Skipping field $mainFieldName at index $index due to null parsedField');
+          return null;
+        }
+
+        // Handle duplicates based on invisible status
+        final isInvisible = parsedField['invisible'] ?? false;
+        final existingField = fieldMapByName[mainFieldName];
+
+        if (existingField == null) {
+          log('_parseDivField: No existing field for $mainFieldName, adding at index $index');
+          fieldMapByName[mainFieldName] = parsedField;
+        } else {
+          final existingInvisible = existingField['invisible'] ?? false;
+          if (isInvisible && !existingInvisible) {
+            log('_parseDivField: Keeping existing visible field for $mainFieldName, skipping invisible at index $index');
+            return null;
+          } else if (!isInvisible) {
+            log('_parseDivField: Replacing field for $mainFieldName with visible field at index $index');
+            fieldMapByName[mainFieldName] = parsedField;
+            return null; // Defer adding until all fields are processed
+          } else {
+            log('_parseDivField: Both fields for $mainFieldName are invisible, keeping existing at index $index');
+          }
+        }
+
+        return parsedField;
+      })
           .where((field) => field != null)
           .cast<Map<String, dynamic>>()
           .toList();
 
-      // Log 6: Parsed fields summary
-      // log("_parseDivField: Parsed fields count = ${parsedFields.length}, fields = $parsedFields");
+      // Add non-null fields from fieldMapByName to parsedFields
+      final finalParsedFields = fieldMapByName.values
+          .where((field) => field != null && !(field['invisible'] ?? false))
+          .cast<Map<String, dynamic>>()
+          .toList();
+
+      log('_parseDivField: Parsed fields count = ${finalParsedFields.length}, fields = $finalParsedFields'); // Log 6: Parsed fields summary
 
       // Parse children recursively
       final parsedChildren = children
           .map((child) {
-            final childMap = child as Map<String, dynamic>;
-
-            // Log 7: Processing each child
-            // log("_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}");
-
-            return _parseDivField(childMap);
-          })
+        final childMap = child as Map<String, dynamic>;
+        log('_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}'); // Log 7: Processing each child
+        return _parseDivField(childMap);
+      })
           .where((child) => child != null)
           .cast<Map<String, dynamic>>()
           .toList();
 
-      // Log 8: Parsed children summary
-      // log("_parseDivField: Parsed children count = ${parsedChildren.length}, children = $parsedChildren");
+      log('_parseDivField: Parsed children count = ${parsedChildren.length}, children = $parsedChildren'); // Log 8: Parsed children summary
 
       // Determine div visibility (default to visible if 'invisible' is absent)
       final isInvisible =
           parseInvisibleValue(divAttributes['invisible']) ?? false;
 
-      // Log 9: Visibility decision
-      // log("_parseDivField: divAttributes['invisible'] = ${divAttributes['invisible']}, isInvisible = $isInvisible");
+      log('_parseDivField: divAttributes[\'invisible\'] = ${divAttributes['invisible']}, isInvisible = $isInvisible'); // Log 9: Visibility decision
 
       // Only return the div if it's visible or has visible fields/children
-      if (isInvisible && parsedFields.isEmpty && parsedChildren.isEmpty) {
-        // Log 10: Skipping invisible div with no visible content
-        // log("_parseDivField: Skipping invisible div with no visible fields or children");
+      if (isInvisible && finalParsedFields.isEmpty && parsedChildren.isEmpty) {
+        log('_parseDivField: Skipping invisible div with no visible fields or children'); // Log 10: Skipping invisible div
         return null;
       }
 
@@ -1514,49 +1531,62 @@ class _FormViewState extends State<FormView>
         'type': 'div',
         'div_tag': divTag,
         'div_attributes': divAttributes,
-        'fields': parsedFields,
+        'fields': finalParsedFields,
         'children': parsedChildren,
         'invisible': isInvisible,
       };
 
-      // Log 11: Final output
-      // log("_parseDivField: Output = $result");
-
+      log('_parseDivField: Output = $result'); // Log 11: Final output
       return result;
-    } catch (e) {
-      // Log 12: Error details
-      print('Error parsing div field: $e, fieldMap = $fieldMap');
+    } catch (e, stackTrace) {
+      log('_parseDivField: Error parsing div field: $e, fieldMap = $fieldMap, stackTrace = $stackTrace', error: e, stackTrace: stackTrace); // Log 12: Error details
       return null;
     }
   }
 
   Map<String, dynamic>? _parseRegularField(Map<String, dynamic> fieldMap) {
+    // log('Starting _parseRegularField with input: $fieldMap'); // Log input
     try {
       final fieldName =
           fieldMap['main_field_name'] as String? ?? 'unknown_field';
-      if (fieldName == 'unknown_field') return null;
+      log('Resolved fieldName: $fieldName'); // Log field name
+      if (fieldName == 'unknown_field') {
+        log('Field name is "unknown_field", returning null');
+        return null;
+      }
 
       final fieldType =
           allPythonFields[fieldName]?['type'] as String? ?? 'char';
+      // log('Field type for $fieldName: $fieldType');
+
       final xmlAttributes =
           fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
       final pythonAttributes =
           fieldMap['python_attributes'] as Map<String, dynamic>? ?? {};
+      // log('xmlAttributes: $xmlAttributes, pythonAttributes: $pythonAttributes');
 
       final invisible = parseInvisibleValue(
           xmlAttributes.containsKey('invisible')
               ? xmlAttributes['invisible']
               : pythonAttributes['invisible']);
-
-      if (invisible) return null;
+      // log('Invisible value for $fieldName: $invisible');
+      if (invisible) {
+        // log('Field $fieldName is invisible, returning null');
+        return null;
+      }
 
       final readonly = parseInvisibleValue(
           xmlAttributes['readonly'] ?? pythonAttributes['readonly'] ?? false);
+      // log('Readonly value for $fieldName: $readonly');
+
       final fieldString =
           allPythonFields[fieldName]?['string'] as String? ?? fieldName;
-      final subFieldName = fieldMap['sub_field_name'] as String?;
+      // log('Field string for $fieldName: $fieldString');
 
-      return {
+      final subFieldName = fieldMap['sub_field_name'] as String?;
+      // log('Sub field name for $fieldName: $subFieldName');
+
+      final result = {
         'main_field_name': fieldName,
         'type': fieldType,
         'invisible': invisible,
@@ -1567,8 +1597,10 @@ class _FormViewState extends State<FormView>
         'xml_attributes': xmlAttributes,
         'python_attributes': pythonAttributes,
       };
-    } catch (e) {
-      print('Error parsing regular field: $e');
+      log('Returning parsed field: $result'); // Log final result
+      return result;
+    } catch (e, stackTrace) {
+      log('Error parsing regular field: $e, StackTrace: $stackTrace', error: e, stackTrace: stackTrace); // Log error with stack trace
       return null;
     }
   }
@@ -2601,6 +2633,7 @@ class _FormViewState extends State<FormView>
             height: MediaQuery.of(context).size.height * 0.6,
             child: TabBarView(
               children: notebookPages.map((page) {
+                log("notebookPages.map : $page");
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   children: (page['fields'] as List<Map<String, dynamic>>)
@@ -2754,14 +2787,29 @@ class _FormViewState extends State<FormView>
         final isReadonly = fieldData?['readonly'] ??
             allPythonFields[fieldName]?['readonly'] ??
             false;
-        return ImageFieldWidget(
-          name: label,
-          value: value?.toString() ?? '',
-          onChanged: isReadonly
-              ? null
-              : (newValue) => _updateFieldValue(fieldName, newValue),
-          isReadonly: isReadonly,
-          viewType: 'form',
+        String? validatedValue;
+        if (rawValue != null && rawValue is String && rawValue.isNotEmpty) {
+          try {
+            base64Decode(rawValue);
+            validatedValue = rawValue;
+          } catch (e) {
+            log("Invalid base64 data for $fieldName: $rawValue - Error: $e");
+            validatedValue = null;
+          }
+        } else if (rawValue == false) {
+          validatedValue = '';
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ImageFieldWidget(
+            name: label,
+            value: validatedValue ?? '',
+            onChanged: isReadonly
+                ? null
+                : (newValue) => _updateFieldValue(fieldName, newValue),
+            isReadonly: isReadonly,
+            viewType: 'form',
+          ),
         );
       }
 
@@ -2885,6 +2933,7 @@ class _FormViewState extends State<FormView>
             child: EmailFieldWidget(
               name: label,
               value: effectiveValue,
+              readonly: isReadonly,
               onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
             ),
           );
@@ -2895,6 +2944,7 @@ class _FormViewState extends State<FormView>
             child: UrlFieldWidget(
               name: label,
               value: effectiveValue,
+              readonly: isReadonly,
               onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
             ),
           );
@@ -2905,6 +2955,7 @@ class _FormViewState extends State<FormView>
             child: PhoneFieldWidget(
               name: label,
               value: effectiveValue,
+              readonly: isReadonly,
               onChanged: (newValue) => _updateFieldValue(fieldName, newValue),
             ),
           );
@@ -2915,6 +2966,7 @@ class _FormViewState extends State<FormView>
             child: CharFieldWidget(
               name: label,
               value: effectiveValue,
+              readonly: isReadonly,
               onChanged: isReadonly
                   ? null
                   : (newValue) => _updateFieldValue(fieldName, newValue),
@@ -2928,6 +2980,7 @@ class _FormViewState extends State<FormView>
           child: CharFieldWidget(
             name: label,
             value: effectiveValue,
+            readonly: isReadonly,
             onChanged: isReadonly
                 ? null
                 : (newValue) => _updateFieldValue(fieldName, newValue),

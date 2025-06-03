@@ -23,8 +23,6 @@ import '../res/odoo_res/odoo_xml_widget/many2many_tags.dart';
 import '../res/odoo_res/odoo_xml_widget/progressbar.dart';
 import '../res/widgets/no_data_image.dart';
 
-
-
 class TreeViewScreen extends StatefulWidget {
   final String title;
   final List<dynamic> dataList;
@@ -33,7 +31,6 @@ class TreeViewScreen extends StatefulWidget {
   final List<Map<String, dynamic>> fieldMetadata;
   final int? viewId;
   final String? moduleName;
-
 
   const TreeViewScreen({
     Key? key,
@@ -77,7 +74,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   void initState() {
     super.initState();
 
-    dev.log("title  : ${widget.title}  , dataList  : ${widget.dataList}  , modelname : ${widget.modelname} , formdata : ${widget.formdata} , fieldMetadata : ${widget.fieldMetadata}");
+    dev.log(
+        "title  : ${widget.title}  , dataList  : ${widget.dataList}  , modelname : ${widget.modelname} , formdata : ${widget.formdata} , fieldMetadata : ${widget.fieldMetadata}");
 
     _odooClientController = OdooClientController();
     _initializeOdooClient();
@@ -85,7 +83,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     _bodyScrollController = ScrollController();
 
     _headerScrollController.addListener(() {
-      if (_headerScrollController.hasClients && _bodyScrollController.hasClients) {
+      if (_headerScrollController.hasClients &&
+          _bodyScrollController.hasClients) {
         if (_bodyScrollController.offset != _headerScrollController.offset) {
           _bodyScrollController.jumpTo(_headerScrollController.offset);
         }
@@ -93,7 +92,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     });
 
     _bodyScrollController.addListener(() {
-      if (_bodyScrollController.hasClients && _headerScrollController.hasClients) {
+      if (_bodyScrollController.hasClients &&
+          _headerScrollController.hasClients) {
         if (_headerScrollController.offset != _bodyScrollController.offset) {
           _headerScrollController.jumpTo(_bodyScrollController.offset);
         }
@@ -128,7 +128,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
   Map<String, dynamic>? getFieldMetadata(String fieldName) {
     try {
-      return widget.fieldMetadata.firstWhere((metadata) => metadata['name'] == fieldName);
+      return widget.fieldMetadata
+          .firstWhere((metadata) => metadata['name'] == fieldName);
     } catch (e) {
       return null;
     }
@@ -140,25 +141,32 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
     dynamic fieldValue = data[fieldName];
 
-    if (fieldValue == null || fieldValue.toString().isEmpty || fieldValue == false) {
+    if (fieldValue == null ||
+        fieldValue.toString().isEmpty ||
+        fieldValue == false) {
       return '';
     }
 
     final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
     final widgetType = xmlAttrs?.firstWhere(
-          (attr) => attr['name'] == 'widget',
+      (attr) => attr['name'] == 'widget',
       orElse: () => {'value': null},
     )['value'];
 
-    dev.log("widgetType : $widgetType  , fieldName  : $fieldName  , metadata : $metadata");
+    // dev.log(
+    //     "widgetType : $widgetType  , fieldName  : $fieldName  , metadata : $metadata");
     final fieldLabel = metadata['pythonAttributes']['string'] ?? fieldName;
 
-    if (fieldValue is List && fieldValue.length >= 2 && metadata['type'] == 'many2one') {
+    if (fieldValue is List &&
+        fieldValue.length >= 2 &&
+        metadata['type'] == 'many2one') {
       return fieldValue[1].toString();
     }
 
-    if (metadata['type'] == 'selection' && metadata['pythonAttributes']['selection'] != null) {
-      final selection = metadata['pythonAttributes']['selection'] as List<dynamic>;
+    if (metadata['type'] == 'selection' &&
+        metadata['pythonAttributes']['selection'] != null) {
+      final selection =
+          metadata['pythonAttributes']['selection'] as List<dynamic>;
       String displayValue = '';
       for (var option in selection) {
         if (option[0].toString() == fieldValue.toString()) {
@@ -166,7 +174,6 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
           break;
         }
       }
-
 
       if (widgetType == 'priority') {
         return PriorityWidget(
@@ -180,7 +187,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
     if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags') {
       return FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'], fieldValue as List<dynamic>),
+        future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'],
+            fieldValue as List<dynamic>),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -263,7 +271,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     }
 
     if (widgetType == 'boolean_favorite') {
-      dev.log("fieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
+      // dev.log(
+      //     "fieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
       bool favoriteValue = fieldValue is bool ? fieldValue : false;
       return BooleanFavoriteWidget(isFavorite: favoriteValue);
     }
@@ -277,7 +286,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     }
 
     if (widgetType == 'badge') {
-      dev.log("badgefieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
+      // dev.log(
+      //     "badgefieldName: $fieldName, widgetType: boolean_favorite, fieldValue: $fieldValue");
       String badgeValue = fieldValue.toString();
       return BadgeWidget(
         value: badgeValue,
@@ -309,7 +319,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     }
 
     if (widgetType != null) {
-      dev.log('Unsupported widget type: $widgetType for field: $fieldName');
+      // dev.log('Unsupported widget type: $widgetType for field: $fieldName');
       return const Text('Unsupported');
     }
 
@@ -372,14 +382,17 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchMany2ManyOptions(String model, List<dynamic> ids) async {
+  Future<List<Map<String, dynamic>>> _fetchMany2ManyOptions(
+      String model, List<dynamic> ids) async {
     if (ids.isEmpty) return [];
     try {
       final result = await _odooClientController.client.callKw({
         'model': model,
         'method': 'search_read',
         'args': [
-          [['id', 'in', ids]],
+          [
+            ['id', 'in', ids]
+          ],
         ],
         'kwargs': {
           'fields': ['id', 'name'],
@@ -387,9 +400,9 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       });
       return (result as List<dynamic>)
           .map((item) => {
-        'id': item['id'],
-        'name': item['name'] ?? 'Unnamed',
-      })
+                'id': item['id'],
+                'name': item['name'] ?? 'Unnamed',
+              })
           .toList();
     } catch (e) {
       return [];
@@ -398,19 +411,16 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
   bool isFieldVisibleByDefault(Map<String, dynamic> metadata) {
     final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-    final columnInvisible = xmlAttrs
-        ?.firstWhere(
-          (attr) => attr['name'] == 'column_invisible',
+    final columnInvisible = xmlAttrs?.firstWhere(
+      (attr) => attr['name'] == 'column_invisible',
       orElse: () => {'value': 'False'},
     )['value'];
-    final optional = xmlAttrs
-        ?.firstWhere(
-          (attr) => attr['name'] == 'optional',
+    final optional = xmlAttrs?.firstWhere(
+      (attr) => attr['name'] == 'optional',
       orElse: () => {'value': null},
     )['value'];
-    final widgetType = xmlAttrs
-        ?.firstWhere(
-          (attr) => attr['name'] == 'widget',
+    final widgetType = xmlAttrs?.firstWhere(
+      (attr) => attr['name'] == 'widget',
       orElse: () => {'value': null},
     )['value'];
 
@@ -448,24 +458,22 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
                 width: double.maxFinite,
                 child: ListView(
                   shrinkWrap: true,
-                  children: widget.fieldMetadata
-                      .where((metadata) {
-                    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-                    final columnInvisible = xmlAttrs
-                        ?.firstWhere(
-                          (attr) => attr['name'] == 'column_invisible',
+                  children: widget.fieldMetadata.where((metadata) {
+                    final xmlAttrs =
+                        metadata['xmlAttributes'] as List<dynamic>?;
+                    final columnInvisible = xmlAttrs?.firstWhere(
+                      (attr) => attr['name'] == 'column_invisible',
                       orElse: () => {'value': 'False'},
                     )['value'];
                     return columnInvisible != 'True' && columnInvisible != '1';
-                  })
-                      .map((metadata) {
+                  }).map((metadata) {
                     final fieldName = metadata['name'] as String;
-                    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-                    final fieldLabel = xmlAttrs
-                        ?.firstWhere(
+                    final xmlAttrs =
+                        metadata['xmlAttributes'] as List<dynamic>?;
+                    final fieldLabel = xmlAttrs?.firstWhere(
                           (attr) => attr['name'] == 'string',
-                      orElse: () => {'value': null},
-                    )['value'] ??
+                          orElse: () => {'value': null},
+                        )['value'] ??
                         metadata['pythonAttributes']['string'] ??
                         fieldName;
 
@@ -502,17 +510,31 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   }
 
   String _getRecordName(Map<String, dynamic> data) {
-    if (data.containsKey('name') && data['name'] is String && data['name'].isNotEmpty) {
+    // dev.log("data  log : $data");
+    if (data.containsKey('name') &&
+        data['name'] is String &&
+        data['name'].isNotEmpty) {
       return data['name'];
     }
-    if (data.containsKey('display_name') && data['display_name'] is String && data['display_name'].isNotEmpty) {
+
+    if (data.containsKey('complete_name') &&
+        data['complete_name'] is String &&
+        data['complete_name'].isNotEmpty) {
+      return data['complete_name'];
+    }
+    if (data.containsKey('display_name') &&
+        data['display_name'] is String &&
+        data['display_name'].isNotEmpty) {
       return data['display_name'];
     }
     for (var metadata in widget.fieldMetadata) {
       if (metadata['type'] == 'many2one') {
         final fieldName = metadata['name'];
         final fieldValue = data[fieldName];
-        if (fieldValue is List && fieldValue.length >= 2 && fieldValue[1] is String && fieldValue[1].isNotEmpty) {
+        if (fieldValue is List &&
+            fieldValue.length >= 2 &&
+            fieldValue[1] is String &&
+            fieldValue[1].isNotEmpty) {
           return fieldValue[1];
         }
       }
@@ -526,15 +548,18 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     final screenWidth = MediaQuery.of(context).size.width;
     final fieldWidth = max(
         120.0,
-        screenWidth / (visibleFieldCount <= maxFieldsPerScreen ? visibleFieldCount : maxFieldsPerScreen)
-    );
+        screenWidth /
+            (visibleFieldCount <= maxFieldsPerScreen
+                ? visibleFieldCount
+                : maxFieldsPerScreen));
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
           widget.title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         backgroundColor: ODOO_COLOR,
         leading: IconButton(
@@ -571,137 +596,148 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       body: widget.dataList.isEmpty
           ? const NoDataWidget()
           : Column(
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: _headerScrollController,
-            child: Container(
-              color: ODOO_COLOR.withOpacity(0.1),
-              child: Row(
-                children: widget.fieldMetadata
-                    .where((metadata) => isFieldVisible(metadata))
-                    .map((metadata) {
-                  final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
-                  final pythonAttrs = metadata['pythonAttributes'] as Map<String, dynamic>?;
-                  final xmlString = xmlAttrs
-                      ?.firstWhere(
-                        (attr) => attr['name'] == 'string',
-                    orElse: () => {'value': null},
-                  )['value'];
-                  final headerString = xmlString ?? pythonAttrs?['string'] ?? metadata['name'];
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _headerScrollController,
+                  child: Container(
+                    color: ODOO_COLOR.withOpacity(0.1),
+                    child: Row(
+                      children: widget.fieldMetadata
+                          .where((metadata) => isFieldVisible(metadata))
+                          .map((metadata) {
+                        final xmlAttrs =
+                            metadata['xmlAttributes'] as List<dynamic>?;
+                        final pythonAttrs = metadata['pythonAttributes']
+                            as Map<String, dynamic>?;
+                        final xmlString = xmlAttrs?.firstWhere(
+                          (attr) => attr['name'] == 'string',
+                          orElse: () => {'value': null},
+                        )['value'];
+                        final headerString = xmlString ??
+                            pythonAttrs?['string'] ??
+                            metadata['name'];
 
-                  return Container(
-                    width: fieldWidth,
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      headerString,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
-                        color: ODOO_COLOR,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              controller: _bodyScrollController,
-              child: SizedBox(
-                width: fieldWidth * visibleFieldCount,
-                child: ReorderableListView(
-                  onReorder: (oldIndex, newIndex) {
-                    setState(() {
-                      if (newIndex > oldIndex) newIndex--;
-                      final item = widget.dataList.removeAt(oldIndex);
-                      widget.dataList.insert(newIndex, item);
-                      for (int i = 0; i < widget.dataList.length; i++) {
-                        widget.dataList[i]['sequence'] = i + 1;
-                      }
-                    });
-                  },
-                  children: widget.dataList.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final data = entry.value as Map<String, dynamic>;
-                    final recordId = data['id'] as int?;
-                    final recordName = _getRecordName(data);
-
-                    return GestureDetector(
-                      key: ValueKey(index),
-                      onTap: () {
-                        if (recordId != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FormView(
-                                modelName: widget.modelname,
-                                recordId: recordId,
-                                // viewId: widget.viewId,
-                                formData: widget.formdata,
-                                name: recordName,
-                                moduleName: widget.moduleName,
-                              ),
+                        return Container(
+                          width: fieldWidth,
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            headerString,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                              color: ODOO_COLOR,
                             ),
-                          ).then((result) {
-                            if (result == true && mounted) {
-                              _refreshDataList();
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    controller: _bodyScrollController,
+                    child: SizedBox(
+                      width: fieldWidth * visibleFieldCount,
+                      child: ReorderableListView(
+                        onReorder: (oldIndex, newIndex) {
+                          setState(() {
+                            if (newIndex > oldIndex) newIndex--;
+                            final item = widget.dataList.removeAt(oldIndex);
+                            widget.dataList.insert(newIndex, item);
+                            for (int i = 0; i < widget.dataList.length; i++) {
+                              widget.dataList[i]['sequence'] = i + 1;
                             }
                           });
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Record ID not found')),
-                          );
-                        }
-                      },
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-                        ),
-                        child: Row(
-                          children: widget.fieldMetadata
-                              .where((metadata) => isFieldVisible(metadata))
-                              .map((metadata) {
-                            final fieldName = metadata['name'];
-                            final displayValue = getFieldDisplay(data, fieldName);
-                            return SizedBox(
-                              width: fieldWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      if (displayValue is Widget)
-                                        displayValue
-                                      else
-                                        Text(
-                                          displayValue.toString(),
-                                          style: const TextStyle(
-                                            fontSize: 16.0,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                    ],
+                        },
+                        children: widget.dataList.asMap().entries.map((entry) {
+                          // dev.log("tree entry : $entry");
+                          final index = entry.key;
+                          final data = entry.value as Map<String, dynamic>;
+                          final recordId = data['id'] as int?;
+                          final recordName = _getRecordName(data);
+
+                          // dev.log("recordName  : $recordName");
+
+                          return GestureDetector(
+                            key: ValueKey(index),
+                            onTap: () {
+                              if (recordId != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FormView(
+                                      modelName: widget.modelname,
+                                      recordId: recordId,
+                                      // viewId: widget.viewId,
+                                      formData: widget.formdata,
+                                      name: recordName,
+                                      moduleName: widget.moduleName,
+                                    ),
                                   ),
-                                ),
+                                ).then((result) {
+                                  if (result == true && mounted) {
+                                    _refreshDataList();
+                                  }
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Record ID not found')),
+                                );
+                              }
+                            },
+                            child: Container(
+                              height: 100,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Colors.grey.shade300)),
                               ),
-                            );
-                          }).toList(),
-                        ),
+                              child: Row(
+                                children: widget.fieldMetadata
+                                    .where(
+                                        (metadata) => isFieldVisible(metadata))
+                                    .map((metadata) {
+                                  final fieldName = metadata['name'];
+                                  final displayValue =
+                                      getFieldDisplay(data, fieldName);
+                                  return SizedBox(
+                                    width: fieldWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [
+                                            if (displayValue is Widget)
+                                              displayValue
+                                            else
+                                              Text(
+                                                displayValue.toString(),
+                                                style: const TextStyle(
+                                                  fontSize: 16.0,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

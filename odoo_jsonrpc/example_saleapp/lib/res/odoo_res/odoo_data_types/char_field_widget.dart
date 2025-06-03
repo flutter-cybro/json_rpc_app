@@ -10,6 +10,7 @@ class CharFieldWidget extends StatefulWidget {
   final int? maxLines;
   final int? maxLength;
   final bool obscureText;
+  final bool isEmailField; // New parameter to identify email fields
 
   const CharFieldWidget({
     required this.name,
@@ -21,6 +22,7 @@ class CharFieldWidget extends StatefulWidget {
     this.maxLines = 1,
     this.maxLength,
     this.obscureText = false,
+    this.isEmailField = false, // Default to false
     Key? key,
   }) : super(key: key);
 
@@ -32,6 +34,7 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
   bool _isFocused = false;
+  String? _errorText; // For validation error messages
 
   @override
   void initState() {
@@ -39,6 +42,11 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
     _controller = TextEditingController(text: widget.value);
     _focusNode = FocusNode();
     _focusNode.addListener(_handleFocusChange);
+
+    // Add listener for email validation if this is an email field
+    if (widget.isEmailField) {
+      _controller.addListener(_validateEmail);
+    }
   }
 
   void _handleFocusChange() {
@@ -47,8 +55,25 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
     });
 
     if (!_focusNode.hasFocus && !widget.readonly) {
-      widget.onChanged?.call(_controller.text);
+      // Only submit if there are no validation errors
+      if (_errorText == null) {
+        widget.onChanged?.call(_controller.text);
+      }
     }
+  }
+
+  // Email validation method
+  void _validateEmail() {
+    if (!widget.isEmailField) return;
+
+    final value = _controller.text;
+    setState(() {
+      if (value.isNotEmpty && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+        _errorText = 'Please enter a valid email address';
+      } else {
+        _errorText = null;
+      }
+    });
   }
 
   @override
@@ -91,7 +116,9 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
             boxShadow: _isFocused && !widget.readonly
                 ? [
               BoxShadow(
-                color: theme.primaryColor.withOpacity(0.2),
+                color: _errorText != null
+                    ? Colors.red.withOpacity(0.2)
+                    : theme.primaryColor.withOpacity(0.2),
                 blurRadius: 6,
                 spreadRadius: 1,
               )
@@ -105,14 +132,16 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
             maxLines: widget.maxLines,
             maxLength: widget.maxLength,
             obscureText: widget.obscureText,
-            keyboardType: widget.keyboardType,
+            keyboardType: widget.isEmailField
+                ? TextInputType.emailAddress
+                : widget.keyboardType,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: widget.readonly
                   ? (isDarkMode ? Colors.white54 : Colors.black54)
                   : (isDarkMode ? Colors.white : Colors.black),
             ),
             decoration: InputDecoration(
-              hintText: widget.hintText,
+              hintText: widget.hintText ?? (widget.isEmailField ? 'Enter email address' : null),
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
                 color: isDarkMode ? Colors.white38 : Colors.black38,
               ),
@@ -130,30 +159,35 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(
+                  color: _errorText != null
+                      ? Colors.red
+                      : Colors.transparent,
+                  width: 1,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: isDarkMode
-                      ? Colors.grey[700]!
-                      : Colors.grey[300]!,
+                  color: _errorText != null
+                      ? Colors.red
+                      : (isDarkMode ? Colors.grey[700]! : Colors.grey[300]!),
                   width: 1,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: theme.primaryColor,
+                  color: _errorText != null
+                      ? Colors.red
+                      : theme.primaryColor,
                   width: 2,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide(
-                  color: isDarkMode
-                      ? Colors.grey[700]!
-                      : Colors.grey[300]!,
+                  color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
                   width: 1,
                 ),
               ),
@@ -162,8 +196,19 @@ class _CharFieldWidgetState extends State<CharFieldWidget> {
                 padding: EdgeInsets.all(12.0),
                 child: Icon(Icons.lock_outline, size: 18),
               )
+                  : widget.isEmailField
+                  ? const Padding(
+                padding: EdgeInsets.all(12.0),
+                child: Icon(Icons.email_outlined, size: 18),
+              )
                   : null,
+              errorText: _errorText,
             ),
+            onSubmitted: (value) {
+              if (widget.isEmailField && _errorText == null) {
+                widget.onChanged?.call(value);
+              }
+            },
           ),
         ),
         if (widget.maxLength != null) ...[
