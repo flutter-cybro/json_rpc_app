@@ -5,12 +5,14 @@ class FloatTimeFieldWidget extends StatefulWidget {
   final String name;
   final double value; // Expects double
   final Function(double)? onChanged; // Returns double
+  final bool readOnly; // Read-only flag
 
   const FloatTimeFieldWidget({
     Key? key,
     required this.name,
     required this.value,
     this.onChanged,
+    this.readOnly = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -87,6 +89,7 @@ class _FloatTimeFieldWidgetState extends State<FloatTimeFieldWidget> {
             child: TextField(
               controller: _controller,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
+              readOnly: widget.readOnly, // Apply readOnly property
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(4.0),
@@ -95,7 +98,7 @@ class _FloatTimeFieldWidgetState extends State<FloatTimeFieldWidget> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               ),
               onChanged: (newValue) {
-                if (widget.onChanged != null) {
+                if (!widget.readOnly && widget.onChanged != null) { // Only trigger if not readOnly
                   final floatValue = _timeToFloat(newValue);
                   widget.onChanged!(floatValue);
                   log("FloatTimeFieldWidget onChanged - Name: ${widget.name}, Input: $newValue, Float: $floatValue");

@@ -7,12 +7,14 @@ class BinaryFieldWidget extends StatefulWidget {
   final String name;
   final dynamic value;
   final Function(String) onChanged;
+  final bool readOnly; // Read-only flag
 
   const BinaryFieldWidget({
     Key? key,
     required this.name,
     required this.value,
     required this.onChanged,
+    this.readOnly = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -32,6 +34,7 @@ class _BinaryFieldWidgetState extends State<BinaryFieldWidget> {
   }
 
   Future<void> _pickImage() async {
+    if (widget.readOnly) return; // Prevent image picking if readOnly
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
@@ -72,27 +75,29 @@ class _BinaryFieldWidgetState extends State<BinaryFieldWidget> {
                 )
                     : _buildImagePlaceholder(),
               ),
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.upload),
-                    onPressed: _pickImage,
-                    color: Colors.white,
+              if (!widget.readOnly) // Show upload button only if not readOnly
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.upload),
+                      onPressed: _pickImage,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
       ],
     );
   }
+
   Widget _buildImagePlaceholder() {
     return Container(
       width: 150,

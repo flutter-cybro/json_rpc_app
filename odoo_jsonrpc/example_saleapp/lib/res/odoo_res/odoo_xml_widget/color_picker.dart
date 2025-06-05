@@ -19,12 +19,14 @@ final Map<int, Color> colorMap = {
 class ColorPickerWidget extends StatefulWidget {
   final int initialColorValue;
   final String viewType;
+  final bool readonly; // Controls interactivity and UI
   final ValueChanged<int>? onChanged;
 
   const ColorPickerWidget({
     super.key,
     required this.initialColorValue,
     required this.viewType,
+    this.readonly = false, // Default to non-readonly
     this.onChanged,
   });
 
@@ -61,6 +63,9 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
   Widget build(BuildContext context) {
     Color color = colorMap[selectedColorValue] ?? Colors.grey;
 
+    // Visual adjustments for readonly state
+    final effectiveOpacity = widget.readonly ? 0.6 : 1.0;
+
     switch (widget.viewType.toLowerCase()) {
       case 'tree':
         return Align(
@@ -68,7 +73,12 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
           child: Container(
             width: 20,
             height: 20,
-            color: color,
+            decoration: BoxDecoration(
+              color: color.withOpacity(effectiveOpacity),
+              border: widget.readonly
+                  ? Border.all(color: Colors.black26, width: 0.5)
+                  : null,
+            ),
             margin: const EdgeInsets.symmetric(vertical: 4.0),
           ),
         );
@@ -81,35 +91,61 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
               Container(
                 width: 40,
                 height: 40,
-                color: color,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(effectiveOpacity),
+                  border: widget.readonly
+                      ? Border.all(color: Colors.black26, width: 0.5)
+                      : Border.all(color: Colors.black54, width: 1.0),
+                ),
                 margin: const EdgeInsets.only(right: 16.0),
               ),
-              DropdownButton<int>(
-                value: selectedColorValue,
-                items: colorMap.keys.map((int key) {
-                  return DropdownMenuItem<int>(
-                    value: key,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 16,
-                          height: 16,
-                          color: colorMap[key],
-                          margin: const EdgeInsets.only(right: 8.0),
-                        ),
-                        Text('Color #$key'),
-                      ],
+              Expanded(
+                child: DropdownButton<int>(
+                  value: selectedColorValue,
+                  items: colorMap.keys.map((int key) {
+                    return DropdownMenuItem<int>(
+                      value: key,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: colorMap[key]!.withOpacity(effectiveOpacity),
+                              border: widget.readonly
+                                  ? Border.all(color: Colors.black26, width: 0.5)
+                                  : null,
+                            ),
+                            margin: const EdgeInsets.only(right: 8.0),
+                          ),
+                          Text(
+                            'Color #$key',
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(effectiveOpacity),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: widget.readonly
+                      ? null
+                      : (int? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        selectedColorValue = newValue;
+                        widget.onChanged?.call(newValue);
+                      });
+                    }
+                  },
+                  isExpanded: true,
+                  disabledHint: Text(
+                    'Color #$selectedColorValue',
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(effectiveOpacity),
                     ),
-                  );
-                }).toList(),
-                onChanged: (int? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      selectedColorValue = newValue;
-                      widget.onChanged?.call(newValue);
-                    });
-                  }
-                },
+                  ),
+                ),
               ),
             ],
           ),
@@ -120,7 +156,12 @@ class _ColorPickerWidgetState extends State<ColorPickerWidget> {
           child: Container(
             width: 20,
             height: 20,
-            color: color,
+            decoration: BoxDecoration(
+              color: color.withOpacity(effectiveOpacity),
+              border: widget.readonly
+                  ? Border.all(color: Colors.black26, width: 0.5)
+                  : null,
+            ),
             margin: const EdgeInsets.symmetric(vertical: 4.0),
           ),
         );

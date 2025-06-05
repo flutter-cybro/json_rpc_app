@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class FloatField extends StatefulWidget {
-  const FloatField({super.key, this.label = 'Float field'}); // Default label
+  const FloatField({
+    super.key,
+    this.label = 'Float field',
+    this.readOnly = false, // Default to false
+  });
 
   final String label; // Field name
+  final bool readOnly; // Read-only flag
 
   @override
   State<FloatField> createState() => _FloatFieldState();
@@ -41,14 +46,17 @@ class _FloatFieldState extends State<FloatField> {
             TextFormField(
               controller: _controller,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
+              readOnly: widget.readOnly, // Apply readOnly property
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter a float value',
               ),
               validator: _validateFloat,
               onChanged: (value) {
-                // Trigger validation on text change
-                _formKey.currentState?.validate();
+                // Trigger validation on text change only if not readOnly
+                if (!widget.readOnly) {
+                  _formKey.currentState?.validate();
+                }
               },
             ),
           ],

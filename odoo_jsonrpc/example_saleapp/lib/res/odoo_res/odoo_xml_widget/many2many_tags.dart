@@ -42,7 +42,7 @@ class _Many2ManyTagsWidgetState extends State<Many2ManyTagsWidget> {
       width: 200, // Match TreeViewScreen column width
       child: selectedValues.isEmpty
           ? const Text(
-        'None',
+        '',
         style: TextStyle(color: Colors.grey, fontSize: 16),
         overflow: TextOverflow.ellipsis,
       )

@@ -21,6 +21,7 @@ import '../res/odoo_res/odoo_data_types/many2one_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/one2many_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/selection_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/text_field_widget.dart';
+import '../res/odoo_res/odoo_xml_widget/DateRangeFieldWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/boolean_favorite.dart';
 import '../res/odoo_res/odoo_xml_widget/boolean_toggle.dart';
@@ -1536,7 +1537,7 @@ class _FormViewState extends State<FormView>
         'invisible': isInvisible,
       };
 
-      log('_parseDivField: Output = $result'); // Log 11: Final output
+      log('_parseDivField: Output = $result');
       return result;
     } catch (e, stackTrace) {
       log('_parseDivField: Error parsing div field: $e, fieldMap = $fieldMap, stackTrace = $stackTrace', error: e, stackTrace: stackTrace); // Log 12: Error details
@@ -1545,7 +1546,7 @@ class _FormViewState extends State<FormView>
   }
 
   Map<String, dynamic>? _parseRegularField(Map<String, dynamic> fieldMap) {
-    // log('Starting _parseRegularField with input: $fieldMap'); // Log input
+    log('Starting _parseRegularField with input: $fieldMap'); // Log input
     try {
       final fieldName =
           fieldMap['main_field_name'] as String? ?? 'unknown_field';
@@ -2777,6 +2778,77 @@ class _FormViewState extends State<FormView>
         return TaxTotalsFieldWidget(
           name: label,
           value: rawValue,
+        );
+      }
+      if (widgetType == 'daterange' && type == 'date') {
+        final options = fieldData?['options'] ?? {};
+        final endDateField = options['end_date_field'] ?? 'stop_datetime';
+
+        final DateTime? start = valueToDate(_recordState[fieldName]);
+        final DateTime? end = valueToDate(_recordState[endDateField]);
+
+        final DateTimeRange? range =
+        (start != null && end != null) ? DateTimeRange(start: start, end: end) : null;
+
+        return DateRangeFieldWidget(
+          name: label,
+          value: range,
+          isReadonly: isReadonly,
+          onChanged: isReadonly
+              ? null
+              : (newRange) {
+            if (newRange == null) {
+              _updateFieldValue(fieldName, null);
+              _updateFieldValue(endDateField, null);
+            } else {
+              _updateFieldValue(fieldName, newRange['start_date']);
+              _updateFieldValue(endDateField, newRange['end_date']);
+            }
+          },
+        );
+      }
+
+      if (widgetType == 'daterange' && type == 'datetime') {
+        final options = fieldData?['options'] ?? {};
+        final endDateField = options['end_date_field'] ?? 'stop_datetime';
+
+        final DateTime? start = valueToDateTime(_recordState[fieldName]);
+        final DateTime? end = valueToDateTime(_recordState[endDateField]);
+
+        final DateTimeRange? range =
+        (start != null && end != null) ? DateTimeRange(start: start, end: end) : null;
+
+        return DateRangeFieldWidget(
+          name: label,
+          value: range,
+          isReadonly: isReadonly,
+          onChanged: isReadonly
+              ? null
+              : (newRange) {
+            if (newRange == null) {
+              _updateFieldValue(fieldName, null);
+              _updateFieldValue(endDateField, null);
+            } else {
+              // Parse dates and convert to ISO 8601 for datetime fields
+              final startDate = newRange['start_date'] != null
+                  ? DateTime.parse(newRange['start_date']!).toIso8601String()
+                  : null;
+              final endDate = newRange['end_date'] != null
+                  ? DateTime.parse(newRange['end_date']!).toIso8601String()
+                  : null;
+              _updateFieldValue(fieldName, startDate);
+              _updateFieldValue(endDateField, endDate);
+            }
+          },
+        );
+      }
+      if (type == 'datetime') {
+        return DateTimeFieldWidget(
+          name: label,
+          value: value,
+          onChanged: isReadonly
+              ? null
+              : (newValue) => _updateFieldValue(fieldName, newValue),
         );
       }
       if (widgetType == 'boolean_toggle' && type == 'boolean') {

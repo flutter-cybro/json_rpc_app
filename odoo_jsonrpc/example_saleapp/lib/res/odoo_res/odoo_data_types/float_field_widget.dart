@@ -1,43 +1,16 @@
 import 'package:flutter/material.dart';
 
-class FloatFieldWidget extends StatefulWidget {
+class FloatFieldWidget extends StatelessWidget {
   final String name;
   final double value;
+  final bool readOnly; // Read-only flag (no effect as widget is display-only)
 
-
-  FloatFieldWidget({
+  const FloatFieldWidget({
     required this.name,
     required this.value,
+    this.readOnly = false, // Default to false
+    super.key,
   });
-
-  @override
-  _FloatFieldWidgetState createState() => _FloatFieldWidgetState();
-}
-
-class _FloatFieldWidgetState extends State<FloatFieldWidget> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.value.toStringAsFixed(2));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-
-  void _onValueChanged(String newValue) {
-    final double? parsedValue = double.tryParse(newValue);
-    // if (parsedValue != null) {
-    //
-    // } else {
-    //
-    // }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,17 +20,17 @@ class _FloatFieldWidgetState extends State<FloatFieldWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
-          TextField(
-            controller: _controller,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+          const SizedBox(height: 4), // Reduced height to minimize space
+          Text(
+            value.toStringAsFixed(2), // Display float with 2 decimal places
+            style: const TextStyle(
+              fontSize: 16.0,
+              color: Colors.black87,
             ),
-            onChanged: _onValueChanged,
+            overflow: TextOverflow.ellipsis, // Handle long text
           ),
         ],
       ),

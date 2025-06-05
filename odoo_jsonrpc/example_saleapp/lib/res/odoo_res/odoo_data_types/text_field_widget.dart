@@ -4,12 +4,14 @@ class TextFieldWidget extends StatefulWidget {
   final String name;
   final String value;
   final ValueChanged<String> onChanged;
+  final bool readOnly; // Read-only flag
 
   const TextFieldWidget({
     Key? key,
     required this.name,
     required this.value,
     required this.onChanged,
+    this.readOnly = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -38,12 +40,13 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(color: Colors.grey),
       ),
-      trailing: const Icon(Icons.edit, color: Colors.blue),
-      onTap: () => _openTextEditor(context),
+      trailing: widget.readOnly ? null : const Icon(Icons.edit, color: Colors.blue), // Hide edit icon if readOnly
+      onTap: widget.readOnly ? null : () => _openTextEditor(context), // Disable tap if readOnly
     );
   }
 
   void _openTextEditor(BuildContext context) {
+    if (widget.readOnly) return; // Prevent opening bottom sheet if readOnly
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -70,19 +73,21 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
                 controller: _controller,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
+                readOnly: widget.readOnly, // Apply readOnly to TextField
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Enter text...",
                 ),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  widget.onChanged(_controller.text);
-                  Navigator.pop(context);
-                },
-                child: const Text("Save"),
-              ),
+              if (!widget.readOnly) // Show Save button only if not readOnly
+                ElevatedButton(
+                  onPressed: () {
+                    widget.onChanged(_controller.text);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Save"),
+                ),
             ],
           ),
         );

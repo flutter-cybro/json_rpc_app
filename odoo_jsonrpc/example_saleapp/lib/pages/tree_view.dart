@@ -7,6 +7,7 @@ import '../controller/odoo_crud_mixier.dart';
 import '../controller/odooclient_manager_controller.dart';
 import '../res/constants/app_colors.dart';
 import '../res/odoo_res/odoo_data_types/boolean_field_widget.dart';
+import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
 import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
@@ -228,6 +229,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       );
     }
 
+
     if (metadata['type'] == 'html') {
       return SizedBox(
         height: 76,
@@ -312,11 +314,25 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
     if (metadata['type'] == 'reference') {
       String referenceValue = fieldValue is String ? fieldValue : '';
+      print('referenceValue: $referenceValue ');
+
       return ReferenceFieldWidget(
         value: referenceValue,
-        onTap: () {},
+        onTap: () {
+        },
+        odooClientController: _odooClientController,
       );
     }
+
+    if (metadata['type'] == 'float') {
+      double floatValue = fieldValue is num ? fieldValue.toDouble() : 0.0;
+      return FloatFieldWidget(
+        name: '',
+        value: floatValue,
+      );
+    }
+
+
 
     if (widgetType != null) {
       // dev.log('Unsupported widget type: $widgetType for field: $fieldName');
@@ -636,104 +652,110 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    controller: _bodyScrollController,
-                    child: SizedBox(
-                      width: fieldWidth * visibleFieldCount,
-                      child: ReorderableListView(
-                        onReorder: (oldIndex, newIndex) {
-                          setState(() {
-                            if (newIndex > oldIndex) newIndex--;
-                            final item = widget.dataList.removeAt(oldIndex);
-                            widget.dataList.insert(newIndex, item);
-                            for (int i = 0; i < widget.dataList.length; i++) {
-                              widget.dataList[i]['sequence'] = i + 1;
-                            }
-                          });
-                        },
-                        children: widget.dataList.asMap().entries.map((entry) {
-                          // dev.log("tree entry : $entry");
-                          final index = entry.key;
-                          final data = entry.value as Map<String, dynamic>;
-                          final recordId = data['id'] as int?;
-                          final recordName = _getRecordName(data);
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Ensure fieldWidth and visibleFieldCount are valid
+                      final double validFieldWidth = fieldWidth > 0 && fieldWidth.isFinite ? fieldWidth : 100.0; // Fallback width
+                      final int validVisibleFieldCount = visibleFieldCount > 0 ? visibleFieldCount : 1; // Fallback count
+                      final double calculatedWidth = validFieldWidth * validVisibleFieldCount;
 
-                          // dev.log("recordName  : $recordName");
-
-                          return GestureDetector(
-                            key: ValueKey(index),
-                            onTap: () {
-                              if (recordId != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FormView(
-                                      modelName: widget.modelname,
-                                      recordId: recordId,
-                                      // viewId: widget.viewId,
-                                      formData: widget.formdata,
-                                      name: recordName,
-                                      moduleName: widget.moduleName,
-                                    ),
-                                  ),
-                                ).then((result) {
-                                  if (result == true && mounted) {
-                                    _refreshDataList();
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller: _bodyScrollController,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minWidth: calculatedWidth,
+                            maxWidth: calculatedWidth.isFinite ? calculatedWidth : constraints.maxWidth,
+                          ),
+                          child: SizedBox(
+                            width: calculatedWidth.isFinite ? calculatedWidth : constraints.maxWidth,
+                            child: ReorderableListView(
+                              onReorder: (oldIndex, newIndex) {
+                                setState(() {
+                                  if (newIndex > oldIndex) newIndex--;
+                                  final item = widget.dataList.removeAt(oldIndex);
+                                  widget.dataList.insert(newIndex, item);
+                                  for (int i = 0; i < widget.dataList.length; i++) {
+                                    widget.dataList[i]['sequence'] = i + 1;
                                   }
                                 });
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Record ID not found')),
-                                );
-                              }
-                            },
-                            child: Container(
-                              height: 100,
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey.shade300)),
-                              ),
-                              child: Row(
-                                children: widget.fieldMetadata
-                                    .where(
-                                        (metadata) => isFieldVisible(metadata))
-                                    .map((metadata) {
-                                  final fieldName = metadata['name'];
-                                  final displayValue =
-                                      getFieldDisplay(data, fieldName);
-                                  return SizedBox(
-                                    width: fieldWidth,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: [
-                                            if (displayValue is Widget)
-                                              displayValue
-                                            else
-                                              Text(
-                                                displayValue.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 16.0,
-                                                  color: Colors.black87,
-                                                ),
-                                              ),
-                                          ],
+                              },
+                              children: widget.dataList.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final data = entry.value as Map<String, dynamic>;
+                                final recordId = data['id'] as int?;
+                                final recordName = _getRecordName(data);
+
+                                return GestureDetector(
+                                  key: ValueKey(index),
+                                  onTap: () {
+                                    if (recordId != null) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => FormView(
+                                            modelName: widget.modelname,
+                                            recordId: recordId,
+                                            formData: widget.formdata,
+                                            name: recordName,
+                                            moduleName: widget.moduleName,
+                                          ),
                                         ),
-                                      ),
+                                      ).then((result) {
+                                        if (result == true && mounted) {
+                                          _refreshDataList();
+                                        }
+                                      });
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Record ID not found')),
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
                                     ),
-                                  );
-                                }).toList(),
-                              ),
+                                    child: Row(
+                                      children: widget.fieldMetadata
+                                          .where((metadata) => isFieldVisible(metadata))
+                                          .map((metadata) {
+                                        final fieldName = metadata['name'];
+                                        final displayValue = getFieldDisplay(data, fieldName);
+                                        return SizedBox(
+                                          width: validFieldWidth, // Use validated fieldWidth
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: [
+                                                  if (displayValue is Widget)
+                                                    displayValue
+                                                  else
+                                                    Text(
+                                                      displayValue.toString(),
+                                                      style: const TextStyle(
+                                                        fontSize: 16.0,
+                                                        color: Colors.black87,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
