@@ -1,120 +1,90 @@
-import 'dart:developer';
+import 'package:odoo_jsonrpc/src/odoo_client.dart';
 import 'package:flutter/material.dart';
 
-class ListActivityWidget extends StatefulWidget {
-  final String fieldName;
-  final List<dynamic> value; // The one2many field value (e.g., list of IDs)
-  final String relationModel; // The related model (e.g., 'mail.activity')
-  final dynamic client; // Odoo client for RPC calls
 
-  const ListActivityWidget({
+class ListActivityWidget extends StatelessWidget {
+  final String fieldName;
+  final List<dynamic> value;
+  final String relationModel;
+  final OdooClient client;
+  final Future<List<Map<String, dynamic>>> _activitiesFuture;
+
+  ListActivityWidget({
     Key? key,
     required this.fieldName,
     required this.value,
     required this.relationModel,
     required this.client,
-  }) : super(key: key);
+  })  : _activitiesFuture = _fetchActivities(value, relationModel, client),
+        super(key: key);
 
-  @override
-  _ListActivityWidgetState createState() => _ListActivityWidgetState();
-}
-
-class _ListActivityWidgetState extends State<ListActivityWidget> {
-  List<Map<String, dynamic>> relatedRecords = [];
-  bool isLoading = true;
-  String? errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchRelatedRecords();
-  }
-
-  Future<void> _fetchRelatedRecords() async {
-    if (widget.value.isEmpty) {
-      setState(() {
-        isLoading = false;
-        relatedRecords = [];
-      });
-      return;
-    }
-
+  static Future<List<Map<String, dynamic>>> _fetchActivities(
+      List<dynamic> value, String relationModel, OdooClient client) async {
+    if (value.isEmpty || relationModel.isEmpty) return [];
     try {
-      final response = await widget.client.callKw({
-        'model': widget.relationModel,
+      final result = await client.callKw({
+        'model': relationModel,
         'method': 'search_read',
-        'args': [],
+        'args': [
+          [['id', 'in', value]],
+        ],
         'kwargs': {
-          'domain': [['id', 'in', widget.value]],
-          'fields': ['display_name', 'activity_type_id', 'date_deadline'],
+          'fields': ['id', 'display_name', 'activity_type_id', 'summary', 'date_deadline'],
         },
       });
-
-      if (response is List<dynamic>) {
-        setState(() {
-          relatedRecords = response.map((record) => Map<String, dynamic>.from(record)).toList();
-          isLoading = false;
-        });
-      } else {
-        throw Exception('Invalid response format');
-      }
+      return (result as List<dynamic>).cast<Map<String, dynamic>>();
     } catch (e) {
-      setState(() {
-        isLoading = false;
-        errorMessage = 'Error loading activities: $e';
-      });
-      log('Error fetching related records for ${widget.fieldName}: $e');
+      debugPrint('Error fetching activities: $e');
+      return [];
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    }
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _activitiesFuture, // Use memoized future
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          );
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Text('');
+        }
 
-    if (errorMessage != null) {
-      return Text(
-        errorMessage!,
-        style: const TextStyle(color: Colors.red, fontSize: 12),
-        overflow: TextOverflow.ellipsis,
-      );
-    }
+        final activities = snapshot.data!;
+        return SizedBox(
+          height: 76,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: activities.map((activity) {
+                final displayName = activity['display_name'] ?? 'Unnamed';
+                final activityType = activity['activity_type_id'] is List
+                    ? activity['activity_type_id'][1]
+                    : 'Unknown';
+                final summary = activity['summary'] ?? '';
+                final dueDate = activity['date_deadline'] ?? '';
 
-    if (relatedRecords.isEmpty) {
-      return const Text(
-        '',
-        style: TextStyle(fontSize: 14, color: Colors.grey),
-        overflow: TextOverflow.ellipsis,
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: relatedRecords.map((record) {
-        final displayName = record['display_name'] ?? '';
-        final activityType = record['activity_type_id'] is List
-            ? record['activity_type_id'][1]
-            : 'Unknown';
-        final deadline = record['date_deadline'] ?? '';
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          // child: Text(
-          //   '$activityType: $displayName ($deadline)',
-          //   style: const TextStyle(fontSize: 14),
-          //   overflow: TextOverflow.ellipsis,
-          // ),
-          child: Text(
-            '$activityType',
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Chip(
+                    label: Text(
+                      '$activityType: $summary${dueDate.isNotEmpty ? ' ($dueDate)' : ''}',
+                      style: const TextStyle(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    backgroundColor: Colors.blue.shade100,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 }

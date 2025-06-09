@@ -147,24 +147,6 @@ class _SettingsFormViewState extends State<SettingsFormView> {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   Future<void> _parseAndCombineData() async {
     try {
       if (widget.settingsData != null) {

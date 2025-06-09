@@ -34,7 +34,7 @@ class _BinaryFieldWidgetState extends State<BinaryFieldWidget> {
   }
 
   Future<void> _pickImage() async {
-    if (widget.readOnly) return; // Prevent image picking if readOnly
+    if (widget.readOnly) return;
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
