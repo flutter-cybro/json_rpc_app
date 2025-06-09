@@ -1121,7 +1121,7 @@ class _FormViewState extends State<FormView>
         setState(() {
           notebookPages = notebookSections
               .map((page) {
-                // log("page : $page");
+                log("page : $page");
                 final pageMap = page as Map<String, dynamic>;
                 final xmlAttrs =
                     pageMap['xml_attributes'] as Map<String, dynamic>? ?? {};
@@ -1226,7 +1226,7 @@ class _FormViewState extends State<FormView>
                         'invisible': invisible,
                         'invisible_column': invisibleColumn,
                         'optional': optional,
-                        'mode_fields': modeFields,
+                        // 'mode_fields': modeFields,
                         if (fieldType == 'one2many') ...{
                           'relation_model': allPythonFields[fieldName]
                                   ?['relation'] as String? ??

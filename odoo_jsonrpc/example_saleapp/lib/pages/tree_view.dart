@@ -17,6 +17,7 @@ import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/RemainingDaysWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/badge.dart';
 import '../res/odoo_res/odoo_xml_widget/boolean_favorite.dart';
+import '../res/odoo_res/odoo_xml_widget/char_with_placeholder_field_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/color.dart';
 import '../res/odoo_res/odoo_xml_widget/color_picker.dart';
 import '../res/odoo_res/odoo_xml_widget/handle.dart';
@@ -479,6 +480,22 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         odooClientController: _odooClientController, // Pass the Odoo client
       );
     }
+
+    if (metadata['type'] == 'char' || widgetType == 'char_with_placeholder_field') {
+      String charValue = fieldValue is String ? fieldValue : '';
+      String hintText = xmlAttrs?.firstWhere(
+            (attr) => attr['name'] == 'placeholder',
+        orElse: () => {'value': 'Enter $fieldLabel'},
+      )['value'] ?? 'Enter $fieldLabel';
+      return CharWithPlaceholderFieldWidget(
+        name: fieldLabel,
+        value: charValue,
+        hintText: hintText,
+        readOnly: true,
+        viewType: 'tree',
+      );
+    }
+
     if (widgetType != null) {
       // dev.log('Unsupported widget type: $widgetType for field: $fieldName');
       return const Text('Unsupported');
@@ -609,6 +626,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       'color_picker',
       'many2many_tags',
       'priority', // Add priority widget
+      'char_with_placeholder_field'
     };
     print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
     return (columnInvisible != 'True' && columnInvisible != '1') &&

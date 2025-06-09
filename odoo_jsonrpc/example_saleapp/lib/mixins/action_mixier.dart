@@ -74,38 +74,46 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
     required BuildContext buildContext,
   }) async {
     try {
-      final resModel = actionResponse['res_model'] as String? ?? '';
+      final resModel = (actionResponse['res_model'] as String? ?? actionResponse['model_name'] as String? ?? '');
       final viewMode = actionResponse['view_mode'] as String? ?? '';
-      final views = actionResponse['views'] as List<dynamic>? ?? [[false, 'form']];
+      final views = actionResponse['views'] as List<dynamic>? ?? [];
+      final bindingViewTypes = actionResponse['binding_view_types'] as String? ?? '';
       final target = actionResponse['target'] as String? ?? 'current';
 
-      log("resModel  : $resModel , viewMode : $viewMode , views : $views , target : $target");
+      log("resModel: $resModel, viewMode: $viewMode, views: $views, bindingViewTypes: $bindingViewTypes, target: $target");
 
+      // Determine viewType, prioritizing view_mode, then views, then binding_view_types
       String viewType = 'list';
-      for (var view in views) {
-        if (view is List && view.length >= 2 && view[1] is String) {
-          if (view[1] != 'form' && view[1] != 'list') {
-            viewType = 'list';
-            break;
-          } else if (view[1] == 'form' || view[1] == 'list') {
-            viewType = view[1] as String;
-            break;
+      if (viewMode.isNotEmpty) {
+        viewType = viewMode.split(',').firstWhere(
+              (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
+          orElse: () => 'list',
+        );
+      } else if (views.isNotEmpty) {
+        for (var view in views) {
+          if (view is List && view.length >= 2 && view[1] is String) {
+            if (['form', 'list'].contains(view[1])) {
+              viewType = view[1] as String;
+              break;
+            }
           }
         }
+      } else if (bindingViewTypes.isNotEmpty) {
+        // Parse binding_view_types (e.g., 'list,form')
+        final viewTypes = bindingViewTypes.split(',').map((e) => e.trim()).toList();
+        viewType = viewTypes.firstWhere(
+              (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
+          orElse: () => 'list',
+        );
       }
 
-      // final viewType = viewMode.split(',').firstWhere(
-      //       (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
-      //   orElse: () => 'list',
-      // ); // Use first valid view type
-
-      log("resModel: $resModel, viewMode: $viewMode, views: $views, viewType: $viewType, target: $target");
+      log("Determined viewType: $viewType");
 
       String formData = '';
       List<Map<String, dynamic>> fieldMetadata = [];
 
       if (resModel.isEmpty) {
-        throw Exception('No res_model found in action response');
+        throw Exception('No res_model or model_name found in action response');
       }
 
       if (!['current', 'new', 'fullscreen', 'inline', 'main'].contains(target)) {
@@ -118,20 +126,17 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
           'model': resModel,
           'method': 'get_views',
           'args': [],
-          'kwargs': {'views': views, 'context': context},
+          'kwargs': {'views': views.isNotEmpty ? views : [[false, viewType]], 'context': context},
         });
-        // log("viewResult (form): $viewResult");
         formData = viewResult['views']['form']?['arch'] as String? ?? '';
       } catch (e) {
         debugPrint('Error fetching form views for $resModel: $e');
         formData = '';
       }
 
-      log("viewType: $viewType");
-
       // Create the widget based on viewType
       Widget targetWidget;
-      if (viewType == 'form' || views.every((v) => v[1] == 'form')) {
+      if (viewType == 'form' || (views.isNotEmpty && views.every((v) => v[1] == 'form'))) {
         int recordId = actionResponse['res_id'] is int ? actionResponse['res_id'] as int : 0;
         Map<String, dynamic>? defaultValues;
 
@@ -156,12 +161,12 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
 
         targetWidget = FormView(
           modelName: resModel,
-          recordId: actionResponse['res_id'] is int ? actionResponse['res_id'] as int : 0,
+          recordId: recordId,
           formData: formData,
           name: menuName,
           moduleName: modulename,
-            defaultValues: defaultValues,
-            wizard: true,
+          defaultValues: defaultValues,
+          wizard: true,
           parentId: parentId,
         );
       } else {
@@ -191,6 +196,8 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
           },
         });
 
+        log("dataList  : $dataList  , resModel : $resModel  , _formatDomain(actionResponse['domain'])  : ${_formatDomain(actionResponse['domain'])}");
+
         targetWidget = TreeViewScreen(
           title: menuName,
           dataList: dataList ?? [],
@@ -203,7 +210,6 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
 
       // Handle target
       if (target == 'new') {
-        // Show the widget in a dialog
         await showDialog(
           context: buildContext,
           builder: (dialogContext) => Dialog(
@@ -211,13 +217,6 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
               width: MediaQuery.of(buildContext).size.width * 0.8,
               height: MediaQuery.of(buildContext).size.height * 0.6,
               child: Scaffold(
-                // appBar: AppBar(
-                //   title: Text(' '),
-                //   leading: IconButton(
-                //     icon: const Icon(Icons.close),
-                //     onPressed: () => Navigator.of(dialogContext).pop(),
-                //   ),
-                // ),
                 body: targetWidget,
               ),
             ),
@@ -225,7 +224,6 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
         );
         return true; // Indicate the action was handled as a dialog
       } else {
-        // Store the widget for navigation
         _targetWidget = targetWidget;
         return false; // Indicate navigation is required
       }
@@ -241,7 +239,6 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
       return true; // Handled as an error dialog
     }
   }
-
   /// Parses field metadata from fields_view_get response.
   List<Map<String, dynamic>> _parseFieldMetadata(dynamic fields) {
     if (fields is! List) return [];
