@@ -36,47 +36,83 @@ class _SelectionFieldWidgetState extends State<SelectionFieldWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value) {
       setState(() {
-        _selectedKey = widget.value; // Update with new value
+        _selectedKey = widget.value;
       });
     }
   }
 
   List<DropdownMenuItem<String>> _buildDropdownItems() {
-    final items = <DropdownMenuItem<String>>[
-      // Add empty option as the first item
-      const DropdownMenuItem<String>(
+    final items = <DropdownMenuItem<String>>[];
+    final seenValues = <String?>{};
+
+    // Add empty option only if it's not already in the options
+    if (!_hasEmptyOption()) {
+      items.add(const DropdownMenuItem<String>(
         value: null,
         child: Text('Select an option'),
-      ),
-    ];
+      ));
+      seenValues.add(null);
+    }
 
     if (widget.options == null || widget.options!.isEmpty) {
       return items;
     }
 
-    items.addAll(widget.options!.map((option) {
-      String key;
+    for (final option in widget.options!) {
+      String? key;
       String displayValue;
 
       if (option is List && option.length >= 2) {
-        key = option[0].toString();
-        displayValue = option[1].toString();
+        key = option[0]?.toString();
+        displayValue = option[1]?.toString() ?? '';
       } else {
-        key = option.toString();
-        displayValue = option.toString();
+        key = option?.toString();
+        displayValue = option?.toString() ?? '';
       }
 
-      return DropdownMenuItem<String>(
+      // Skip if we've already seen this value
+      if (seenValues.contains(key)) {
+        continue;
+      }
+
+      seenValues.add(key);
+      items.add(DropdownMenuItem<String>(
         value: key,
         child: Text(displayValue),
-      );
-    }));
+      ));
+    }
 
     return items;
   }
 
+  bool _hasEmptyOption() {
+    if (widget.options == null || widget.options!.isEmpty) {
+      return false;
+    }
+
+    for (final option in widget.options!) {
+      String? key;
+      if (option is List && option.length >= 2) {
+        key = option[0]?.toString();
+      } else {
+        key = option?.toString();
+      }
+
+      if (key == null || key.isEmpty) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dropdownItems = _buildDropdownItems();
+
+    // Ensure the selected value exists in the items
+    final selectedValueExists = _selectedKey == null ||
+        dropdownItems.any((item) => item.value == _selectedKey);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -97,8 +133,8 @@ class _SelectionFieldWidgetState extends State<SelectionFieldWidget> {
           ),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedKey,
-              items: _buildDropdownItems(),
+              value: selectedValueExists ? _selectedKey : null,
+              items: dropdownItems,
               onChanged: widget.readonly || widget.onChanged == null
                   ? null
                   : (newKey) {
@@ -114,7 +150,7 @@ class _SelectionFieldWidgetState extends State<SelectionFieldWidget> {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               ),
               isExpanded: true,
-              hint: const Text('Select an option'), // Hint when no value is selected
+              hint: const Text('Select an option'),
             ),
           ),
         ],

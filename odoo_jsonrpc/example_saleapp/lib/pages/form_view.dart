@@ -1135,7 +1135,7 @@ class _FormViewState extends State<FormView>
 
                 final fields = (pageMap['fields'] as List<dynamic>)
                     .map((field) {
-                      // log("map((field) : $field");
+                      log("map((field) : $field");
                       final fieldMap = field as Map<String, dynamic>;
                       final fieldName =
                           fieldMap['main_field_name'] as String? ??
