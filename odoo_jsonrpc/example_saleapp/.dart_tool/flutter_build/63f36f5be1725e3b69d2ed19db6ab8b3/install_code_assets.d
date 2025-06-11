@@ -1,0 +1,1 @@
+ /home/cybrosys/StudioProjects/odoo_jsonrpc/example_saleapp/.dart_tool/flutter_build/63f36f5be1725e3b69d2ed19db6ab8b3/native_assets.json: 
