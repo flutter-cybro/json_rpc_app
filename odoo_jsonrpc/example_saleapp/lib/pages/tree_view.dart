@@ -1,22 +1,20 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'dart:math';
 import 'package:example_saleapp/pages/form_view.dart';
 import 'package:example_saleapp/res/odoo_res/odoo_data_types/many2one_field_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import '../controller/odoo_crud_mixier.dart';
 import '../controller/odooclient_manager_controller.dart';
 import '../res/constants/app_colors.dart';
 import '../res/odoo_res/odoo_data_types/MonetaryFieldWidget.dart';
-import '../res/odoo_res/odoo_data_types/boolean_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
-import '../res/odoo_res/odoo_data_types/monetary_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
 import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/RemainingDaysWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/badge.dart';
 import '../res/odoo_res/odoo_xml_widget/boolean_favorite.dart';
+import '../res/odoo_res/odoo_xml_widget/boolean_toggle.dart';
 import '../res/odoo_res/odoo_xml_widget/char_with_placeholder_field_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/color.dart';
 import '../res/odoo_res/odoo_xml_widget/color_picker.dart';
@@ -26,6 +24,8 @@ import '../res/odoo_res/odoo_xml_widget/image_url.dart';
 import '../res/odoo_res/odoo_xml_widget/list_activity.dart';
 import '../res/odoo_res/odoo_xml_widget/many2many_tags.dart';
 import '../res/odoo_res/odoo_xml_widget/progressbar.dart';
+import '../res/odoo_res/odoo_xml_widget/so_line_field.dart';
+import '../res/odoo_res/odoo_xml_widget/timesheet_uom_timer_widget.dart';
 import '../res/widgets/no_data_image.dart';
 
 
@@ -38,6 +38,7 @@ class TreeViewScreen extends StatefulWidget {
   final List<Map<String, dynamic>> fieldMetadata;
   final int? viewId;
   final String? moduleName;
+  final bool readonly; // Add this
 
 
   const TreeViewScreen({
@@ -49,6 +50,7 @@ class TreeViewScreen extends StatefulWidget {
     required this.fieldMetadata,
     this.moduleName,
     this.viewId,
+    this.readonly = true,
   }) : super(key: key);
 
   @override
@@ -56,7 +58,6 @@ class TreeViewScreen extends StatefulWidget {
 }
 
 class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
-
   late final OdooClientController _odooClientController;
   late List<String> _visibleFields;
   late ScrollController _headerScrollController;
@@ -82,6 +83,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   @override
   void initState() {
     super.initState();
+    dev.log("TreeView  : ${widget.modelname}  , ${widget.title}  , ${widget.moduleName}  , ${widget.dataList} , \n\n\n ${widget.fieldMetadata}");
     _odooClientController = OdooClientController();
     _initializeOdooClient();
     _headerScrollController = ScrollController();
@@ -223,9 +225,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       return MonetaryFieldWidget(
         name: fieldLabel,
         value: monetaryValue,
-        currency: '', onChanged: (double value) {  },
-        // currencySymbolFuture: fetchCurrencySymbol(),
-        // viewType: 'tree', currency: '', onChanged: (double value) {  },
+        currencySymbolFuture: fetchCurrencySymbol(),
+        viewType: 'tree',
       );
     }
     if (fieldValue is List &&
@@ -235,15 +236,23 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
     }
     if (metadata['type'] == 'float') {
       double floatValue = fieldValue is num ? fieldValue.toDouble() : 0.0;
+      if (widgetType == 'timesheet_uom') {
+        return TimesheetUomTimerWidget(
+          name: fieldLabel,
+          value: floatValue,
+          viewType: 'tree',
+        );
+      }
       return FloatFieldWidget(
         name: '',
         value: floatValue,
       );
     }
+
     if (metadata['type'] == 'selection' &&
         metadata['pythonAttributes']['selection'] != null) {
       final selection =
-      metadata['pythonAttributes']['selection'] as List<dynamic>;
+          metadata['pythonAttributes']['selection'] as List<dynamic>;
       String displayValue = '';
       for (var option in selection) {
         if (option[0].toString() == fieldValue.toString()) {
@@ -297,6 +306,36 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         },
       );
     }
+    if (metadata['type'] == 'boolean' && widgetType == 'boolean_toggle') {
+      bool toggleValue = fieldValue is bool ? fieldValue : false;
+      return BooleanToggleFieldWidget(
+        name: fieldLabel,
+        value: toggleValue,
+        onChanged: (newValue) {
+          setState(() {
+            data[fieldName] = newValue;
+            _updateRecord(data['id'], {fieldName: newValue});
+          });
+        },
+        readonly: true, // Keep readonly for tree view
+        viewType: 'tree', // Specify tree view layout
+      );
+    }
+    if (metadata['type'] == 'char' || widgetType == 'char_with_placeholder_field') {
+      String charValue = fieldValue is String ? fieldValue : '';
+      String hintText = xmlAttrs?.firstWhere(
+            (attr) => attr['name'] == 'placeholder',
+        orElse: () => {'value': 'Enter $fieldLabel'},
+      )['value'] ?? 'Enter $fieldLabel';
+      return CharWithPlaceholderFieldWidget(
+        name: fieldLabel,
+        value: charValue,
+        hintText: hintText,
+        readOnly: true,
+        viewType: 'tree',
+      );
+    }
+
     if (metadata['type'] == 'one2many' || widgetType == 'list_activity') {
       return ListActivityWidget(
         fieldName: fieldName,
@@ -305,6 +344,53 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         client: _odooClientController.client,
       );
     }
+    if (metadata['type'] == 'many2one' && widgetType == 'so_line_field') {
+      dynamic valueId = (fieldValue is List && fieldValue.length >= 2)
+          ? fieldValue[0]
+          : null;
+      String displayValue = (fieldValue is List && fieldValue.length >= 2)
+          ? fieldValue[1].toString()
+          : '';
+
+      return FutureBuilder<List<Map<String, dynamic>>>(
+        future: _fetchMany2OneOptions(
+            metadata['pythonAttributes']['relation'] ?? '',
+            valueId != null ? [valueId] : []),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          final options = snapshot.data ?? [
+            if (valueId != null) {'id': valueId, 'name': displayValue}
+          ];
+
+          return SoLineFieldWidget(
+            name: fieldLabel,
+            value: valueId,
+            options: options,
+            onValueChanged: (newValue) {
+              setState(() {
+                data[fieldName] = newValue != null
+                    ? [newValue, _getDisplayNameFromOptions(newValue, options)]
+                    : false;
+                if (newValue != null) {
+                  _updateRecord(data['id'], {fieldName: newValue});
+                }
+              });
+            },
+            viewType: 'tree',
+            readonly: true, // Set to true for tree view to prevent editing
+            hintText: 'Select $fieldLabel',
+            odooClientController: _odooClientController,
+          );
+        },
+      );
+    }
+
+
     if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags') {
       return FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'],
@@ -521,6 +607,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       }
     }
   }
+
+
 // Helper function to fetch many2one options
   Future<List<Map<String, dynamic>>> _fetchMany2OneOptions(String model, List<dynamic> ids) async {
     if (model.isEmpty || ids.isEmpty) return [];
@@ -625,10 +713,12 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       'boolean_favorite',
       'color_picker',
       'many2many_tags',
-      'priority', // Add priority widget
-      'char_with_placeholder_field'
+      'priority',
+      'char_with_placeholder_field',
+      'boolean_toggle',
+      'timesheet_uom_timer'// Add this
     };
-    print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
+print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
     return (columnInvisible != 'True' && columnInvisible != '1') &&
         optional != 'hide' &&
         (widgetType == null || allowedWidgetTypes.contains(widgetType));

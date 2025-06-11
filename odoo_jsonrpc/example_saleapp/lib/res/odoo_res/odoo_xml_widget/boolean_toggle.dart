@@ -5,12 +5,14 @@ class BooleanToggleFieldWidget extends StatefulWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
   final bool readonly;
+  final String viewType;
 
   const BooleanToggleFieldWidget({
     required this.name,
     required this.value,
     this.onChanged,
     this.readonly = false,
+    this.viewType = 'form'
   });
 
   @override

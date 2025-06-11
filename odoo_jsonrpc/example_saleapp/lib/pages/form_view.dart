@@ -113,7 +113,7 @@ class _FormViewState extends State<FormView>
   @override
   void initState() {
     super.initState();
-    print("name of modulename : ${widget.wizard}");
+    print("name of modulename : ${widget.formData}");
     if (widget.recordId == 0) {
       tempRecordId = DateTime.now().millisecondsSinceEpoch;
     }
@@ -897,6 +897,7 @@ class _FormViewState extends State<FormView>
                                                                     // 'invisible': parseInvisibleValue(childAttrs['invisible']),
                                                                   };
                                                                 }
+                                                                return null;
                                                                 return null;
                                                               })
                                                               ?.where((item) =>
