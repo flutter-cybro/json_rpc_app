@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class PriorityWidget extends StatelessWidget {
   final String value; // The display value, e.g., "Normal" or "Urgent"
-  final List<dynamic> selection; // The selection options, e.g., [[0, "Normal"], [1, "Urgent"]]
+  final List<
+      dynamic> selection; // The selection options, e.g., [[0, "Normal"], [1, "Urgent"]]
   final VoidCallback? onTap; // Optional tap callback for interactivity
 
   const PriorityWidget({
@@ -14,40 +15,94 @@ class PriorityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Access theme for consistent styling
+    print('valueeeee: $value');
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final iconSize = screenWidth < 360 ? 14.0 : 16.0; // Smaller icons on narrow screens
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final iconSize = screenWidth < 360
+        ? 14.0
+        : 16.0; // Smaller icons on narrow screens
     final fontSize = screenWidth < 360 ? 14.0 : 16.0; // Adjust font size
     final padding = screenWidth < 360 ? 2.0 : 4.0; // Adjust spacing
 
-
-    IconData? icon;
+    List<Widget> icons;
     Color textColor;
-    String tooltipMessage;
+    String tooltipMessage = ''; // Empty tooltip for all cases
 
     switch (value) {
-      case 'Urgent':
-        icon = Icons.star;
+      case 'High':
+      // case 'Urgent':
+        icons = [
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+
+        ];
         textColor = isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!;
-        tooltipMessage = 'Urgent Priority';
         break;
-      case 'Normal':
-        icon = Icons.star_border;
+      case 'Low':
+      // case 'Normal':
+        icons = [
+          Icon(Icons.star_border,
+              color: isDarkMode ? Colors.grey[400]! : Colors.grey[600]!,
+              size: iconSize),
+        ];
         textColor = isDarkMode ? Colors.grey[400]! : Colors.grey[600]!;
-        tooltipMessage = 'Normal Priority';
+        break;
+      case 'Very High':
+        icons = [
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+
+        ];
+        textColor = isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!;
+        break;
+      case 'Medium':
+        icons = [
+          Icon(Icons.star_half,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+
+        ];
+        textColor = isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!;
+        break;
+      case 'High priority':
+        icons = [
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+        ];
+        textColor = isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!;
+        break;
+      case 'Medium priority':
+        icons = [
+          Icon(Icons.star,
+              color: isDarkMode ? Colors.yellow[200]! : Colors.yellow[700]!,
+              size: iconSize),
+        ];
+        textColor = isDarkMode ? Colors.grey[400]! : Colors.grey[600]!;
         break;
       default:
-        icon = Icons.help_outline;
+        icons = [
+          Icon(Icons.star_border,
+              color: isDarkMode ? Colors.grey[500]! : Colors.grey[700]!,
+              size: iconSize),
+        ];
         textColor = isDarkMode ? Colors.grey[500]! : Colors.grey[700]!;
-        tooltipMessage = 'Unknown Priority';
         break;
     }
 
-    // Build the widget with hover and tap feedback
+// Build the widget with hover and tap feedback
     return Tooltip(
       message: tooltipMessage,
       child: InkWell(
@@ -62,25 +117,19 @@ class PriorityWidget extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: textColor,
-                  size: iconSize,
-                ),
-                SizedBox(width: padding),
-              ],
+              ...icons, // Spread the list of star icons
+              SizedBox(width: padding),
               // Flexible(
-              //   child: Text(
-              //     value.isEmpty ? 'N/A' : value,
-              //     style: theme.textTheme.bodyMedium?.copyWith(
-              //       color: textColor,
-              //       fontSize: fontSize,
-              //       fontWeight: FontWeight.w500,
-              //     ),
-              //     overflow: TextOverflow.ellipsis,
-              //     maxLines: 1,
+              // child: Text(
+              //   value.isEmpty ? 'N/A' : value,
+              //   style: theme.textTheme.bodyMedium?.copyWith(
+              //     color: textColor,
+              //     fontSize: fontSize,
+              //     fontWeight: FontWeight.w500,
               //   ),
+              //   overflow: TextOverflow.ellipsis,
+              //   maxLines: 1,
+              // ),
               // ),
             ],
           ),

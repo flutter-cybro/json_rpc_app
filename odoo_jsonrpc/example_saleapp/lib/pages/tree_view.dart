@@ -1,4 +1,3 @@
-import 'dart:developer' as dev;
 import 'dart:math';
 import 'package:example_saleapp/pages/form_view.dart';
 import 'package:example_saleapp/res/odoo_res/odoo_data_types/many2one_field_widget.dart';
@@ -7,6 +6,7 @@ import '../controller/odoo_crud_mixier.dart';
 import '../controller/odooclient_manager_controller.dart';
 import '../res/constants/app_colors.dart';
 import '../res/odoo_res/odoo_data_types/MonetaryFieldWidget.dart';
+import '../res/odoo_res/odoo_data_types/date_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
@@ -24,6 +24,7 @@ import '../res/odoo_res/odoo_xml_widget/image_url.dart';
 import '../res/odoo_res/odoo_xml_widget/list_activity.dart';
 import '../res/odoo_res/odoo_xml_widget/many2many_tags.dart';
 import '../res/odoo_res/odoo_xml_widget/progressbar.dart';
+import '../res/odoo_res/odoo_xml_widget/project_favorite.dart';
 import '../res/odoo_res/odoo_xml_widget/so_line_field.dart';
 import '../res/odoo_res/odoo_xml_widget/timesheet_uom_timer_widget.dart';
 import '../res/widgets/no_data_image.dart';
@@ -56,13 +57,19 @@ class TreeViewScreen extends StatefulWidget {
   @override
   State<TreeViewScreen> createState() => _TreeViewScreenState();
 }
-
-class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
+class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, SingleTickerProviderStateMixin {
+// class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   late final OdooClientController _odooClientController;
   late List<String> _visibleFields;
   late ScrollController _headerScrollController;
   late ScrollController _bodyScrollController;
   final int maxFieldsPerScreen = 3;
+  String _searchQuery = '';
+  List<dynamic> _filteredDataList = [];
+  bool _isSearchActive = false;
+  final TextEditingController _searchController = TextEditingController();
+  late AnimationController _animationController;
+  late Animation<double> _searchBarAnimation;
 
   @override
   OdooClientController get odooClientController => _odooClientController;
@@ -82,12 +89,22 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
 
   @override
   void initState() {
+
     super.initState();
-    dev.log("TreeView  : ${widget.modelname}  , ${widget.title}  , ${widget.moduleName}  , ${widget.dataList} , \n\n\n ${widget.fieldMetadata}");
     _odooClientController = OdooClientController();
     _initializeOdooClient();
     _headerScrollController = ScrollController();
     _bodyScrollController = ScrollController();
+    _filteredDataList = widget.dataList;
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _searchBarAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _searchController.addListener(_onSearchChanged);
 
     _headerScrollController.addListener(() {
       if (_headerScrollController.hasClients && _bodyScrollController.hasClients) {
@@ -104,13 +121,31 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         }
       }
     });
-
     _visibleFields = widget.fieldMetadata
         .where((metadata) => isFieldVisibleByDefault(metadata))
         .map((metadata) => metadata['name'] as String)
         .toList();
   }
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      _filterDataList(_searchQuery);
+    });
+  }
 
+  void _toggleSearch() {
+    setState(() {
+      _isSearchActive = !_isSearchActive;
+      if (_isSearchActive) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+        _searchController.clear();
+        _searchQuery = '';
+        _filteredDataList = widget.dataList;
+      }
+    });
+  }
   Future<void> _initializeOdooClient() async {
     try {
       await _odooClientController.initialize();
@@ -128,6 +163,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
   void dispose() {
     _headerScrollController.dispose();
     _bodyScrollController.dispose();
+    _searchController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -248,11 +285,9 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         value: floatValue,
       );
     }
-
     if (metadata['type'] == 'selection' &&
         metadata['pythonAttributes']['selection'] != null) {
-      final selection =
-          metadata['pythonAttributes']['selection'] as List<dynamic>;
+      final selection = metadata['pythonAttributes']['selection'] as List<dynamic>;
       String displayValue = '';
       for (var option in selection) {
         if (option[0].toString() == fieldValue.toString()) {
@@ -260,15 +295,29 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
           break;
         }
       }
-
+      print('Field: $fieldName, WidgetType: $widgetType, Selection: $selection, FieldValue: $fieldValue, DisplayValue: $displayValue'); // Debug log
       if (widgetType == 'priority') {
+        print('Rendering PriorityWidget for $fieldName'); // Confirm widget rendering
         return PriorityWidget(
           value: displayValue,
           selection: selection,
         );
       }
-
       return displayValue;
+    }
+// Inside getFieldDisplay method, add or update this condition before the generic boolean handling
+    if (metadata['type'] == 'boolean' && widgetType == 'project_is_favorite') {
+      bool favoriteValue = fieldValue is bool ? fieldValue : false;
+      return ProjectFavoriteWidget(
+        isFavorite: favoriteValue,
+        onChanged: (newValue) {
+          setState(() {
+            data[fieldName] = newValue;
+            _updateRecord(data['id'], {fieldName: newValue});
+          });
+        },
+        readonly: true, // Set to true for tree view to prevent editing
+      );
     }
 // Handle one2many or list_activity widget
     if (metadata['type'] == 'one2many' && widgetType == 'list_activity') {
@@ -566,22 +615,6 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
         odooClientController: _odooClientController, // Pass the Odoo client
       );
     }
-
-    if (metadata['type'] == 'char' || widgetType == 'char_with_placeholder_field') {
-      String charValue = fieldValue is String ? fieldValue : '';
-      String hintText = xmlAttrs?.firstWhere(
-            (attr) => attr['name'] == 'placeholder',
-        orElse: () => {'value': 'Enter $fieldLabel'},
-      )['value'] ?? 'Enter $fieldLabel';
-      return CharWithPlaceholderFieldWidget(
-        name: fieldLabel,
-        value: charValue,
-        hintText: hintText,
-        readOnly: true,
-        viewType: 'tree',
-      );
-    }
-
     if (widgetType != null) {
       // dev.log('Unsupported widget type: $widgetType for field: $fieldName');
       return const Text('Unsupported');
@@ -718,7 +751,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin {
       'boolean_toggle',
       'timesheet_uom_timer'// Add this
     };
-print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
+    print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
     return (columnInvisible != 'True' && columnInvisible != '1') &&
         optional != 'hide' &&
         (widgetType == null || allowedWidgetTypes.contains(widgetType));
@@ -790,7 +823,25 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
       },
     );
   }
-
+  void _filterDataList(String query) {
+    setState(() {
+      _searchQuery = query;
+      if (query.isEmpty) {
+        _filteredDataList = widget.dataList;
+      } else {
+        _filteredDataList = widget.dataList.where((data) {
+          return _visibleFields.any((fieldName) {
+            final fieldValue = data[fieldName];
+            if (fieldValue == null) return false;
+            if (fieldValue is List && fieldValue.length >= 2) {
+              return fieldValue[1].toString().toLowerCase().contains(query.toLowerCase());
+            }
+            return fieldValue.toString().toLowerCase().contains(query.toLowerCase());
+          });
+        }).toList();
+      }
+    });
+  }
   String _getRecordName(Map<String, dynamic> data) {
     // dev.log("data  log : $data");
     if (data.containsKey('name') &&
@@ -826,6 +877,7 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Define theme here
     final visibleFieldCount = _visibleFields.length;
     final screenWidth = MediaQuery.of(context).size.width;
     final fieldWidth = max(
@@ -835,30 +887,110 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
                 ? visibleFieldCount
                 : maxFieldsPerScreen));
 
+    SnackBar _buildCustomSnackBar(String message) {
+      return SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.warning_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.redAccent, // Error color for visibility
+        behavior: SnackBarBehavior.floating, // Floating style
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Margin for floating effect
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1), // Inner padding
+        duration: const Duration(seconds: 3), // Visible for 3 seconds
+        elevation: 8, // Shadow
+        action: SnackBarAction(
+          label: 'DISMISS',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(
+        elevation: 4,
+        shadowColor: theme.colorScheme.shadow.withOpacity(0.2),
+        title: _isSearchActive
+            ? FadeTransition(
+          opacity: _searchBarAnimation,
+          child: TextField(
+            controller: _searchController,
+            autofocus: true,
+            style: theme.textTheme.bodyLarge,
+            decoration: InputDecoration(
+              hintText: 'Search records...',
+              hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHigh,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.clear, color: theme.colorScheme.onSurface),
+                onPressed: _toggleSearch,
+              ),
+            ),
+          ),
+        )
+            : Text(
           widget.title,
-          style:
-          const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onPrimary,
+          ),
         ),
-        backgroundColor: ODOO_COLOR,
         leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onPrimary),
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
         ),
         actions: [
+          if (!_isSearchActive)
+            IconButton(
+              icon: Icon(Icons.search, color: theme.colorScheme.onPrimary),
+              onPressed: _toggleSearch,
+            ),
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
             onPressed: () async {
+
+              if (widget.formdata == null || widget.formdata.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  _buildCustomSnackBar('Form data is missing'),
+                );
+                return;
+              }
               final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => FormView(
                     modelName: widget.modelname,
                     recordId: 0,
-                    // viewId: widget.viewId,
                     formData: widget.formdata,
                     name: 'New ${widget.title}',
                   ),
@@ -870,12 +1002,14 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
+            icon: Icon(Icons.filter_list, color: theme.colorScheme.onPrimary),
             onPressed: _showFieldSelectorDialog,
           ),
         ],
+        backgroundColor: ODOO_COLOR,
       ),
-      body: widget.dataList.isEmpty
+      body: _filteredDataList.isEmpty
+      // body: widget.dataList.isEmpty
           ? const NoDataWidget()
           : Column(
         children: [
@@ -936,17 +1070,28 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
                     child: SizedBox(
                       width: calculatedWidth.isFinite ? calculatedWidth : constraints.maxWidth,
                       child: ReorderableListView(
+                        // onReorder: (oldIndex, newIndex) {
+                        //   setState(() {
+                        //     if (newIndex > oldIndex) newIndex--;
+                        //     final item = widget.dataList.removeAt(oldIndex);
+                        //     widget.dataList.insert(newIndex, item);
+                        //     for (int i = 0; i < widget.dataList.length; i++) {
+                        //       widget.dataList[i]['sequence'] = i + 1;
+                        //     }
+                        //   });
+                        // },
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
                             if (newIndex > oldIndex) newIndex--;
-                            final item = widget.dataList.removeAt(oldIndex);
-                            widget.dataList.insert(newIndex, item);
-                            for (int i = 0; i < widget.dataList.length; i++) {
-                              widget.dataList[i]['sequence'] = i + 1;
+                            final item = _filteredDataList.removeAt(oldIndex);
+                            _filteredDataList.insert(newIndex, item);
+                            for (int i = 0; i < _filteredDataList.length; i++) {
+                              _filteredDataList[i]['sequence'] = i + 1;
                             }
                           });
                         },
-                        children: widget.dataList.asMap().entries.map((entry) {
+                        // children: widget.dataList.asMap()
+                        children: _filteredDataList.asMap().entries.map((entry) {
                           final index = entry.key;
                           final data = entry.value as Map<String, dynamic>;
                           final recordId = data['id'] as int?;
@@ -955,6 +1100,14 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
                           return GestureDetector(
                             key: ValueKey(index),
                             onTap: () {
+
+                              if (widget.formdata == null || widget.formdata.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  _buildCustomSnackBar('Form data is missing'),
+                                );
+                                return;
+                              }
+
                               if (recordId != null) {
                                 Navigator.push(
                                   context,
@@ -979,7 +1132,7 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
                               }
                             },
                             child: Container(
-                              height: 100,
+                              height: 120,
                               decoration: BoxDecoration(
                                 border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
                               ),
@@ -989,25 +1142,27 @@ print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
                                     .map((metadata) {
                                   final fieldName = metadata['name'];
                                   final displayValue = getFieldDisplay(data, fieldName);
-                                  return SizedBox(
-                                    width: validFieldWidth, // Use validated fieldWidth
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: [
-                                            if (displayValue is Widget)
-                                              displayValue
-                                            else
-                                              Text(
-                                                displayValue.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 16.0,
-                                                  color: Colors.black87,
+                                  return Expanded(
+                                    child: SizedBox(
+                                      width: validFieldWidth, // Use validated fieldWidth
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children: [
+                                              if (displayValue is Widget)
+                                                displayValue
+                                              else
+                                                Text(
+                                                  displayValue.toString(),
+                                                  style: const TextStyle(
+                                                    fontSize: 16.0,
+                                                    color: Colors.black87,
+                                                  ),
                                                 ),
-                                              ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),

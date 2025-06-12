@@ -1157,6 +1157,11 @@ class _FormViewState extends State<FormView>
                           allPythonFields[fieldName]?['type'] as String? ??
                               'char';
 
+                      if (fieldType == 'properties') {
+                        log('Field type is "properties" for $fieldName, returning null');
+                        return null;
+                      }
+
                       final invisible =
                           parseInvisibleValue(xmlAttrs['invisible']);
                       final invisibleColumn =
@@ -1560,6 +1565,11 @@ class _FormViewState extends State<FormView>
       final fieldType =
           allPythonFields[fieldName]?['type'] as String? ?? 'char';
       // log('Field type for $fieldName: $fieldType');
+
+      if (fieldType == 'properties') {
+        log('Field type is "properties" for $fieldName, returning null');
+        return null;
+      }
 
       final xmlAttributes =
           fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
