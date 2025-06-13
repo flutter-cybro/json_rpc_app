@@ -16,6 +16,7 @@ class SettingsFormView extends StatefulWidget {
   final moduleName;
   final Map<String, dynamic>? settingsData;
   final Map<String, dynamic>? fieldMetadata;
+
   const SettingsFormView({
     Key? key,
     this.fieldMetadata,
@@ -38,13 +39,14 @@ class _SettingsFormViewState extends State<SettingsFormView> {
   bool _isLoading = true;
   Map<String, dynamic> appsData = {};
   Map<String, dynamic> fieldMetadata = {};
+
   @override
   void initState() {
     super.initState();
 
     _parseAndCombineData();
-    processFormData(widget.formData); // Call processFormData with widget.formData
-
+    processFormData(
+        widget.formData); // Call processFormData with widget.formData
   }
 
   Map<String, dynamic> separateFormData(String formXml) {
@@ -85,15 +87,19 @@ class _SettingsFormViewState extends State<SettingsFormView> {
 
         // Process settings within block
         for (var settingElement in blockElement.findAllElements('setting')) {
-          final settingId = settingElement.getAttribute('id') ?? 'unnamed_setting';
+          final settingId =
+              settingElement.getAttribute('id') ?? 'unnamed_setting';
 
           final settingData = {
             'attributes': settingElement.attributes
                 .map((attr) => {attr.name.local: attr.value})
                 .toList(),
-            'widgets': <Map<String, dynamic>>[],  // Explicitly typed as List<Map>
-            'fields': <Map<String, dynamic>>[],   // Explicitly typed as List<Map>
-            'other_elements': <Map<String, dynamic>>[]  // Explicitly typed as List<Map>
+            'widgets': <Map<String, dynamic>>[],
+            // Explicitly typed as List<Map>
+            'fields': <Map<String, dynamic>>[],
+            // Explicitly typed as List<Map>
+            'other_elements': <Map<String, dynamic>>[]
+            // Explicitly typed as List<Map>
           };
 
           // Process all child elements
@@ -105,16 +111,14 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                     .map((attr) => {attr.name.local: attr.value})
                     .toList(),
               });
-            }
-            else if (child.name.local == 'field') {
+            } else if (child.name.local == 'field') {
               settingData['fields']!.add({
                 'name': child.getAttribute('name') ?? '',
                 'attributes': child.attributes
                     .map((attr) => {attr.name.local: attr.value})
                     .toList(),
               });
-            }
-            else {
+            } else {
               // Handle other elements (span, button, div, etc.)
               settingData['other_elements']!.add({
                 'tag': child.name.local,
@@ -126,7 +130,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
             }
           }
 
-          (blockData['settings'] as Map<String, dynamic>)[settingId] = settingData;
+          (blockData['settings'] as Map<String, dynamic>)[settingId] =
+              settingData;
         }
 
         (appData['blocks'] as Map<String, dynamic>)[blockName] = blockData;
@@ -145,8 +150,6 @@ class _SettingsFormViewState extends State<SettingsFormView> {
     // log('Structured Form Data: ${jsonEncode(result)}');
   }
 
-
-
   Future<void> _parseAndCombineData() async {
     try {
       if (widget.settingsData != null) {
@@ -157,7 +160,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
       final formElement = document.findAllElements('form').firstOrNull;
       // log('testttttttttttttttttttttttt $formElement');
 
-      if (formElement != null && formElement.getAttribute('string') == 'Settings') {
+      if (formElement != null &&
+          formElement.getAttribute('string') == 'Settings') {
         _extractSettingsData(formElement);
       }
 
@@ -180,29 +184,32 @@ class _SettingsFormViewState extends State<SettingsFormView> {
       if (element.name.local == 'app') {
         final appName = element.getAttribute('string') ?? 'Unknown App';
 
-        if (widget.moduleName != null && !appName.toLowerCase().contains(widget.moduleName!.toLowerCase())) {
+        if (widget.moduleName != null &&
+            !appName.toLowerCase().contains(widget.moduleName!.toLowerCase())) {
           continue;
         }
 
-        final appData = tempAppsData[appName] ?? {
-          'app_name': appName,
-          'attributes': element.attributes
-              .where((attr) => attr.name.local != 'string')
-              .map((attr) => {attr.name.local: attr.value})
-              .toList(),
-          'blocks': <String, dynamic>{},
-        };
+        final appData = tempAppsData[appName] ??
+            {
+              'app_name': appName,
+              'attributes': element.attributes
+                  .where((attr) => attr.name.local != 'string')
+                  .map((attr) => {attr.name.local: attr.value})
+                  .toList(),
+              'blocks': <String, dynamic>{},
+            };
 
         for (var block in element.findAllElements('block')) {
           final blockName = block.getAttribute('title') ?? ' ';
-          final blockData = appData['blocks'][blockName] ?? {
-            'block_name': blockName,
-            'attributes': block.attributes
-                .where((attr) => attr.name.local != 'title')
-                .map((attr) => {attr.name.local: attr.value})
-                .toList(),
-            'settings': <String, dynamic>{},
-          };
+          final blockData = appData['blocks'][blockName] ??
+              {
+                'block_name': blockName,
+                'attributes': block.attributes
+                    .where((attr) => attr.name.local != 'title')
+                    .map((attr) => {attr.name.local: attr.value})
+                    .toList(),
+                'settings': <String, dynamic>{},
+              };
 
           for (var setting in block.findAllElements('setting')) {
             final settingId = setting.getAttribute('id') ?? 'Unknown Setting';
@@ -212,29 +219,39 @@ class _SettingsFormViewState extends State<SettingsFormView> {
 
             if (settingString == settingId || settingString.isEmpty) {
               final spanLabel = setting.findAllElements('span').firstWhere(
-                    (e) => e.getAttribute('class')?.contains('o_form_label') == true,
-                orElse: () => xml.XmlElement(xml.XmlName('span')),
-              );
-              settingString = spanLabel.text.trim().isNotEmpty ? spanLabel.text.trim() : settingId;
+                    (e) =>
+                        e.getAttribute('class')?.contains('o_form_label') ==
+                        true,
+                    orElse: () => xml.XmlElement(xml.XmlName('span')),
+                  );
+              settingString = spanLabel.text.trim().isNotEmpty
+                  ? spanLabel.text.trim()
+                  : settingId;
             }
 
-            final settingData = blockData['settings'][settingId] ?? {
-              'string': settingString,
-              'help': helpText,
-              'documentation': documentationUrl,
-              'attributes': setting.attributes
-                  .where((attr) => attr.name.local != 'id' && attr.name.local != 'string' && attr.name.local != 'help' && attr.name.local != 'documentation')
-                  .map((attr) => {attr.name.local: attr.value})
-                  .toList(),
-              'fields': <Map<String, dynamic>>[],
-              'hasModuleField': false,
-              'buttons': <Map<String, dynamic>>[], // Add buttons list
-            };
+            final settingData = blockData['settings'][settingId] ??
+                {
+                  'string': settingString,
+                  'help': helpText,
+                  'documentation': documentationUrl,
+                  'attributes': setting.attributes
+                      .where((attr) =>
+                          attr.name.local != 'id' &&
+                          attr.name.local != 'string' &&
+                          attr.name.local != 'help' &&
+                          attr.name.local != 'documentation')
+                      .map((attr) => {attr.name.local: attr.value})
+                      .toList(),
+                  'fields': <Map<String, dynamic>>[],
+                  'hasModuleField': false,
+                  'buttons': <Map<String, dynamic>>[], // Add buttons list
+                };
 
             for (var subElement in setting.childElements) {
-              if (subElement.name.local == 'field' || subElement.name.local == 'widget') {
-
-                final fieldName = subElement.getAttribute('name') ?? 'Unknown Field';
+              if (subElement.name.local == 'field' ||
+                  subElement.name.local == 'widget') {
+                final fieldName =
+                    subElement.getAttribute('name') ?? 'Unknown Field';
                 final fieldInfo = fieldMetadata[fieldName] ?? {};
                 // log('Processing field: $fieldName');
                 // log('Field Metadata: ${jsonEncode(fieldMetadata)}');
@@ -243,8 +260,6 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                 } else {
                   // log('No metadata found for $fieldName');
                 }
-
-
 
                 (settingData['fields'] as List<Map<String, dynamic>>).add({
                   'tag': subElement.name.local,
@@ -272,7 +287,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
               }
             }
 
-            (blockData['settings'] as Map<String, dynamic>)[settingId] = settingData;
+            (blockData['settings'] as Map<String, dynamic>)[settingId] =
+                settingData;
           }
 
           (appData['blocks'] as Map<String, dynamic>)[blockName] = blockData;
@@ -284,11 +300,13 @@ class _SettingsFormViewState extends State<SettingsFormView> {
 
     tempAppsData.forEach((appName, appData) {
       if (appsData.containsKey(appName)) {
-        final existingBlocks = appsData[appName]['blocks'] as Map<String, dynamic>;
+        final existingBlocks =
+            appsData[appName]['blocks'] as Map<String, dynamic>;
         final newBlocks = appData['blocks'] as Map<String, dynamic>;
         newBlocks.forEach((blockName, blockData) {
           if (existingBlocks.containsKey(blockName)) {
-            final existingSettings = existingBlocks[blockName]['settings'] as Map<String, dynamic>;
+            final existingSettings =
+                existingBlocks[blockName]['settings'] as Map<String, dynamic>;
             final newSettings = blockData['settings'] as Map<String, dynamic>;
             newSettings.forEach((settingId, settingData) {
               existingSettings[settingId] = settingData;
@@ -315,7 +333,9 @@ class _SettingsFormViewState extends State<SettingsFormView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
-              ...(appData['blocks'] as Map<String, dynamic>).entries.map<Widget>((blockEntry) {
+              ...(appData['blocks'] as Map<String, dynamic>)
+                  .entries
+                  .map<Widget>((blockEntry) {
                 final blockName = blockEntry.key;
                 final blockData = blockEntry.value;
 
@@ -324,7 +344,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                   children: [
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 6.0),
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                       ),
@@ -338,23 +359,29 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ...((blockData['settings'] as Map<String, dynamic>).entries.map<Widget>((settingEntry) {
+                    ...((blockData['settings'] as Map<String, dynamic>)
+                        .entries
+                        .map<Widget>((settingEntry) {
                       final settingId = settingEntry.key;
                       final settingData = settingEntry.value;
 
-                      List<String> helpTexts = (settingData['fields'] as List<Map<String, dynamic>>)
+                      List<String> helpTexts = (settingData['fields']
+                              as List<Map<String, dynamic>>)
                           .where((field) => field['help'] != null)
                           .map((field) => '${field['label']}: ${field['help']}')
                           .toList();
 
-                      bool hasModuleField = (settingData['fields'] as List<Map<String, dynamic>>)
+                      bool hasModuleField = (settingData['fields']
+                              as List<Map<String, dynamic>>)
                           .any((field) => field['name'].startsWith('module_'));
 
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 16.0),
                         child: StatefulBuilder(
                           builder: (context, setState) {
-                            bool isChecked = settingData['checkboxValue'] ?? false;
+                            bool isChecked =
+                                settingData['checkboxValue'] ?? false;
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,7 +395,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                         activeColor: ODOO_COLOR,
                                         onChanged: (bool? value) {
                                           setState(() {
-                                            settingData['checkboxValue'] = value ?? false;
+                                            settingData['checkboxValue'] =
+                                                value ?? false;
                                           });
                                         },
                                       ),
@@ -377,22 +405,35 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                     Expanded(
                                       child: Text(
                                         settingData['string'],
-                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500),
                                       ),
                                     ),
-                                    if (settingData['documentation'] != null) ...[
+                                    if (settingData['documentation'] !=
+                                        null) ...[
                                       IconButton(
-                                        icon: Icon(Icons.link, size: 20, color: ODOO_COLOR),
+                                        icon: Icon(Icons.link,
+                                            size: 20, color: ODOO_COLOR),
                                         onPressed: () async {
-                                          final baseUrl = 'https://www.odoo.com/documentation/18.0';
-                                          final documentationPath = settingData['documentation'];
-                                          final fullUrl = '$baseUrl$documentationPath';
+                                          final baseUrl =
+                                              'https://www.odoo.com/documentation/18.0';
+                                          final documentationPath =
+                                              settingData['documentation'];
+                                          final fullUrl =
+                                              '$baseUrl$documentationPath';
 
-                                          if (await canLaunchUrl(Uri.parse(fullUrl))) {
-                                            await launchUrl(Uri.parse(fullUrl), mode: LaunchMode.externalApplication);
+                                          if (await canLaunchUrl(
+                                              Uri.parse(fullUrl))) {
+                                            await launchUrl(Uri.parse(fullUrl),
+                                                mode: LaunchMode
+                                                    .externalApplication);
                                           } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Could not launch $fullUrl')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Could not launch $fullUrl')),
                                             );
                                           }
                                         },
@@ -405,19 +446,24 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                   const SizedBox(height: 4),
                                   Text(
                                     settingData['help'],
-                                    style: TextStyle(fontSize: 12, color: Colors.yellow[700]),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.yellow[700]),
                                   ),
                                 ],
                                 if (hasModuleField && isChecked) ...[
                                   const SizedBox(height: 8),
-                                  ...((settingData['fields'] as List<Map<String, dynamic>>)
-                                      .where((field) => !field['name'].startsWith('module_'))
+                                  ...((settingData['fields']
+                                          as List<Map<String, dynamic>>)
+                                      .where((field) =>
+                                          !field['name'].startsWith('module_'))
                                       .map((field) {
                                     // log('Rendering field: ${field['name']}');
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 8.0),
                                       child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           SizedBox(
                                             width: 120,
@@ -431,11 +477,15 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                           ),
                                           Expanded(
                                             child: TextField(
-                                              obscureText: field['attributes']?.any((attr) =>
-                                              attr['password'] == 'True') ?? false,
+                                              obscureText: field['attributes']
+                                                      ?.any((attr) =>
+                                                          attr['password'] ==
+                                                          'True') ??
+                                                  false,
                                               decoration: InputDecoration(
                                                 border: OutlineInputBorder(),
-                                                contentPadding: EdgeInsets.symmetric(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
                                                   horizontal: 8,
                                                   vertical: 4,
                                                 ),
@@ -447,9 +497,14 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                     );
                                   }).toList()),
                                 ],
-                                if ((settingData['buttons'] as List<Map<String, dynamic>>?)?.isNotEmpty ?? false) ...[
+                                if ((settingData['buttons']
+                                            as List<Map<String, dynamic>>?)
+                                        ?.isNotEmpty ??
+                                    false) ...[
                                   const SizedBox(height: 8),
-                                  ...(settingData['buttons'] as List<Map<String, dynamic>>).map<Widget>((button) {
+                                  ...(settingData['buttons']
+                                          as List<Map<String, dynamic>>)
+                                      .map<Widget>((button) {
                                     return Padding(
                                       padding: const EdgeInsets.only(top: 4.0),
                                       child: TextButton(
@@ -457,10 +512,17 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                           log('Button clicked: ${button['name']} - ${button['type']}');
                                           if (button['type'] == 'object') {
                                             // Call Odoo to get the action details
-                                            final settingsController = SettingsController(client: OdooClientController().client);
-                                            print('\n\n settingsController11111111111111 $settingsController ');
+                                            final settingsController =
+                                                SettingsController(
+                                                    client:
+                                                        OdooClientController()
+                                                            .client);
+                                            print(
+                                                '\n\n settingsController11111111111111 $settingsController ');
                                             try {
-                                              final actionResult = await settingsController.callKw({
+                                              final actionResult =
+                                                  await settingsController
+                                                      .callKw({
                                                 'model': widget.modelName,
                                                 'method': button['name'],
                                                 'args': [],
@@ -469,42 +531,72 @@ class _SettingsFormViewState extends State<SettingsFormView> {
 
                                               log('Action result: $actionResult');
 
-                                              if (actionResult is Map<String, dynamic> && actionResult.containsKey('type')) {
-                                                final actionType = actionResult['type'];
-                                                if (actionType == 'ir.actions.act_window') {
-                                                  final views = actionResult['views'] as List<dynamic>? ?? [];
-                                                  final resModel = actionResult['res_model'] as String? ?? widget.modelName;
-                                                  final resId = actionResult['res_id'] as int? ?? 0;
+                                              if (actionResult
+                                                      is Map<String, dynamic> &&
+                                                  actionResult
+                                                      .containsKey('type')) {
+                                                final actionType =
+                                                    actionResult['type'];
+                                                if (actionType ==
+                                                    'ir.actions.act_window') {
+                                                  final views = actionResult[
+                                                              'views']
+                                                          as List<dynamic>? ??
+                                                      [];
+                                                  final resModel =
+                                                      actionResult['res_model']
+                                                              as String? ??
+                                                          widget.modelName;
+                                                  final resId =
+                                                      actionResult['res_id']
+                                                              as int? ??
+                                                          0;
 
                                                   // Check if any view is of type 'form'
-                                                  bool isFormView = views.any((view) => view is List && view[1] == 'form');
+                                                  bool isFormView = views.any(
+                                                      (view) =>
+                                                          view is List &&
+                                                          view[1] == 'form');
                                                   if (isFormView) {
                                                     // Navigate to FormView
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
-                                                        builder: (context) => FormView(
+                                                        builder: (context) =>
+                                                            FormView(
                                                           modelName: resModel,
                                                           recordId: resId,
-                                                          name: button['string'] ?? 'Form View',
+                                                          name: button[
+                                                                  'string'] ??
+                                                              'Form View',
                                                         ),
                                                       ),
                                                     );
                                                   } else {
-                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(content: Text('No form view available for this action')),
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                          content: Text(
+                                                              'No form view available for this action')),
                                                     );
                                                   }
                                                 }
                                               } else {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(content: Text('Unexpected action result')),
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                      content: Text(
+                                                          'Unexpected action result')),
                                                 );
                                               }
                                             } catch (e) {
                                               log('Error calling button method: $e');
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Error executing action: $e')),
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Error executing action: $e')),
                                               );
                                             }
                                           }
@@ -519,7 +611,8 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                           children: [
                                             if (button['icon'] != null) ...[
                                               Icon(
-                                                button['icon'] == 'oi-arrow-right'
+                                                button['icon'] ==
+                                                        'oi-arrow-right'
                                                     ? Icons.arrow_forward
                                                     : Icons.arrow_forward,
                                                 size: 16,
@@ -528,8 +621,11 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                               const SizedBox(width: 4),
                                             ],
                                             Text(
-                                              button['string'] ?? 'Unnamed Button',
-                                              style: TextStyle(fontSize: 14, color: ODOO_COLOR),
+                                              button['string'] ??
+                                                  'Unnamed Button',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: ODOO_COLOR),
                                             ),
                                           ],
                                         ),
@@ -537,21 +633,24 @@ class _SettingsFormViewState extends State<SettingsFormView> {
                                     );
                                   }).toList(),
                                 ],
-
-
                                 if (helpTexts.isNotEmpty) ...[
                                   const SizedBox(height: 8),
                                   Text(
                                     'Help on Settings:',
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54),
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black54),
                                   ),
                                   ...helpTexts.map((help) => Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                    child: Text(
-                                      help,
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                    ),
-                                  )),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 2.0),
+                                        child: Text(
+                                          help,
+                                          style: const TextStyle(
+                                              fontSize: 12, color: Colors.grey),
+                                        ),
+                                      )),
                                 ],
                               ],
                             );
@@ -571,7 +670,6 @@ class _SettingsFormViewState extends State<SettingsFormView> {
     return widgets;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -589,12 +687,12 @@ class _SettingsFormViewState extends State<SettingsFormView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : appsData.isEmpty
-          ? const Center(child: Text('No settings found for this module'))
-          : SingleChildScrollView(
-        child: Column(
-          children: _formDataWidgets,
-        ),
-      ),
+              ? const Center(child: Text('No settings found for this module'))
+              : SingleChildScrollView(
+                  child: Column(
+                    children: _formDataWidgets,
+                  ),
+                ),
     );
   }
 }

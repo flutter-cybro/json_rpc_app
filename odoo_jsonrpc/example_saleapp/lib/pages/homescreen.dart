@@ -14,7 +14,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   Future<List<OdooModule>>? _futureModules;
   final client = OdooClientController();
   bool _isSearchActive = false;
@@ -96,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       if (_allModules != null) {
         _filteredModules = _allModules!
             .where((module) =>
-            module.display_name.toLowerCase().contains(_searchQuery))
+                module.display_name.toLowerCase().contains(_searchQuery))
             .toList();
       } else {
         _filteredModules = [];
@@ -138,7 +139,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Responsive grid columns: 2 for mobile, 3 for tablets, 4 for larger screens
-    final crossAxisCount = screenWidth < 600 ? 2 : screenWidth < 900 ? 3 : 4;
+    final crossAxisCount = screenWidth < 600
+        ? 2
+        : screenWidth < 900
+            ? 3
+            : 4;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -147,37 +152,39 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         shadowColor: theme.colorScheme.shadow.withOpacity(0.2),
         title: _isSearchActive
             ? FadeTransition(
-          opacity: _searchBarAnimation,
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            style: theme.textTheme.bodyLarge,
-            decoration: InputDecoration(
-              hintText: 'Search modules...',
-              hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHigh,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              suffixIcon: IconButton(
-                icon: Icon(Icons.clear, color: theme.colorScheme.onSurface),
-                onPressed: _toggleSearch,
-              ),
-            ),
-          ),
-        )
+                opacity: _searchBarAnimation,
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  style: theme.textTheme.bodyLarge,
+                  decoration: InputDecoration(
+                    hintText: 'Search modules...',
+                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHigh,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    suffixIcon: IconButton(
+                      icon:
+                          Icon(Icons.clear, color: theme.colorScheme.onSurface),
+                      onPressed: _toggleSearch,
+                    ),
+                  ),
+                ),
+              )
             : Text(
-          'Odoo Modules',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
+                'Odoo Modules',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
         leading: IconButton(
           icon: Icon(Icons.menu, color: theme.colorScheme.onPrimary),
           onPressed: () {
@@ -207,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -251,7 +259,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: theme.colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -261,7 +270,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               );
             } else {
-              final modules = _searchQuery.isEmpty ? snapshot.data : _filteredModules;
+              final modules =
+                  _searchQuery.isEmpty ? snapshot.data : _filteredModules;
               if (modules == null || modules.isEmpty) {
                 return Center(
                   child: Column(
@@ -274,7 +284,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _searchQuery.isEmpty ? 'No modules found' : 'No matching modules',
+                        _searchQuery.isEmpty
+                            ? 'No modules found'
+                            : 'No matching modules',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: theme.colorScheme.onSurface,
                         ),
@@ -297,7 +309,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           style: OutlinedButton.styleFrom(
                             foregroundColor: theme.colorScheme.primary,
                             side: BorderSide(color: theme.colorScheme.primary),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

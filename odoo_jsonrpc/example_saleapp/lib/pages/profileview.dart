@@ -15,9 +15,11 @@ class ProfileView extends StatefulWidget {
   State<ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin {
+class _ProfileViewState extends State<ProfileView>
+    with TickerProviderStateMixin {
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmpasswordController = TextEditingController();
+  final TextEditingController _confirmpasswordController =
+      TextEditingController();
   Future<List<OdooUserProfile>>? _futureUserProfile;
   final _formKey = GlobalKey<FormState>();
   final _clientController = OdooClientController();
@@ -80,13 +82,27 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
         return [
           OdooUserProfile(
             id: userData['id'] is int ? userData['id'] as int : 0,
-            name: userData['name'] is String ? userData['name'] as String : 'Unknown Name',
-            email: userData['email'] is String ? userData['email'] as String : 'Email not available',
-            city: userData['city'] is String ? userData['city'] as String : 'City not available',
-            birthday: userData['birthday'] is String ? DateTime.tryParse(userData['birthday'] as String) : null,
-            barcode_id: userData['barcode_id'] is String ? userData['barcode_id'] as String : 'No Barcode_id',
-            company_name: userData['company_name'] is String ? userData['company_name'] as String : null,
-            avatar_1024: userData['avatar_1024'] is String ? _getAvatarFromBase64(userData['avatar_1024'] as String) : null,
+            name: userData['name'] is String
+                ? userData['name'] as String
+                : 'Unknown Name',
+            email: userData['email'] is String
+                ? userData['email'] as String
+                : 'Email not available',
+            city: userData['city'] is String
+                ? userData['city'] as String
+                : 'City not available',
+            birthday: userData['birthday'] is String
+                ? DateTime.tryParse(userData['birthday'] as String)
+                : null,
+            barcode_id: userData['barcode_id'] is String
+                ? userData['barcode_id'] as String
+                : 'No Barcode_id',
+            company_name: userData['company_name'] is String
+                ? userData['company_name'] as String
+                : null,
+            avatar_1024: userData['avatar_1024'] is String
+                ? _getAvatarFromBase64(userData['avatar_1024'] as String)
+                : null,
           ),
         ];
       }
@@ -131,7 +147,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel'),
           ),
@@ -140,7 +157,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Logout'),
           ),
@@ -204,8 +222,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                   Text(
                     'Change Password',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
@@ -325,7 +343,9 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                                 children: [
                                   Icon(Icons.error, color: Colors.white),
                                   SizedBox(width: 12),
-                                  Expanded(child: Text('Failed to change password: $e')),
+                                  Expanded(
+                                      child: Text(
+                                          'Failed to change password: $e')),
                                 ],
                               ),
                               backgroundColor: Colors.red,
@@ -341,7 +361,10 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                   },
                   child: const Text(
                     'Update Password',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -353,7 +376,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
     );
   }
 
-  Widget _buildProfileHeader(OdooUserProfile userProfile, BuildContext context) {
+  Widget _buildProfileHeader(
+      OdooUserProfile userProfile, BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedBuilder(
       animation: _animationController,
@@ -422,10 +446,10 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                           backgroundColor: Colors.white.withOpacity(0.2),
                           child: userProfile.avatar_1024 == null
                               ? Icon(
-                            Icons.person,
-                            size: 60,
-                            color: Colors.white.withOpacity(0.9),
-                          )
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.white.withOpacity(0.9),
+                                )
                               : null,
                         ),
                       ),
@@ -468,7 +492,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
@@ -491,7 +516,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
     );
   }
 
-  Widget _buildProfileItem(IconData icon, String title, String? value, {Color? iconColor}) {
+  Widget _buildProfileItem(IconData icon, String title, String? value,
+      {Color? iconColor}) {
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -542,19 +568,28 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
                             children: [
                               Text(
                                 title,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withOpacity(0.6),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 value ?? 'Not available',
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ],
                           ),
@@ -651,7 +686,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
               heroTag: "changePassword",
               onPressed: _changePasswordOverlay,
               backgroundColor: ODOO_COLOR,
-              label: const Text('Change Password', style: TextStyle(color: Colors.white)),
+              label: const Text('Change Password',
+                  style: TextStyle(color: Colors.white)),
               icon: const Icon(Icons.lock_outline, color: Colors.white),
             ),
           ),
@@ -690,7 +726,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
             style: ElevatedButton.styleFrom(
               backgroundColor: ODOO_COLOR,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             icon: const Icon(Icons.refresh),
             label: const Text('Try Again'),
@@ -711,7 +748,8 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
               color: Colors.grey.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline, size: 60, color: Colors.grey),
+            child:
+                const Icon(Icons.person_outline, size: 60, color: Colors.grey),
           ),
           const SizedBox(height: 24),
           const Text(
@@ -752,7 +790,7 @@ class _ProfileViewState extends State<ProfileView> with TickerProviderStateMixin
             child: Column(
               children: List.generate(
                 4,
-                    (index) => Shimmer.fromColors(
+                (index) => Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
                   highlightColor: Colors.grey[100]!,
                   child: Container(

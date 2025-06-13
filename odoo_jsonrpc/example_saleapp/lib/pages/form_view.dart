@@ -1349,7 +1349,7 @@ class _FormViewState extends State<FormView>
       if (responseData.containsKey('wizard_data')) {
         final List<dynamic> wizardFields =
             responseData['wizard_data'] as List<dynamic>;
-        // log("wizardFields  : $wizardFields");
+        log("wizardFields  : $wizardFields");
         setState(() {
           wizardData = wizardFields
               .where((field) {
@@ -1359,7 +1359,7 @@ class _FormViewState extends State<FormView>
                 return fieldName.isNotEmpty && fieldName != 'unknown';
               })
               .map((field) {
-                // log("field kimster : $field");
+                log("field kimster : $field");
                 final fieldMap = field as Map<String, dynamic>;
                 final fieldName =
                     fieldMap['main_field_name'] as String? ?? 'unknown';
@@ -1398,6 +1398,7 @@ class _FormViewState extends State<FormView>
                   'required': required,
                   'widget': widget,
                   'options': options,
+                  'python_attributes': pythonAttributes,
                 };
               })
               .where((field) =>
@@ -1455,48 +1456,48 @@ class _FormViewState extends State<FormView>
           .asMap()
           .entries
           .map((entry) {
-        final index = entry.key;
-        final field = entry.value as Map<String, dynamic>;
+            final index = entry.key;
+            final field = entry.value as Map<String, dynamic>;
 
-        log('_parseDivField: Processing field at index $index, field = $field'); // Log 3: Processing each field
+            log('_parseDivField: Processing field at index $index, field = $field'); // Log 3: Processing each field
 
-        final mainFieldName = field['main_field_name'] as String?;
-        if (mainFieldName == null) {
-          log('_parseDivField: Skipping field at index $index due to null main_field_name');
-          return null;
-        }
+            final mainFieldName = field['main_field_name'] as String?;
+            if (mainFieldName == null) {
+              log('_parseDivField: Skipping field at index $index due to null main_field_name');
+              return null;
+            }
 
-        final parsedField = _parseRegularField(field);
-        log('_parseDivField: Parsed field $mainFieldName, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}'); // Log 5: Result of parsing field
+            final parsedField = _parseRegularField(field);
+            log('_parseDivField: Parsed field $mainFieldName, parsedField = $parsedField, invisible = ${parsedField?['invisible'] ?? 'not set'}'); // Log 5: Result of parsing field
 
-        if (parsedField == null) {
-          log('_parseDivField: Skipping field $mainFieldName at index $index due to null parsedField');
-          return null;
-        }
+            if (parsedField == null) {
+              log('_parseDivField: Skipping field $mainFieldName at index $index due to null parsedField');
+              return null;
+            }
 
-        // Handle duplicates based on invisible status
-        final isInvisible = parsedField['invisible'] ?? false;
-        final existingField = fieldMapByName[mainFieldName];
+            // Handle duplicates based on invisible status
+            final isInvisible = parsedField['invisible'] ?? false;
+            final existingField = fieldMapByName[mainFieldName];
 
-        if (existingField == null) {
-          log('_parseDivField: No existing field for $mainFieldName, adding at index $index');
-          fieldMapByName[mainFieldName] = parsedField;
-        } else {
-          final existingInvisible = existingField['invisible'] ?? false;
-          if (isInvisible && !existingInvisible) {
-            log('_parseDivField: Keeping existing visible field for $mainFieldName, skipping invisible at index $index');
-            return null;
-          } else if (!isInvisible) {
-            log('_parseDivField: Replacing field for $mainFieldName with visible field at index $index');
-            fieldMapByName[mainFieldName] = parsedField;
-            return null; // Defer adding until all fields are processed
-          } else {
-            log('_parseDivField: Both fields for $mainFieldName are invisible, keeping existing at index $index');
-          }
-        }
+            if (existingField == null) {
+              log('_parseDivField: No existing field for $mainFieldName, adding at index $index');
+              fieldMapByName[mainFieldName] = parsedField;
+            } else {
+              final existingInvisible = existingField['invisible'] ?? false;
+              if (isInvisible && !existingInvisible) {
+                log('_parseDivField: Keeping existing visible field for $mainFieldName, skipping invisible at index $index');
+                return null;
+              } else if (!isInvisible) {
+                log('_parseDivField: Replacing field for $mainFieldName with visible field at index $index');
+                fieldMapByName[mainFieldName] = parsedField;
+                return null; // Defer adding until all fields are processed
+              } else {
+                log('_parseDivField: Both fields for $mainFieldName are invisible, keeping existing at index $index');
+              }
+            }
 
-        return parsedField;
-      })
+            return parsedField;
+          })
           .where((field) => field != null)
           .cast<Map<String, dynamic>>()
           .toList();
@@ -1512,10 +1513,10 @@ class _FormViewState extends State<FormView>
       // Parse children recursively
       final parsedChildren = children
           .map((child) {
-        final childMap = child as Map<String, dynamic>;
-        log('_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}'); // Log 7: Processing each child
-        return _parseDivField(childMap);
-      })
+            final childMap = child as Map<String, dynamic>;
+            log('_parseDivField: Processing child div with div_tag = ${childMap['div_tag']}'); // Log 7: Processing each child
+            return _parseDivField(childMap);
+          })
           .where((child) => child != null)
           .cast<Map<String, dynamic>>()
           .toList();
@@ -1546,7 +1547,8 @@ class _FormViewState extends State<FormView>
       log('_parseDivField: Output = $result');
       return result;
     } catch (e, stackTrace) {
-      log('_parseDivField: Error parsing div field: $e, fieldMap = $fieldMap, stackTrace = $stackTrace', error: e, stackTrace: stackTrace); // Log 12: Error details
+      log('_parseDivField: Error parsing div field: $e, fieldMap = $fieldMap, stackTrace = $stackTrace',
+          error: e, stackTrace: stackTrace); // Log 12: Error details
       return null;
     }
   }
@@ -1612,7 +1614,8 @@ class _FormViewState extends State<FormView>
       log('Returning parsed field: $result'); // Log final result
       return result;
     } catch (e, stackTrace) {
-      log('Error parsing regular field: $e, StackTrace: $stackTrace', error: e, stackTrace: stackTrace); // Log error with stack trace
+      log('Error parsing regular field: $e, StackTrace: $stackTrace',
+          error: e, stackTrace: stackTrace); // Log error with stack trace
       return null;
     }
   }
@@ -1729,7 +1732,9 @@ class _FormViewState extends State<FormView>
     final visibleButtons = headerButtons.where((button) {
       final invisible = button['invisible'];
       log("_showHeaderButtonsMenu invisible : $invisible  , ${button}");
-      return invisible != true && invisible.toString().toLowerCase() != 'true' && invisible != 1;
+      return invisible != true &&
+          invisible.toString().toLowerCase() != 'true' &&
+          invisible != 1;
     }).toList();
 
     if (visibleButtons.isEmpty) {
@@ -2798,8 +2803,9 @@ class _FormViewState extends State<FormView>
         final DateTime? start = valueToDate(_recordState[fieldName]);
         final DateTime? end = valueToDate(_recordState[endDateField]);
 
-        final DateTimeRange? range =
-        (start != null && end != null) ? DateTimeRange(start: start, end: end) : null;
+        final DateTimeRange? range = (start != null && end != null)
+            ? DateTimeRange(start: start, end: end)
+            : null;
 
         return DateRangeFieldWidget(
           name: label,
@@ -2808,14 +2814,14 @@ class _FormViewState extends State<FormView>
           onChanged: isReadonly
               ? null
               : (newRange) {
-            if (newRange == null) {
-              _updateFieldValue(fieldName, null);
-              _updateFieldValue(endDateField, null);
-            } else {
-              _updateFieldValue(fieldName, newRange['start_date']);
-              _updateFieldValue(endDateField, newRange['end_date']);
-            }
-          },
+                  if (newRange == null) {
+                    _updateFieldValue(fieldName, null);
+                    _updateFieldValue(endDateField, null);
+                  } else {
+                    _updateFieldValue(fieldName, newRange['start_date']);
+                    _updateFieldValue(endDateField, newRange['end_date']);
+                  }
+                },
         );
       }
 
@@ -2826,8 +2832,9 @@ class _FormViewState extends State<FormView>
         final DateTime? start = valueToDateTime(_recordState[fieldName]);
         final DateTime? end = valueToDateTime(_recordState[endDateField]);
 
-        final DateTimeRange? range =
-        (start != null && end != null) ? DateTimeRange(start: start, end: end) : null;
+        final DateTimeRange? range = (start != null && end != null)
+            ? DateTimeRange(start: start, end: end)
+            : null;
 
         return DateRangeFieldWidget(
           name: label,
@@ -2836,21 +2843,23 @@ class _FormViewState extends State<FormView>
           onChanged: isReadonly
               ? null
               : (newRange) {
-            if (newRange == null) {
-              _updateFieldValue(fieldName, null);
-              _updateFieldValue(endDateField, null);
-            } else {
-              // Parse dates and convert to ISO 8601 for datetime fields
-              final startDate = newRange['start_date'] != null
-                  ? DateTime.parse(newRange['start_date']!).toIso8601String()
-                  : null;
-              final endDate = newRange['end_date'] != null
-                  ? DateTime.parse(newRange['end_date']!).toIso8601String()
-                  : null;
-              _updateFieldValue(fieldName, startDate);
-              _updateFieldValue(endDateField, endDate);
-            }
-          },
+                  if (newRange == null) {
+                    _updateFieldValue(fieldName, null);
+                    _updateFieldValue(endDateField, null);
+                  } else {
+                    // Parse dates and convert to ISO 8601 for datetime fields
+                    final startDate = newRange['start_date'] != null
+                        ? DateTime.parse(newRange['start_date']!)
+                            .toIso8601String()
+                        : null;
+                    final endDate = newRange['end_date'] != null
+                        ? DateTime.parse(newRange['end_date']!)
+                            .toIso8601String()
+                        : null;
+                    _updateFieldValue(fieldName, startDate);
+                    _updateFieldValue(endDateField, endDate);
+                  }
+                },
         );
       }
       if (type == 'datetime') {
@@ -3628,8 +3637,12 @@ class _FormViewState extends State<FormView>
           name: label,
           // relationModel: fieldData?['relation_model'] as String? ?? '',
           // relationField: fieldData?['relation_field'] as String? ?? '',
-          relationModel: fieldData?['relation_model'] as String? ?? fieldData?['python_attributes']?['relation'] as String? ?? '',
-          relationField: fieldData?['relation_field'] as String? ?? fieldData?['python_attributes']?['relation_field'] as String? ??'',
+          relationModel: fieldData?['relation_model'] as String? ??
+              fieldData?['python_attributes']?['relation'] as String? ??
+              '',
+          relationField: fieldData?['relation_field'] as String? ??
+              fieldData?['python_attributes']?['relation_field'] as String? ??
+              '',
           mainRecordId: widget.recordId,
           tempRecordId: tempRecordId,
           client: _odooClientController.client,

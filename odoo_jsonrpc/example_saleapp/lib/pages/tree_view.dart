@@ -23,6 +23,7 @@ import '../res/odoo_res/odoo_xml_widget/image.dart';
 import '../res/odoo_res/odoo_xml_widget/image_url.dart';
 import '../res/odoo_res/odoo_xml_widget/list_activity.dart';
 import '../res/odoo_res/odoo_xml_widget/many2many_tags.dart';
+import '../res/odoo_res/odoo_xml_widget/many2one_avatar_user_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/progressbar.dart';
 import '../res/odoo_res/odoo_xml_widget/project_favorite.dart';
 import '../res/odoo_res/odoo_xml_widget/so_line_field.dart';
@@ -180,6 +181,11 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
   dynamic getFieldDisplay(Map<String, dynamic> data, String fieldName) {
     final metadata = getFieldMetadata(fieldName);
     if (metadata == null) return '';
+
+    // Skip rendering fields with type 'properties'
+    if (metadata['type'] == 'properties') {
+      return const Text('');
+    }
 
     dynamic fieldValue = data[fieldName];
 
@@ -371,6 +377,28 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       );
     }
     if (metadata['type'] == 'char' || widgetType == 'char_with_placeholder_field') {
+      String charValue = fieldValue is String ? fieldValue : '';
+      String hintText = xmlAttrs?.firstWhere(
+            (attr) => attr['name'] == 'placeholder',
+        orElse: () => {'value': 'Enter $fieldLabel'},
+      )['value'] ?? 'Enter $fieldLabel';
+      return CharWithPlaceholderFieldWidget(
+        name: fieldLabel,
+        value: charValue,
+        hintText: hintText,
+        readOnly: true,
+        viewType: 'tree',
+      );
+    }
+
+    if (metadata['type'] == 'char' || widgetType == 'image_url') {
+      String urlValue = fieldValue is String ? fieldValue : '';
+      if (widgetType == 'image_url' || (metadata['type'] == 'char' && _isImageUrl(urlValue))) {
+        return ImageUrlFieldWidget(
+          value: urlValue,
+          baseUrl: 'http://10.0.20.232:8018', // Replace with your Odoo server URL
+        );
+      }
       String charValue = fieldValue is String ? fieldValue : '';
       String hintText = xmlAttrs?.firstWhere(
             (attr) => attr['name'] == 'placeholder',
@@ -599,6 +627,44 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
               _updateRecord(data['id'], {fieldName: newValue});
             });
           }
+        },
+      );
+    }
+
+
+    if (metadata['type'] == 'binary' || widgetType == 'image') {
+      dynamic valueId = (fieldValue is List && fieldValue.length >= 2)
+          ? fieldValue[0]
+          : null;
+      String displayName = (fieldValue is List && fieldValue.length >= 2)
+          ? fieldValue[1].toString()
+          : '';
+      String binaryData = fieldValue is String ? fieldValue : ''; // Binary data (e.g., base64 string)
+
+      return FutureBuilder<List<Map<String, dynamic>>>(
+        future: _fetchMany2OneOptions(
+            metadata['pythonAttributes']['relation'] ?? '',
+            valueId != null ? [valueId] : []),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          final options = snapshot.data ?? [
+            if (valueId != null) {'id': valueId, 'name': displayName}
+          ];
+
+          return Many2OneAvatarUserWidget(
+            name: fieldLabel,
+            value: valueId,
+            displayName: displayName,
+            binaryData: binaryData,
+            options: options,
+            viewType: 'tree',
+            readonly: true, // Set to true for tree view to prevent editing
+          );
         },
       );
     }
@@ -1020,7 +1086,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
               color: ODOO_COLOR.withOpacity(0.1),
               child: Row(
                 children: widget.fieldMetadata
-                    .where((metadata) => isFieldVisible(metadata))
+                    .where((metadata) => isFieldVisible(metadata) && metadata['type'] != 'properties')
                     .map((metadata) {
                   final xmlAttrs =
                   metadata['xmlAttributes'] as List<dynamic>?;
@@ -1183,4 +1249,14 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       ),
     );
   }
+}
+
+bool _isImageUrl(String value) {
+  // Basic check for image URL patterns
+  if (value.isEmpty || value == 'false') return false;
+  // Check if the value ends with common image extensions
+  final imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
+  return imageExtensions.any((ext) => value.toLowerCase().endsWith(ext)) ||
+      value.startsWith('http') ||
+      value.startsWith('/'); // Relative paths are also considered
 }
