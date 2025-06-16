@@ -84,8 +84,10 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
 
       // Determine viewType, prioritizing view_mode, then views, then binding_view_types
       String viewType = 'list';
-      if (viewMode.isNotEmpty) {
-        viewType = viewMode.split(',').firstWhere(
+      if (bindingViewTypes.isNotEmpty) {
+        // Parse binding_view_types (e.g., 'list,form')
+        final viewTypes = bindingViewTypes.split(',').map((e) => e.trim()).toList();
+        viewType = viewTypes.firstWhere(
               (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
           orElse: () => 'list',
         );
@@ -98,10 +100,8 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
             }
           }
         }
-      } else if (bindingViewTypes.isNotEmpty) {
-        // Parse binding_view_types (e.g., 'list,form')
-        final viewTypes = bindingViewTypes.split(',').map((e) => e.trim()).toList();
-        viewType = viewTypes.firstWhere(
+      } else if (viewMode.isNotEmpty) {
+        viewType = viewMode.split(',').firstWhere(
               (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
           orElse: () => 'list',
         );
@@ -192,7 +192,7 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
           'kwargs': {
             'fields': fieldMetadata.map((e) => e['name'] as String).toList(),
             'limit': 50,
-            'context': {'search_default_my_quotation': 1},
+            // 'context': {'search_default_my_quotation': 1},
           },
         });
 

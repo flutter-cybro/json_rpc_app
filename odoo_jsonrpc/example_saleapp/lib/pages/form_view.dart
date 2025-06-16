@@ -1347,62 +1347,23 @@ class _FormViewState extends State<FormView>
       }
 
       if (responseData.containsKey('wizard_data')) {
-        final List<dynamic> wizardFields =
-            responseData['wizard_data'] as List<dynamic>;
+        final List<dynamic> wizardFields = responseData['wizard_data'] as List<dynamic>;
         log("wizardFields  : $wizardFields");
         setState(() {
           wizardData = wizardFields
               .where((field) {
-                final fieldMap = field as Map<String, dynamic>;
-                final fieldName =
-                    fieldMap['main_field_name'] as String? ?? 'unknown';
-                return fieldName.isNotEmpty && fieldName != 'unknown';
-              })
+            final fieldMap = field as Map<String, dynamic>;
+            final fieldName = fieldMap['main_field_name'] as String? ?? 'unknown';
+            return fieldName.isNotEmpty && fieldName != 'unknown';
+          })
               .map((field) {
-                log("field kimster : $field");
-                final fieldMap = field as Map<String, dynamic>;
-                final fieldName =
-                    fieldMap['main_field_name'] as String? ?? 'unknown';
-
-                final xmlAttributes =
-                    fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
-                final pythonAttributes =
-                    fieldMap['python_attributes'] as Map<String, dynamic>? ??
-                        {};
-                final fieldType = pythonAttributes['type'] as String? ?? 'char';
-                final invisible =
-                    parseInvisibleValue(xmlAttributes['invisible']);
-                print("invisible count $fieldName: $invisible");
-                final readonly = parseInvisibleValue(
-                    xmlAttributes['readonly'] ??
-                        pythonAttributes['readonly'] ??
-                        false);
-                final required = parseInvisibleValue(
-                    xmlAttributes['required'] ??
-                        pythonAttributes['required'] ??
-                        false);
-                final fieldString =
-                    pythonAttributes['string'] as String? ?? fieldName;
-                final widget = xmlAttributes['widget'] as String?;
-                final options =
-                    xmlAttributes['options'] ?? pythonAttributes['options'];
-
-                // log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
-
-                return {
-                  'name': fieldName,
-                  'type': fieldType,
-                  'string': fieldString,
-                  'invisible': invisible,
-                  'readonly': readonly,
-                  'required': required,
-                  'widget': widget,
-                  'options': options,
-                  'python_attributes': pythonAttributes,
-                };
-              })
-              .where((field) =>
-                  field['invisible'] != true && field['invisible'] != 1)
+            log("field kimster : $field");
+            final fieldMap = field as Map<String, dynamic>;
+            return _parseRegularField(fieldMap);
+          })
+              .where((field) => field != null) // Filter out null fields
+              .cast<Map<String, dynamic>>() // Ensure non-nullable type
+              .where((field) => field['invisible'] != true && field['invisible'] != 1)
               .toList();
 
           footerButtons = [];
@@ -1410,21 +1371,17 @@ class _FormViewState extends State<FormView>
             final fieldMap = field as Map<String, dynamic>;
             if (fieldMap.containsKey('footer')) {
               print("inside the footer");
-              final List<dynamic> footerButtonsData =
-                  fieldMap['footer'] as List<dynamic>;
-              // log("footerButtonsData: $footerButtonsData");
+              final List<dynamic> footerButtonsData = fieldMap['footer'] as List<dynamic>;
               footerButtons.addAll(footerButtonsData.map((button) {
                 final buttonMap = button as Map<String, dynamic>;
-                final attributes =
-                    buttonMap['attributes'] as Map<String, dynamic>? ?? {};
+                final attributes = buttonMap['attributes'] as Map<String, dynamic>? ?? {};
                 final invisible = parseInvisibleValue(attributes['invisible']);
                 return {
                   'name': buttonMap['name'] as String?,
                   'type': buttonMap['type'] as String?,
                   'string': buttonMap['string'] as String? ?? 'Unnamed',
                   'class': buttonMap['class'] as String? ?? 'default',
-                  'color': _getButtonColor(
-                      buttonMap['class'] as String? ?? 'default'),
+                  'color': _getButtonColor(buttonMap['class'] as String? ?? 'default'),
                   'invisible': invisible,
                   'special': attributes['special'] as String?,
                   'hotkey': attributes['data-hotkey'] as String?,
@@ -1432,9 +1389,99 @@ class _FormViewState extends State<FormView>
               }).toList());
             }
           }
-          // log("Parsed footerButtons: $footerButtons");
         });
       }
+
+      // if (responseData.containsKey('wizard_data')) {
+      //   final List<dynamic> wizardFields =
+      //       responseData['wizard_data'] as List<dynamic>;
+      //   log("wizardFields  : $wizardFields");
+      //   setState(() {
+      //     wizardData = wizardFields
+      //         .where((field) {
+      //           final fieldMap = field as Map<String, dynamic>;
+      //
+      //           final fieldName =
+      //               fieldMap['main_field_name'] as String? ?? 'unknown';
+      //           return fieldName.isNotEmpty && fieldName != 'unknown';
+      //         })
+      //         .map((field) {
+      //           log("field kimster : $field");
+      //           final fieldMap = field as Map<String, dynamic>;
+      //           final fieldName =
+      //               fieldMap['main_field_name'] as String? ?? 'unknown';
+      //
+      //           final xmlAttributes =
+      //               fieldMap['xml_attributes'] as Map<String, dynamic>? ?? {};
+      //           final pythonAttributes =
+      //               fieldMap['python_attributes'] as Map<String, dynamic>? ??
+      //                   {};
+      //           final fieldType = pythonAttributes['type'] as String? ?? 'char';
+      //           final invisible =
+      //               parseInvisibleValue(xmlAttributes['invisible']);
+      //           print("invisible count $fieldName: $invisible");
+      //           final readonly = parseInvisibleValue(
+      //               xmlAttributes['readonly'] ??
+      //                   pythonAttributes['readonly'] ??
+      //                   false);
+      //           final required = parseInvisibleValue(
+      //               xmlAttributes['required'] ??
+      //                   pythonAttributes['required'] ??
+      //                   false);
+      //           final fieldString =
+      //               pythonAttributes['string'] as String? ?? fieldName;
+      //           final widget = xmlAttributes['widget'] as String?;
+      //           final options =
+      //               xmlAttributes['options'] ?? pythonAttributes['options'];
+      //
+      //           // log("fieldString : $fieldString , widget : $widget , options : $options , required : $required , readonly : $readonly  , invisible : $invisible , fieldType : $fieldType , pythonAttributes : $pythonAttributes , xmlAttributes : $xmlAttributes , fieldName : $fieldName");
+      //
+      //           return {
+      //             'name': fieldName,
+      //             'type': fieldType,
+      //             'string': fieldString,
+      //             'invisible': invisible,
+      //             'readonly': readonly,
+      //             'required': required,
+      //             'widget': widget,
+      //             'options': options,
+      //             'python_attributes': pythonAttributes,
+      //           };
+      //         })
+      //         .where((field) =>
+      //             field['invisible'] != true && field['invisible'] != 1)
+      //         .toList();
+      //
+      //     footerButtons = [];
+      //     for (var field in wizardFields) {
+      //       final fieldMap = field as Map<String, dynamic>;
+      //       if (fieldMap.containsKey('footer')) {
+      //         print("inside the footer");
+      //         final List<dynamic> footerButtonsData =
+      //             fieldMap['footer'] as List<dynamic>;
+      //         // log("footerButtonsData: $footerButtonsData");
+      //         footerButtons.addAll(footerButtonsData.map((button) {
+      //           final buttonMap = button as Map<String, dynamic>;
+      //           final attributes =
+      //               buttonMap['attributes'] as Map<String, dynamic>? ?? {};
+      //           final invisible = parseInvisibleValue(attributes['invisible']);
+      //           return {
+      //             'name': buttonMap['name'] as String?,
+      //             'type': buttonMap['type'] as String?,
+      //             'string': buttonMap['string'] as String? ?? 'Unnamed',
+      //             'class': buttonMap['class'] as String? ?? 'default',
+      //             'color': _getButtonColor(
+      //                 buttonMap['class'] as String? ?? 'default'),
+      //             'invisible': invisible,
+      //             'special': attributes['special'] as String?,
+      //             'hotkey': attributes['data-hotkey'] as String?,
+      //           };
+      //         }).toList());
+      //       }
+      //     }
+      //     // log("Parsed footerButtons: $footerButtons");
+      //   });
+      // }
     }
   }
 
