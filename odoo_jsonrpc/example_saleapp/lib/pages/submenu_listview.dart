@@ -32,6 +32,7 @@ class _SubmenuListviewState extends State<SubmenuListview>
   bool isLoading = true;
   List<Menu> currentMenuList = [];
   String currentTitle = '';
+  int _selectedIndex = 1; // Default to Submenu tab
 
   @override
   OdooClientController get odooClientController => OdooClientController();
@@ -61,7 +62,26 @@ class _SubmenuListviewState extends State<SubmenuListview>
       log('Error fetching menu data: $e');
     }
   }
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
 
+    switch (index) {
+      case 0: // Home
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Submenu
+        setState(() {
+          currentMenuList = menuHierarchy;
+          currentTitle = widget.moduleName;
+        });
+        break;
+      case 2: // Profile
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+    }
+  }
   Future<void> navigateToSubmenu(Menu menu) async {
     setState(() => isLoading = true);
 
@@ -187,6 +207,25 @@ class _SubmenuListviewState extends State<SubmenuListview>
                     },
                   ),
                 ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu),
+            label: 'Submenu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: ODOO_COLOR,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }

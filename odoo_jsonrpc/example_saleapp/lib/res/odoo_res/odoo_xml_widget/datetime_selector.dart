@@ -39,33 +39,6 @@ class _DateTimeSelectorWidgetState extends State<DateTimeSelectorWidget> {
       }
     }
   }
-  Future<void> _pickDateRange() async {
-    final DateTime now = DateTime.now();
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 5),
-      lastDate: DateTime(now.year + 5),
-      initialDateRange: selectedRange,
-    );
-
-    if (mounted) {
-      setState(() {
-        selectedRange = picked;
-        log("Picked date range: $selectedRange");
-      });
-      if (widget.onChanged != null) {
-        if (picked != null) {
-          final formatter = DateFormat('yyyy-MM-dd');
-          widget.onChanged!({
-            'start_date': formatter.format(picked.start),
-            'end_date': formatter.format(picked.end),
-          });
-        } else {
-          widget.onChanged!({'start_date': null, 'end_date': null});
-        }
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

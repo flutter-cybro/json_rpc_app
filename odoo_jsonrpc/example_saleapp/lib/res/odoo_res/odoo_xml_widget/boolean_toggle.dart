@@ -50,18 +50,6 @@ class _BooleanToggleFieldWidgetState extends State<BooleanToggleFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // return InkWell(
-    //   onTap: readonly ? null : onTap, // Disable tap if readonly
-    //   borderRadius: BorderRadius.circular(12.0), // Rounded ripple effect
-    //   child: Padding(
-    //     padding: const EdgeInsets.all(4.0), // Small padding for tap area
-    //     child: Icon(
-    //       isFavorite ? Icons.star : Icons.star_border,
-    //       color: iconColor,
-    //       size: 24.0,
-    //     ),
-    //   ),
-    // );
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(

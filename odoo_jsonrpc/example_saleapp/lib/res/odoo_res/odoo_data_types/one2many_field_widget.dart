@@ -62,7 +62,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
     print("relationModel  :  ${widget.relationModel}");
     print("relationField  :  ${widget.relationField}");
     print("mainRecordId  :  ${widget.mainRecordId}");
-    print("relationField  :  ${widget.readonly}");
+    print("relationField  :  ${widget.relatedFields}");
   }
 
   Future<void> _fetchLocalRecords() async {
@@ -105,12 +105,21 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
       if (fieldsResponse is Map<String, dynamic>) {
         allFieldNames = fieldsResponse.entries.map((entry) {
+          // Handle domain field which can be either String or List
+          dynamic domain = entry.value['domain'];
+          String domainString = '[]';
+          if (domain is String) {
+            domainString = domain;
+          } else if (domain is List) {
+            domainString = jsonEncode(domain);
+          }
+
           return {
             'name': entry.key as String,
             'type': entry.value['type'] as String?,
             'string': entry.value['string'] as String? ?? entry.key,
             'relation': entry.value['relation'] as String?,
-            'domain': entry.value['domain'],
+            'domain': domainString, // Ensure domain is always a string
           };
         }).toList();
       } else {
@@ -291,12 +300,21 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
 
       if (fieldsResponse is Map<String, dynamic>) {
         allFieldNames = fieldsResponse.entries.map((entry) {
+          // Handle domain field which can be either String or List
+          dynamic domain = entry.value['domain'];
+          String domainString = '[]';
+          if (domain is String) {
+            domainString = domain;
+          } else if (domain is List) {
+            domainString = jsonEncode(domain);
+          }
+
           return {
             'name': entry.key as String,
             'type': entry.value['type'] as String?,
             'string': entry.value['string'] as String? ?? entry.key,
             'relation': entry.value['relation'] as String?,
-            'domain': entry.value['domain'],
+            'domain': domainString, // Ensure domain is always a string
           };
         }).toList();
       } else {
@@ -514,6 +532,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
       setState(() {
         isLoading = false;
         errorMessage = 'Failed to load data: $e';
+        log(errorMessage!);
       });
     }
   }

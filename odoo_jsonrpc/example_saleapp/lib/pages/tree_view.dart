@@ -10,6 +10,7 @@ import '../res/odoo_res/odoo_data_types/date_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
+import '../res/odoo_res/odoo_xml_widget/Many2ManyTagSkillsWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/RemainingDaysWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/badge.dart';
@@ -277,15 +278,6 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         metadata['type'] == 'many2one') {
       return fieldValue[1].toString();
     }
-    if (metadata['type'] == 'float' && widgetType == 'progressbar') {
-      double progressValue = fieldValue is num ? fieldValue.toDouble() : 0.0;
-      return ProgressBarWidget(
-        value: progressValue,
-        fieldLabel: fieldLabel,
-        readonly: widget.readonly,
-      );
-    }
-
     if (metadata['type'] == 'float') {
       double floatValue = fieldValue is num ? fieldValue.toDouble() : 0.0;
       if (widgetType == 'timesheet_uom') {
@@ -477,10 +469,35 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
     }
 
 
-    if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags') {
+    // if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags') {
+    //   return FutureBuilder<List<Map<String, dynamic>>>(
+    //     future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'],
+    //         fieldValue as List<dynamic>),
+    //     builder: (context, snapshot) {
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return const CircularProgressIndicator();
+    //       }
+    //       if (snapshot.hasError || !snapshot.hasData) {
+    //         return Text('Error: ${snapshot.error}');
+    //       }
+    //       final options = snapshot.data!;
+    //       return Many2ManyTagsWidget(
+    //         name: fieldName,
+    //         values: fieldValue,
+    //         options: options,
+    //         onValuesChanged: (newValues) {
+    //           setState(() {
+    //             data[fieldName] = newValues;
+    //           });
+    //         },
+    //       );
+    //     },
+    //   );
+    // }
+    if (metadata['type'] == 'many2many' || widgetType == 'many2many_tags' || widgetType == 'many2many_tag_skills') {
       return FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchMany2ManyOptions(metadata['pythonAttributes']['relation'],
-            fieldValue as List<dynamic>),
+        future: _fetchMany2ManyOptions(
+            metadata['pythonAttributes']['relation'], fieldValue as List<dynamic>),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
@@ -489,6 +506,20 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
             return Text('Error: ${snapshot.error}');
           }
           final options = snapshot.data!;
+          if (widgetType == 'many2many_tag_skills') {
+            return Many2ManyTagSkillsWidget(
+              name: fieldName,
+              values: fieldValue,
+              options: options,
+              onValuesChanged: (newValues) {
+                setState(() {
+                  data[fieldName] = newValues;
+                });
+              },
+              readonly: widget.readonly, // Use the readonly property from TreeViewScreen
+              viewType: 'tree',
+            );
+          }
           return Many2ManyTagsWidget(
             name: fieldName,
             values: fieldValue,
@@ -510,106 +541,6 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
           ? fieldValue[1].toString()
           : '';
 
-      if (metadata['type'] == 'boolean' && widgetType == 'project_is_favorite') {
-        bool favoriteValue = fieldValue is bool ? fieldValue : false;
-        return ProjectFavoriteWidget(
-          isFavorite: favoriteValue,
-          onChanged: (newValue) {
-            setState(() {
-              data[fieldName] = newValue;
-              _updateRecord(data['id'], {fieldName: newValue});
-            });
-          },
-          readonly: true, // Set to true for tree view to prevent editing
-        );
-      }
-// Handle one2many or list_activity widget
-      if (metadata['type'] == 'one2many' && widgetType == 'list_activity') {
-        return ListActivityWidget(
-          fieldName: fieldName,
-          value: fieldValue is List ? fieldValue : [],
-          relationModel: metadata['pythonAttributes']['relation'] ?? "",
-          client: _odooClientController.client,
-        );
-      }
-
-      // Handle one2many with many2many_tags widget
-      if (widgetType == 'many2many_tags') {
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: _fetchMany2ManyOptions(
-              metadata['pythonAttributes']['relation'], fieldValue as List<dynamic>),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if (snapshot.hasError || !snapshot.hasData) {
-              return Text('Error: ${snapshot.error}');
-            }
-            final options = snapshot.data!;
-            return Many2ManyTagsWidget(
-              name: fieldName,
-              values: fieldValue,
-              options: options,
-              onValuesChanged: (newValues) {
-                setState(() {
-                  data[fieldName] = newValues;
-                });
-              },
-            );
-          },
-        );
-      }
-      if ( widgetType == 'boolean_toggle') {
-        bool toggleValue = fieldValue is bool ? fieldValue : false;
-        return BooleanToggleFieldWidget(
-          name: fieldLabel,
-          value: toggleValue,
-          onChanged: (newValue) {
-            setState(() {
-              data[fieldName] = newValue;
-              _updateRecord(data['id'], {fieldName: newValue});
-            });
-          },
-          readonly: true, // Keep readonly for tree view
-          viewType: 'tree', // Specify tree view layout
-        );
-      }
-      if ( widgetType == 'char_with_placeholder_field') {
-        String charValue = fieldValue is String ? fieldValue : '';
-        String hintText = xmlAttrs?.firstWhere(
-              (attr) => attr['name'] == 'placeholder',
-          orElse: () => {'value': 'Enter $fieldLabel'},
-        )['value'] ?? 'Enter $fieldLabel';
-        return CharWithPlaceholderFieldWidget(
-          name: fieldLabel,
-          value: charValue,
-          hintText: hintText,
-          readOnly: true,
-          viewType: 'tree',
-        );
-      }
-
-      if ( widgetType == 'image_url') {
-        String urlValue = fieldValue is String ? fieldValue : '';
-        if (widgetType == 'image_url' || (metadata['type'] == 'char' && _isImageUrl(urlValue))) {
-          return ImageUrlFieldWidget(
-            value: urlValue,
-            baseUrl: 'http://10.0.20.232:8018', // Replace with your Odoo server URL
-          );
-        }
-        String charValue = fieldValue is String ? fieldValue : '';
-        String hintText = xmlAttrs?.firstWhere(
-              (attr) => attr['name'] == 'placeholder',
-          orElse: () => {'value': 'Enter $fieldLabel'},
-        )['value'] ?? 'Enter $fieldLabel';
-        return CharWithPlaceholderFieldWidget(
-          name: fieldLabel,
-          value: charValue,
-          hintText: hintText,
-          readOnly: true,
-          viewType: 'tree',
-        );
-      }
       return FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchMany2OneOptions(
             metadata['pythonAttributes']['relation'] ?? '',
@@ -921,6 +852,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       'boolean_favorite',
       'color_picker',
       'many2many_tags',
+      'many2many_tag_skills',
       'priority',
       'char_with_placeholder_field',
       'boolean_toggle',
