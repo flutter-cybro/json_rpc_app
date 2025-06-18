@@ -723,6 +723,13 @@
             </list>
           </value>
         </entry>
+        <entry key="motion_tab_bar_v2">
+          <value>
+            <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/motion_tab_bar_v2-0.4.0/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="multiselect_dropdown_flutter">
           <value>
             <list>
@@ -1414,6 +1421,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/material_color_utilities-0.11.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/meta-1.16.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/mime-2.0.0/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/motion_tab_bar_v2-0.4.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/multiselect_dropdown_flutter-0.0.7/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/odoo_rpc-0.5.8/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/package_config-2.2.0/lib" />

@@ -1555,6 +1555,7 @@ class _FormViewState extends State<FormView>
     }
   }
 
+
   Map<String, dynamic>? _parseRegularField(Map<String, dynamic> fieldMap) {
     log('Starting _parseRegularField with input: $fieldMap'); // Log input
     try {

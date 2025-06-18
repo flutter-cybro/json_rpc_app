@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:motion_tab_bar_v2/motion-tab-bar.dart';
+import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 import '../mixins/action_mixier.dart';
 import '../controller/odooclient_manager_controller.dart';
 import '../controller/submenu_controller.dart';
@@ -7,9 +9,6 @@ import '../models/menu.dart';
 import '../res/constants/app_colors.dart';
 import '../res/utils/loading.dart';
 import '../res/widgets/no_data_image.dart';
-import 'form_view.dart';
-import 'settings_form_view.dart';
-import 'tree_view.dart';
 
 class SubmenuListview extends StatefulWidget {
   final int moduleId;
@@ -26,12 +25,13 @@ class SubmenuListview extends StatefulWidget {
 }
 
 class _SubmenuListviewState extends State<SubmenuListview>
-    with ActWindowActionMixin<SubmenuListview> {
+    with ActWindowActionMixin<SubmenuListview>, SingleTickerProviderStateMixin {
   late SubmenuController submenuController;
   List<Menu> menuHierarchy = [];
   bool isLoading = true;
   List<Menu> currentMenuList = [];
   String currentTitle = '';
+  late MotionTabBarController _motionTabBarController; // Controller for MotionTabBar
   int _selectedIndex = 1; // Default to Submenu tab
 
   @override
@@ -44,7 +44,21 @@ class _SubmenuListviewState extends State<SubmenuListview>
     final client = odooClientController.client;
     submenuController = SubmenuController(client: client);
     currentTitle = widget.moduleName;
+
+    // Initialize MotionTabBarController
+    _motionTabBarController = MotionTabBarController(
+      initialIndex: _selectedIndex,
+      length: 3,
+      vsync: this,
+    );
+
     fetchMenuData();
+  }
+
+  @override
+  void dispose() {
+    _motionTabBarController.dispose(); // Dispose the controller
+    super.dispose();
   }
 
   Future<void> fetchMenuData() async {
@@ -62,26 +76,7 @@ class _SubmenuListviewState extends State<SubmenuListview>
       log('Error fetching menu data: $e');
     }
   }
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
 
-    switch (index) {
-      case 0: // Home
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1: // Submenu
-        setState(() {
-          currentMenuList = menuHierarchy;
-          currentTitle = widget.moduleName;
-        });
-        break;
-      case 2: // Profile
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
-  }
   Future<void> navigateToSubmenu(Menu menu) async {
     setState(() => isLoading = true);
 
@@ -111,9 +106,9 @@ class _SubmenuListviewState extends State<SubmenuListview>
       }
 
       final isHandled = await callWindowAction(
-        actionId: actionId,
-        buildContext: context,
-        modulename: widget.moduleName
+          actionId: actionId,
+          buildContext: context,
+          modulename: widget.moduleName
       );
 
       if (!isHandled && targetWidget != null && mounted) {
@@ -148,6 +143,28 @@ class _SubmenuListviewState extends State<SubmenuListview>
     }
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _motionTabBarController.index = index; // Update the controller index
+    });
+
+    switch (index) {
+      case 0: // Home
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1: // Submenu
+        setState(() {
+          currentMenuList = menuHierarchy;
+          currentTitle = widget.moduleName;
+        });
+        break;
+      case 2: // Profile
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -158,7 +175,7 @@ class _SubmenuListviewState extends State<SubmenuListview>
         title: Text(
           currentTitle,
           style:
-              TextStyle(fontSize: screenSize.width * 0.05, color: WHITE_COLOR),
+          TextStyle(fontSize: screenSize.width * 0.05, color: WHITE_COLOR),
         ),
         leading: IconButton(
           onPressed: () => currentMenuList == menuHierarchy
@@ -172,59 +189,59 @@ class _SubmenuListviewState extends State<SubmenuListview>
       body: isLoading
           ? Center(child: RotatingLoadingWidget())
           : currentMenuList.isEmpty
-              ? const NoDataWidget()
-              : Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12.0,
-                      mainAxisSpacing: 12.0,
-                      childAspectRatio: 1.2,
+          ? const NoDataWidget()
+          : Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: GridView.builder(
+          gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.0,
+            mainAxisSpacing: 12.0,
+            childAspectRatio: 1.2,
+          ),
+          itemCount: currentMenuList.length,
+          itemBuilder: (context, index) {
+            final menu = currentMenuList[index];
+            return Card(
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.0)),
+              child: InkWell(
+                onTap: () => navigateToSubmenu(menu),
+                child: Center(
+                  child: Text(
+                    menu.name,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: screenSize.width * 0.04,
+                      fontWeight: FontWeight.bold,
                     ),
-                    itemCount: currentMenuList.length,
-                    itemBuilder: (context, index) {
-                      final menu = currentMenuList[index];
-                      return Card(
-                        elevation: 5.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16.0)),
-                        child: InkWell(
-                          onTap: () => navigateToSubmenu(menu),
-                          child: Center(
-                            child: Text(
-                              menu.name,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: screenSize.width * 0.04,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'Submenu',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: ODOO_COLOR,
-        onTap: _onItemTapped,
+              ),
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: MotionTabBar(
+        controller: _motionTabBarController, // Assign the controller
+        initialSelectedTab: "Menu", // Set initial tab
+        labels: const ["Home", "Menu", "Profile"], // Tab labels
+        icons: const [
+          Icons.home,
+          Icons.pages,
+          Icons.person,
+        ], // Tab icons
+        tabIconColor: Colors.white, // Unselected icon color
+        tabIconSelectedColor: Colors.white, // Selected icon color
+        tabSelectedColor: Colors.white12,//selected tab background
+        tabBarColor:ODOO_COLOR, // Background color of the tab bar
+        textStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ), // Style for tab labels
+        onTabItemSelected: _onItemTapped, // Handle tab selection
       ),
     );
   }

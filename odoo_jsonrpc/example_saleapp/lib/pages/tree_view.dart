@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:developer' as dev;
 import 'package:example_saleapp/pages/form_view.dart';
 import 'package:example_saleapp/res/odoo_res/odoo_data_types/many2one_field_widget.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import '../res/odoo_res/odoo_data_types/date_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
+import '../res/odoo_res/odoo_xml_widget/AppraisalRemainingDaysWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/Many2ManyTagSkillsWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/PriorityWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/RemainingDaysWidget.dart';
@@ -28,6 +30,7 @@ import '../res/odoo_res/odoo_xml_widget/many2one_avatar_user_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/progressbar.dart';
 import '../res/odoo_res/odoo_xml_widget/project_favorite.dart';
 import '../res/odoo_res/odoo_xml_widget/so_line_field.dart';
+import '../res/odoo_res/odoo_xml_widget/timeless_date_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/timesheet_uom_timer_widget.dart';
 import '../res/widgets/no_data_image.dart';
 
@@ -91,8 +94,8 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
 
   @override
   void initState() {
-
     super.initState();
+    dev.log("title : ${widget.title} \ndataList  : ${widget.dataList} \nmodelname : ${widget.modelname} \nfieldMetadata : ${widget.fieldMetadata}");
     _odooClientController = OdooClientController();
     _initializeOdooClient();
     _headerScrollController = ScrollController();
@@ -123,9 +126,13 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         }
       }
     });
+
     _visibleFields = widget.fieldMetadata
-        .where((metadata) => isFieldVisibleByDefault(metadata))
-        .map((metadata) => metadata['name'] as String)
+        .asMap()
+        .entries
+        .where((entry) => isFieldVisibleByDefault(entry.value))
+        .map((entry) => entry.value['name'] as String)
+        .toSet() // Remove duplicates
         .toList();
   }
   void _onSearchChanged() {
@@ -516,7 +523,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
                   data[fieldName] = newValues;
                 });
               },
-              readonly: widget.readonly, // Use the readonly property from TreeViewScreen
+              readonly: widget.readonly,
               viewType: 'tree',
             );
           }
@@ -721,6 +728,28 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         odooClientController: _odooClientController, // Pass the Odoo client
       );
     }
+
+    if (metadata['type'] == 'date' && widgetType == 'appraisal_remaining_days') {
+      String dateValue = fieldValue is String ? fieldValue : '';
+      return AppraisalRemainingDaysWidget(
+        fieldLabel: fieldLabel,
+        value: dateValue,
+        readonly: widget.readonly,
+        viewType: 'tree',
+      );
+    }
+
+    if (metadata['type'] == 'datetime' && widgetType == 'timeless_date') {
+      String dateValue = fieldValue is String ? fieldValue : '';
+      return TimelessDateWidget(
+        name: fieldLabel,
+        value: dateValue,
+        viewType: 'tree',
+        readonly: widget.readonly,
+      );
+    }
+
+
     if (widgetType != null) {
       // dev.log('Unsupported widget type: $widgetType for field: $fieldName');
       return const Text('Unsupported');
@@ -856,7 +885,9 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       'priority',
       'char_with_placeholder_field',
       'boolean_toggle',
-      'timesheet_uom_timer'// Add this
+      'timesheet_uom_timer',// Add this
+      'many2one_avatar_user',
+      'appraisal_remaining_days'// Add this
     };
     print('innnnnnnnnnnnnnnnnn $columnInvisible $optional $widgetType');
     return (columnInvisible != 'True' && columnInvisible != '1') &&
@@ -865,7 +896,12 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
   }
 
   bool isFieldVisible(Map<String, dynamic> metadata) {
-    return _visibleFields.contains(metadata['name']);
+    final xmlAttrs = metadata['xmlAttributes'] as List<dynamic>?;
+    final columnInvisible = xmlAttrs?.firstWhere(
+          (attr) => attr['name'] == 'column_invisible',
+      orElse: () => {'value': 'False'},
+    )['value'];
+    return _visibleFields.contains(metadata['name']) && (columnInvisible != 'True' && columnInvisible != '1');
   }
 
   void _showFieldSelectorDialog() {

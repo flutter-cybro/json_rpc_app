@@ -1410,7 +1410,7 @@ class _One2ManyFieldWidgetState extends State<One2ManyFieldWidget> {
                 if (!widget.readonly) // Add button only shown if not readonly
                   ElevatedButton.icon(
                     onPressed: _showAddRecordDialog,
-                    icon: const Icon(Icons.add),
+                    // icon: const Icon(Icons.add),
                     label: const Text('Add'),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
