@@ -10,6 +10,7 @@ import '../res/odoo_res/odoo_data_types/MonetaryFieldWidget.dart';
 import '../res/odoo_res/odoo_data_types/date_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
+import '../res/odoo_res/odoo_data_types/many2one_reference_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/reference.dart';
 import '../res/odoo_res/odoo_xml_widget/AppraisalRemainingDaysWidget.dart';
 import '../res/odoo_res/odoo_xml_widget/Many2ManyTagSkillsWidget.dart';
@@ -21,6 +22,7 @@ import '../res/odoo_res/odoo_xml_widget/boolean_toggle.dart';
 import '../res/odoo_res/odoo_xml_widget/char_with_placeholder_field_widget.dart';
 import '../res/odoo_res/odoo_xml_widget/color.dart';
 import '../res/odoo_res/odoo_xml_widget/color_picker.dart';
+import '../res/odoo_res/odoo_xml_widget/copy_clipboard_char.dart';
 import '../res/odoo_res/odoo_xml_widget/handle.dart';
 import '../res/odoo_res/odoo_xml_widget/image.dart';
 import '../res/odoo_res/odoo_xml_widget/image_url.dart';
@@ -399,6 +401,16 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       );
     }
 
+    if (metadata['type'] == 'char' && widgetType == 'CopyClipboardChar') {
+      String charValue = fieldValue is String ? fieldValue : '';
+      return CopyClipboardChar(
+        name: fieldLabel,
+        value: charValue,
+        readonly: widget.readonly,
+        viewType: 'tree',
+      );
+    }
+
     if (metadata['type'] == 'char' || widgetType == 'image_url') {
       String urlValue = fieldValue is String ? fieldValue : '';
       if (widgetType == 'image_url' || (metadata['type'] == 'char' && _isImageUrl(urlValue))) {
@@ -738,6 +750,36 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         viewType: 'tree',
       );
     }
+    if (metadata['type'] == 'many2one_reference') {
+      dynamic valueId = fieldValue is int ? fieldValue : null;
+      String relationModel = metadata['pythonAttributes']['model_field'] ?? ''; // The field storing the model name, e.g., 'res_model'
+      String resIdField = metadata['pythonAttributes']['id_field'] ?? 'id'; // The field storing the record ID, e.g., 'res_id'
+
+      return FutureBuilder<Map<String, dynamic>>(
+        future: _fetchMany2oneReferenceOption(relationModel, valueId, data, resIdField),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          final option = snapshot.data ?? {'id': valueId, 'name': 'Unnamed'};
+
+          return Many2oneReferenceFieldWidget(
+            name: fieldLabel,
+            value: valueId,
+            displayName: option['name']?.toString() ?? 'Unnamed',
+            relationModel: relationModel,
+            options: [option],
+            viewType: 'tree',
+            readonly: true,
+            hintText: 'Select $fieldLabel',
+            odooClientController: _odooClientController,
+          );
+        },
+      );
+    }
 
     if (metadata['type'] == 'datetime' && widgetType == 'timeless_date') {
       String dateValue = fieldValue is String ? fieldValue : '';
@@ -1022,13 +1064,18 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // Define theme here
     final visibleFieldCount = _visibleFields.length;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width.isFinite
+        ? MediaQuery.of(context).size.width
+        : 400.0; // Fallback width
+
+    // final screenWidth = MediaQuery.of(context).size.width;
     final fieldWidth = max(
         120.0,
         screenWidth /
             (visibleFieldCount <= maxFieldsPerScreen
                 ? visibleFieldCount
                 : maxFieldsPerScreen));
+
 
     SnackBar _buildCustomSnackBar(String message) {
       return SnackBar(
@@ -1325,6 +1372,37 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         ],
       ),
     );
+  }
+  Future<Map<String, dynamic>> _fetchMany2oneReferenceOption(
+      String modelField, dynamic valueId, Map<String, dynamic> data, String resIdField) async {
+    if (modelField.isEmpty || valueId == null || !data.containsKey(modelField)) return {'id': valueId, 'name': 'Unnamed'};
+    try {
+      String model = data[modelField] ?? '';
+      if (model.isEmpty) return {'id': valueId, 'name': 'Unnamed'};
+
+      final result = await _odooClientController.client.callKw({
+        'model': model,
+        'method': 'search_read',
+        'args': [
+          [['id', '=', valueId]],
+        ],
+        'kwargs': {
+          'fields': ['id', 'name', 'display_name'],
+          'limit': 1,
+        },
+      });
+
+      if (result is List && result.isNotEmpty) {
+        return {
+          'id': result[0]['id'],
+          'name': result[0]['display_name'] ?? result[0]['name'] ?? 'Unnamed',
+        };
+      }
+      return {'id': valueId, 'name': 'Unnamed'};
+    } catch (e) {
+      dev.log('Failed to fetch many2one_reference option: $e');
+      return {'id': valueId, 'name': 'Unnamed'};
+    }
   }
 }
 

@@ -1130,6 +1130,8 @@ class _FormViewState extends State<FormView>
                 final pageInvisible =
                     parseInvisibleValue(xmlAttrs['invisible']);
 
+                print("pageInvisible  : $pageInvisible");
+
                 if (pageInvisible == true || pageInvisible == 1) {
                   return null;
                 }

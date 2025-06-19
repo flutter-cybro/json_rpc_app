@@ -110,10 +110,11 @@ mixin InvisibleConditionMixin {
   }
 
   String _normalizeExpression(String expression) {
+    dev.log("expression  : $expression");
     // Replace text operators with symbol operators for consistency
     String normalized = expression
-        .replaceAll(RegExp(r'\s+and\s+', caseSensitive: false), ' & ')
-        .replaceAll(RegExp(r'\s+or\s+', caseSensitive: false), ' | ');
+        .replaceAll(RegExp(r'\s*and\s*', caseSensitive: false), r' & ')
+        .replaceAll(RegExp(r'\s*or\s*', caseSensitive: false), r' | ');
 
     // Handle spaces around operators
     normalized = normalized
@@ -127,8 +128,8 @@ mixin InvisibleConditionMixin {
 
     // Add spaces around logical operators for easier splitting
     normalized = normalized
-        .replaceAll('&', ' & ')
-        .replaceAll('|', ' | ');
+        .replaceAll(RegExp(r'\s*&+\s*'), r' & ')
+        .replaceAll(RegExp(r'\s*\|+\s*'), r' | ');
 
     return normalized;
   }
@@ -448,6 +449,7 @@ mixin InvisibleConditionMixin {
     }
   }
 
+  // FIXED: Complete rewrite of logical expression evaluation
   bool _evaluateLogicalExpression(
       String expression, {
         bool requireFieldExistence = false,
@@ -457,26 +459,61 @@ mixin InvisibleConditionMixin {
       name: 'InvisibleConditionMixin',
     );
 
-    // Handle parenthesized expressions first
-    final parenthesizedRegex = RegExp(r'\([^()]*\)');
-    String processedExpr = expression;
+    return _evaluateLogicalExpressionRecursive(
+      expression.trim(),
+      requireFieldExistence: requireFieldExistence,
+    );
+  }
 
-    while (parenthesizedRegex.hasMatch(processedExpr)) {
-      processedExpr = processedExpr.replaceAllMapped(parenthesizedRegex, (match) {
-        final innerExpr = match.group(0)!.substring(1, match.group(0)!.length - 1);
-        final result = _evaluateInvisibleExpression(
-          innerExpr,
-          requireFieldExistence: requireFieldExistence,
-        );
-        return result.toString();
-      });
+  bool _evaluateLogicalExpressionRecursive(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
+    expression = expression.trim();
+
+    // Handle parentheses first - find the innermost parentheses and evaluate them
+    int openParen = -1;
+    int closeParen = -1;
+    int parenLevel = 0;
+
+    for (int i = 0; i < expression.length; i++) {
+      if (expression[i] == '(') {
+        if (parenLevel == 0) {
+          openParen = i;
+        }
+        parenLevel++;
+      } else if (expression[i] == ')') {
+        parenLevel--;
+        if (parenLevel == 0 && openParen != -1) {
+          closeParen = i;
+          break;
+        }
+      }
     }
 
-    // Split by OR operator first
-    if (processedExpr.contains(' | ')) {
-      final orParts = processedExpr.split(' | ');
+    // If we found parentheses, evaluate the content inside and substitute
+    if (openParen != -1 && closeParen != -1) {
+      final beforeParen = expression.substring(0, openParen);
+      final insideParen = expression.substring(openParen + 1, closeParen);
+      final afterParen = expression.substring(closeParen + 1);
+
+      final insideResult = _evaluateLogicalExpressionRecursive(
+        insideParen,
+        requireFieldExistence: requireFieldExistence,
+      );
+
+      final newExpression = beforeParen + insideResult.toString() + afterParen;
+      return _evaluateLogicalExpressionRecursive(
+        newExpression,
+        requireFieldExistence: requireFieldExistence,
+      );
+    }
+
+    // No parentheses, now handle OR operations (lowest precedence)
+    final orParts = _splitByOperator(expression, ' | ');
+    if (orParts.length > 1) {
       for (final part in orParts) {
-        if (_evaluateInvisibleExpression(
+        if (_evaluateLogicalExpressionRecursive(
           part.trim(),
           requireFieldExistence: requireFieldExistence,
         )) {
@@ -486,11 +523,11 @@ mixin InvisibleConditionMixin {
       return false;
     }
 
-    // Then split by AND operator
-    if (processedExpr.contains(' & ')) {
-      final andParts = processedExpr.split(' & ');
+    // Handle AND operations (higher precedence)
+    final andParts = _splitByOperator(expression, ' & ');
+    if (andParts.length > 1) {
       for (final part in andParts) {
-        if (!_evaluateInvisibleExpression(
+        if (!_evaluateLogicalExpressionRecursive(
           part.trim(),
           requireFieldExistence: requireFieldExistence,
         )) {
@@ -500,9 +537,112 @@ mixin InvisibleConditionMixin {
       return true;
     }
 
-    // If no logical operators found after processing parentheses
-    return _evaluateInvisibleExpression(
-      processedExpr,
+    // Handle boolean literals
+    if (expression == 'true') return true;
+    if (expression == 'false') return false;
+
+    // Handle single expression (comparison, field, etc.)
+    return _evaluateSingleExpression(
+      expression,
+      requireFieldExistence: requireFieldExistence,
+    );
+  }
+
+  List<String> _splitByOperator(String expression, String operator) {
+    final parts = <String>[];
+    int start = 0;
+    bool inQuotes = false;
+    String quoteChar = '';
+    int parenLevel = 0;
+
+    for (int i = 0; i <= expression.length - operator.length; i++) {
+      final char = expression[i];
+
+      // Handle quotes
+      if ((char == '"' || char == "'") && !inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+      } else if (char == quoteChar && inQuotes) {
+        inQuotes = false;
+        quoteChar = '';
+      }
+
+      // Handle parentheses
+      if (!inQuotes) {
+        if (char == '(') {
+          parenLevel++;
+        } else if (char == ')') {
+          parenLevel--;
+        }
+      }
+
+      // Check for operator at top level
+      if (!inQuotes && parenLevel == 0) {
+        if (expression.substring(i, i + operator.length) == operator) {
+          parts.add(expression.substring(start, i));
+          start = i + operator.length;
+          i += operator.length - 1; // -1 because loop will increment
+        }
+      }
+    }
+
+    // Add the last part
+    parts.add(expression.substring(start));
+
+    return parts;
+  }
+
+  bool _evaluateSingleExpression(
+      String expression, {
+        bool requireFieldExistence = false,
+      }) {
+    expression = expression.trim();
+
+    // Handle 'in' and 'not in' operators
+    if (_containsInOperator(expression)) {
+      return _evaluateInExpression(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
+    }
+
+    // Handle 'not' prefix
+    if (expression.startsWith('not ')) {
+      final fieldName = expression.substring(4).trim();
+      return !_getFieldBoolValue(
+        fieldName,
+        requireFieldExistence: requireFieldExistence,
+      );
+    }
+
+    // Handle comparison operators
+    final comparisonResult = _evaluateComparisonExpression(
+      expression,
+      requireFieldExistence: requireFieldExistence,
+    );
+    if (comparisonResult != null) {
+      return comparisonResult;
+    }
+
+    // Handle group_ prefix
+    if (expression.startsWith('group_')) {
+      return _getFieldBoolValue(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
+    }
+
+    // Handle nested fields
+    if (expression.contains('.')) {
+      return _evaluateNestedField(
+        expression,
+        requireFieldExistence: requireFieldExistence,
+      );
+    }
+
+    // Default case - treat as field name
+    return _getFieldBoolValue(
+      expression,
       requireFieldExistence: requireFieldExistence,
     );
   }
