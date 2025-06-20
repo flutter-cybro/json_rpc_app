@@ -150,8 +150,8 @@ class _ViewDetailsWidgetState extends State<ViewDetailsWidget> {
 
         if (widget.mainView == 'list') {
           viewOfXml = 'tree';
-        } else if (widget.mainView == 'kanban') {
-          viewOfXml = 'kanban';
+        // } else if (widget.mainView == 'kanban') {
+        //   viewOfXml = 'kanban';
         } else if (widget.mainView == 'form') {
           viewOfXml = 'form';
         }
@@ -170,14 +170,15 @@ class _ViewDetailsWidgetState extends State<ViewDetailsWidget> {
           _fetchModelData(modelName, requiredFieldNames);
         } else if (viewOfXml != null && viewOfXml == 'form') {
 
-        } else if (viewOfXml != null && viewOfXml == 'kanban') {
-          final fields = jsonData[viewOfXml]['field'] as List<dynamic>;
-          final List<String> fieldNames =
-              fields.map((field) => field['name'].toString()).toList();
-          _fetchModelData(modelName, fieldNames);
-          final List<String> requiredFieldNames =
-              fields.map((field) => field['name'].toString()).toList();
-          _fetchModelData(modelName, requiredFieldNames);
+        // } else if (viewOfXml != null && viewOfXml == 'kanban') {
+        //   final fields = jsonData[viewOfXml]['field'] as List<dynamic>;
+        //   final List<String> fieldNames =
+        //       fields.map((field) => field['name'].toString()).toList();
+        //   _fetchModelData(modelName, fieldNames);
+        //   final List<String> requiredFieldNames =
+        //       fields.map((field) => field['name'].toString()).toList();
+        //   _fetchModelData(modelName, requiredFieldNames);
+
         } else {
 
         }

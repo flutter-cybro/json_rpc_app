@@ -8,6 +8,7 @@ import '../controller/odooclient_manager_controller.dart';
 import '../res/constants/app_colors.dart';
 import '../res/odoo_res/odoo_data_types/MonetaryFieldWidget.dart';
 import '../res/odoo_res/odoo_data_types/date_field_widget.dart';
+import '../res/odoo_res/odoo_data_types/date_time_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/float_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/html_field_widget.dart';
 import '../res/odoo_res/odoo_data_types/many2one_reference_field_widget.dart';
@@ -371,6 +372,20 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         },
       );
     }
+    if (metadata['type'] == 'datetime') {
+      DateTime? dateTimeValue;
+      try {
+        dateTimeValue = fieldValue is String ? DateTime.parse(fieldValue) : null;
+      } catch (e) {
+        dateTimeValue = null;
+      }
+      return DateTimeFieldWidget(
+        name: fieldLabel,
+        value: dateTimeValue ?? DateTime.now(),
+        readonly: widget.readonly,
+        viewType: 'tree',
+      );
+    }
     if (metadata['type'] == 'boolean' && widgetType == 'boolean_toggle') {
       bool toggleValue = fieldValue is bool ? fieldValue : false;
       return BooleanToggleFieldWidget(
@@ -648,10 +663,10 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
         viewType: 'tree',
       );
     }
-    if (widgetType == 'handle') {
-      int sequenceValue = int.tryParse(fieldValue.toString()) ?? 0;
-      return HandleWidget(sequence: sequenceValue);
-    }
+    // if (widgetType == 'handle') {
+    //   int sequenceValue = int.tryParse(fieldValue.toString()) ?? 0;
+    //   return HandleWidget(sequence: sequenceValue);
+    // }
     if (widgetType == 'boolean_favorite') {
       bool favoriteValue = fieldValue is bool ? fieldValue : false;
       return BooleanFavoriteWidget(isFavorite: favoriteValue);
@@ -919,7 +934,7 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
       'progressbar',
       'image_url',
       'image',
-      'handle',
+      // 'handle',
       'boolean_favorite',
       'color_picker',
       'many2many_tags',
@@ -976,6 +991,12 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
                     )['value'] ??
                         metadata['pythonAttributes']['string'] ??
                         fieldName;
+                    if (fieldLabel.toLowerCase() == 'properties') {
+                      return const SizedBox.shrink(); // Return an empty widget to skip this field
+                    }
+                    if (fieldLabel.toLowerCase() == 'sequence') {
+                      return const SizedBox.shrink(); // Return an empty widget to skip this field
+                    }
 
                     return CheckboxListTile(
                       title: Text(fieldLabel),
@@ -1223,7 +1244,12 @@ class _TreeViewScreenState extends State<TreeViewScreen> with OdooCrudMixin, Sin
                   final headerString = xmlString ??
                       pythonAttrs?['string'] ??
                       metadata['name'];
-
+                  if (headerString.toLowerCase() == 'properties') {
+                    return const SizedBox.shrink(); // Return an empty widget to skip this field
+                  }
+                  if (headerString.toLowerCase() == 'sequence') {
+                    return const SizedBox.shrink(); // Return an empty widget to skip this field
+                  }
                   return Container(
                     width: fieldWidth,
                     padding: const EdgeInsets.all(12.0),

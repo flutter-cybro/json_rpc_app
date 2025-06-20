@@ -129,8 +129,8 @@ class _FormViewPageState extends State<FormViewPage> {
 
         if (widget.mainView == 'list') {
           viewOfXml = 'tree';
-        } else if (widget.mainView == 'kanban') {
-          viewOfXml = 'kanban';
+        // } else if (widget.mainView == 'kanban') {
+        //   viewOfXml = 'kanban';
         } else if (widget.mainView == 'form') {
           viewOfXml = 'form';
         }
@@ -143,7 +143,8 @@ class _FormViewPageState extends State<FormViewPage> {
               fields.map((field) => field['name'].toString()).toList();
 
 
-          if (viewOfXml == 'tree' || viewOfXml == 'kanban') {
+          // if (viewOfXml == 'tree' || viewOfXml == 'kanban') {
+          if (viewOfXml == 'tree') {
             _fetchModelData(modelName, fieldNames);
           } else {
 

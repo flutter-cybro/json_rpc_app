@@ -60,12 +60,7 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  /// Processes the action response from /web/action/load and returns a widget or shows a dialog.
-  /// [actionResponse]: The response from the /web/action/load call.
-  /// [context]: The context map to pass to view fetching.
-  /// [menuName]: The name of the menu item for the widget title.
-  /// [buildContext]: The BuildContext to use for showing dialogs or navigation.
-  /// Returns a Future<bool> indicating whether the action was handled (true for dialogs, false for navigation).
+
   Future<bool> processWindowActionResponse({
     required Map<String, dynamic> actionResponse,
     required Map<String, dynamic> context,
@@ -74,47 +69,121 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
     required BuildContext buildContext,
   }) async {
     try {
-      final resModel = (actionResponse['res_model'] as String? ?? actionResponse['model_name'] as String? ?? '');
+      final actionType = actionResponse['type'] as String? ?? '';
+      final resModel = (actionResponse['res_model'] is String ? actionResponse['res_model'] as String? : actionResponse['model_name'] is String ? actionResponse['model_name'] as String? : '');
       final viewMode = actionResponse['view_mode'] as String? ?? '';
       final views = actionResponse['views'] as List<dynamic>? ?? [];
       final bindingViewTypes = actionResponse['binding_view_types'] as String? ?? '';
       final target = actionResponse['target'] as String? ?? 'current';
 
-      log("resModel: $resModel, viewMode: $viewMode, views: $views, bindingViewTypes: $bindingViewTypes, target: $target");
+      log("resModel: $resModel, viewMode: $viewMode, views: $views, bindingViewTypes: $bindingViewTypes, target: $target, actionType: $actionType");
+
+      // Helper function to show SnackBar with right-to-left animation at the top
+      void showTopSnackBar(String message) {
+        final overlay = Overlay.of(buildContext);
+        late OverlayEntry overlayEntry;
+
+        final controller = AnimationController(
+          vsync: Navigator.of(buildContext),
+          duration: const Duration(milliseconds: 500),
+        );
+        final animation = Tween<Offset>(
+          begin: const Offset(1.0, 0.0), // Start from right
+          end: Offset.zero, // End at original position
+        ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+        overlayEntry = OverlayEntry(
+          builder: (context) => AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              return Positioned(
+                top: 10.0,
+                left: 10.0,
+                right: 10.0,
+                child: SlideTransition(
+                  position: animation,
+                  child: Material(
+                    elevation: 4.0,
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Text(
+                        message,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+
+        // Insert the overlay entry
+        overlay.insert(overlayEntry);
+        controller.forward();
+
+        // Remove the overlay after 3 seconds
+        Future.delayed(const Duration(seconds: 3), () {
+          controller.reverse().then((_) {
+            overlayEntry.remove();
+            controller.dispose();
+          });
+        });
+      }
+      // Handle client actions (e.g., ir.actions.client) separately
+      if (actionType == 'ir.actions.client') {
+        final errorMessage = 'This action ("$menuName") is a client action and cannot be processed as a window action.';
+        debugPrint(errorMessage);
+        showTopSnackBar(errorMessage);
+        return true; // Handled as an error dialog
+      }
+
+      // Check if resModel is valid
+      if (resModel == null || resModel.isEmpty) {
+        final errorMessage = 'Invalid or missing model for action "$menuName". Please contact support.';
+        debugPrint(errorMessage);
+        showTopSnackBar(errorMessage);
+        return true; // Handled as an error dialog
+      }
 
       // Determine viewType, prioritizing view_mode, then views, then binding_view_types
-      String viewType = 'list';
-      if (bindingViewTypes.isNotEmpty) {
-        // Parse binding_view_types (e.g., 'list,form')
-        final viewTypes = bindingViewTypes.split(',').map((e) => e.trim()).toList();
-        viewType = viewTypes.firstWhere(
-              (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
-          orElse: () => 'list',
-        );
-      } else if (views.isNotEmpty) {
+      String? viewType;
+      if (viewMode.isNotEmpty) {
+        final viewModes = viewMode.split(',').map((e) => e.trim()).toList();
+        viewType = viewModes.contains('list') ? 'list' : viewModes.contains('form') ? 'form' : null;
+      }
+      else if (views.isNotEmpty) {
         for (var view in views) {
           if (view is List && view.length >= 2 && view[1] is String) {
-            if (['form', 'list'].contains(view[1])) {
-              viewType = view[1] as String;
+            if (view[1] == 'list') {
+              viewType = 'list';
               break;
+            } else if (view[1] == 'form') {
+              viewType ??= 'form'; // Set form only if list is not found
             }
           }
         }
-      } else if (viewMode.isNotEmpty) {
-        viewType = viewMode.split(',').firstWhere(
-              (type) => ['form', 'list', 'kanban', 'calendar'].contains(type),
-          orElse: () => 'list',
-        );
+      }
+      else if (bindingViewTypes.isNotEmpty) {
+        final viewTypes = bindingViewTypes.split(',').map((e) => e.trim()).toList();
+        viewType = viewTypes.contains('list') ? 'list' : viewTypes.contains('form') ? 'form' : null;
       }
 
-      log("Determined viewType: $viewType");
+      // If no valid viewType is found, show a popup
+      if (viewType == null) {
+        final errorMessage = 'No list or form view found for action "$menuName".';
+        debugPrint(errorMessage);
+        showTopSnackBar(errorMessage);
+        return true; // Handled as an error dialog
+      }
 
       String formData = '';
       List<Map<String, dynamic>> fieldMetadata = [];
-
-      if (resModel.isEmpty) {
-        throw Exception('No res_model or model_name found in action response');
-      }
 
       if (!['current', 'new', 'fullscreen', 'inline', 'main'].contains(target)) {
         debugPrint('Warning: Invalid target value: $target. Defaulting to "current".');
@@ -192,11 +261,11 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
           'kwargs': {
             'fields': fieldMetadata.map((e) => e['name'] as String).toList(),
             'limit': 50,
-            // 'context': {'search_default_my_quotation': 1},
+            'context': {'search_default_my_quotation': 1},
           },
         });
 
-        log("dataList  : $dataList  , resModel : $resModel  , _formatDomain(actionResponse['domain'])  : ${_formatDomain(actionResponse['domain'])}");
+        log("dataList: $dataList, resModel: $resModel, domain: ${_formatDomain(actionResponse['domain'])}");
 
         targetWidget = TreeViewScreen(
           title: menuName,
@@ -228,14 +297,51 @@ mixin ActWindowActionMixin<T extends StatefulWidget> on State<T> {
         return false; // Indicate navigation is required
       }
     } catch (e) {
-      final errorMessage = 'Error processing window action response: $e';
-      debugPrint(errorMessage);
-      ScaffoldMessenger.of(buildContext).showSnackBar(
+      final errorMessage = 'Unable to process action "$menuName". Please try again or contact support.';
+      debugPrint('Error processing window action: $e');
+      log('Error processing window action: $e');
+      // Use the custom SnackBar function
+      final scaffoldMessenger = ScaffoldMessenger.of(buildContext);
+      scaffoldMessenger.clearSnackBars();
+      scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text(errorMessage),
+          content: Text(
+            errorMessage,
+            style: const TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            top: 10.0, // Position at the top
+            left: 10.0,
+            right: 10.0,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          animation: CurvedAnimation(
+            parent: const AlwaysStoppedAnimation(1.0),
+            curve: Curves.easeInOut,
+          ),
         ),
       );
+
+      // Custom animation for right-to-left slide
+      final controller = AnimationController(
+        vsync: Navigator.of(buildContext),
+        duration: const Duration(milliseconds: 500),
+      );
+      final animation = Tween<Offset>(
+        begin: const Offset(1.0, 0.0), // Start from right
+        end: Offset.zero, // End at original position
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+      controller.forward();
+      Future.delayed(const Duration(seconds: 3), () {
+        controller.dispose();
+      });
+
       return true; // Handled as an error dialog
     }
   }
